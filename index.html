@@ -8,19 +8,25 @@
 <meta name="apple-mobile-web-app-title" content="Kontor">
 <meta name="theme-color" content="#15171A">
 <title>Kontor</title>
-<!-- Kontor V1.0 -->
+<!-- Kontor V1.1 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
 <style>
-:root{--bg:#15171A;--surface:#1E2228;--surface-2:#262B31;--field:#34393F;--line:#2A2F35;--line-strong:#3A4048;--text:#E8E8E8;--text-strong:#FFFFFF;--muted:#999999;--silver:#C3C3C3;--faint:#6E747B;--accent:#C9A227;--accent-soft:rgba(201,162,39,.14);--accent-line:rgba(201,162,39,.40);--pos:#54BE86;--pos-soft:rgba(84,190,134,.15);--pos-line:rgba(84,190,134,.45);--info:#6B87A2;--info-soft:rgba(107,135,162,.16);--info-line:rgba(107,135,162,.40);--danger:#E0705C}
+/* Keine Markenfarbe: der Akzent ist neutral (hell auf dunkel, dunkel auf hell).
+   Farbe gibt es NUR wo sie etwas bedeutet: pos = ueber Ziel/entspannt, info = unter Ziel,
+   danger = destruktiv/Stress. --on-accent ist die Schrift auf Akzentflaechen. */
+:root{--bg:#15171A;--surface:#1E2228;--surface-2:#262B31;--field:#34393F;--line:#2A2F35;--line-strong:#3A4048;--text:#E8E8E8;--text-strong:#FFFFFF;--muted:#999999;--silver:#C3C3C3;--faint:#6E747B;--accent:#F0EFEC;--on-accent:#15171A;--accent-soft:rgba(240,239,236,.10);--accent-line:rgba(240,239,236,.32);--pos:#54BE86;--pos-soft:rgba(84,190,134,.15);--pos-line:rgba(84,190,134,.45);--info:#6B87A2;--info-soft:rgba(107,135,162,.16);--info-line:rgba(107,135,162,.40);--danger:#E0705C}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+/* clip statt hidden: schneidet genauso ab, macht den Body aber NICHT zum Scroll-Container.
+   Mit hidden verliert jedes position:sticky darin seinen Bezug und klebt nicht (Safari 16+). */
+html,body{margin:0;padding:0;max-width:100%;overflow-x:clip}
+@supports not (overflow-x:clip){html,body{overflow-x:hidden}}
 body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.45;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .mono{font-variant-numeric:tabular-nums}
 .app{max-width:560px;margin:0 auto;min-height:100vh}
 .bar{position:sticky;top:0;z-index:30;background:rgba(21,23,26,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:calc(env(safe-area-inset-top) + 16px) 18px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
-.bar .logo{width:30px;height:30px;border-radius:9px;flex:none;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#15171A;font-size:16px;letter-spacing:-.5px}
+.bar .logo{width:30px;height:30px;border-radius:9px;flex:none;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--on-accent);font-size:16px;letter-spacing:-.5px}
 .bar h1{font-weight:700;font-size:18px;margin:0;letter-spacing:-.2px;flex:1;color:var(--text-strong)}
 .bar h1 small{display:block;font-weight:500;font-size:10px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase;margin-top:3px}
 .iconbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
@@ -34,7 +40,7 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .empty .big{font-size:42px;margin-bottom:10px;opacity:.4}
 .empty p{font-size:14px;line-height:1.6}
 .ot-pos{color:var(--pos)} .ot-zero{color:var(--muted)} .ot-neg{color:var(--info)}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:none;font-family:inherit;font-size:15px;font-weight:700;background:var(--accent);color:#15171A;margin-bottom:10px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:none;font-family:inherit;font-size:15px;font-weight:700;background:var(--accent);color:var(--on-accent);margin-bottom:10px}
 .btn:active{filter:brightness(.92)}
 .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line);font-weight:600}
 .btn.ghost:active{background:var(--surface)}
@@ -55,6 +61,8 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .statbig .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:8px}
 .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 .statgrid .s{background:transparent;border:1px solid var(--line);border-radius:13px;padding:15px}
+/* Hervorhebung ohne Farbton: der Behaelter traegt sie, nicht der Text (monochromes Schema) */
+.statgrid .s.mark{background:var(--accent-soft);border-color:var(--accent-line)}
 .statgrid .s .n{font-weight:700;font-size:22px;font-variant-numeric:tabular-nums;color:var(--text-strong)}
 .statgrid .s .l{font-size:11px;color:var(--muted);margin-top:4px}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:14px 2px;background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;margin-bottom:0}
@@ -84,7 +92,7 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .field input:disabled{opacity:.4}
 .toggles{display:flex;gap:8px;flex-wrap:wrap}
 .toggles button{flex:1;min-width:52px;padding:11px 4px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--muted);font-family:inherit;font-size:13.5px;font-weight:600}
-.toggles button.on{background:var(--accent);color:#15171A;border-color:var(--accent)}
+.toggles button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .toggles.mono button{font-variant-numeric:tabular-nums}
 .toggles.wrap{flex-wrap:wrap}
 .toggles.wrap button{flex:0 1 auto;min-width:0;padding:9px 12px}
@@ -104,10 +112,7 @@ details.exp[open] summary::before{content:"–"}
 .divider{height:1px;background:var(--line);margin:18px 0}
 .hidden{display:none!important}
 .foot{text-align:center;padding:34px 20px 18px}
-.foot-facts{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0 0 11px}
-.foot-facts span{font-size:10.5px;color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:7px;padding:3px 9px;font-variant-numeric:tabular-nums}
-.foot-note{font-size:10.5px;color:var(--faint);line-height:1.5}
-.foot-v{font-size:11.5px;font-weight:600;color:var(--faint);letter-spacing:.2px;margin-top:14px}
+.foot-v{font-size:11.5px;font-weight:600;color:var(--faint);letter-spacing:.2px}
 .foot-v b{color:var(--accent);font-weight:700}
 .cscrim{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:120;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
 .cscrim.on{display:flex;animation:fadein .25s ease}
@@ -120,7 +125,7 @@ details.exp[open] summary::before{content:"–"}
 .cdlg .cmsg{margin:0 0 18px;font-size:15px;line-height:1.5;color:var(--text)}
 .crow{display:flex;gap:10px}.crow .btn{flex:1}
 /* Hell-Modus */
-body.light{--bg:#F5F4F1;--surface:#FFFFFF;--surface-2:#EFEDE8;--field:#E9E7E1;--line:#DEDBD3;--line-strong:#C9C5BC;--text:#28251F;--text-strong:#141210;--muted:#7A756C;--silver:#545048;--faint:#9B968C;--accent:#9A7B14;--accent-soft:rgba(154,123,20,.12);--accent-line:rgba(154,123,20,.5);--pos:#1E9E60;--pos-soft:rgba(30,158,96,.12);--pos-line:rgba(30,158,96,.5);--info:#49688C;--info-soft:rgba(73,104,140,.12);--info-line:rgba(73,104,140,.45);--danger:#C24E3B}
+body.light{--bg:#F5F4F1;--surface:#FFFFFF;--surface-2:#EFEDE8;--field:#E9E7E1;--line:#DEDBD3;--line-strong:#C9C5BC;--text:#28251F;--text-strong:#141210;--muted:#7A756C;--silver:#545048;--faint:#9B968C;--accent:#1F1C17;--on-accent:#F5F4F1;--accent-soft:rgba(31,28,23,.07);--accent-line:rgba(31,28,23,.28);--pos:#1E9E60;--pos-soft:rgba(30,158,96,.12);--pos-line:rgba(30,158,96,.5);--info:#49688C;--info-soft:rgba(73,104,140,.12);--info-line:rgba(73,104,140,.45);--danger:#C24E3B}
 body.light .bar{background:rgba(245,244,241,.85)}
 body.light .day:active{background:rgba(0,0,0,.03)}
 /* Anleitung */
@@ -145,6 +150,21 @@ body.light .day:active{background:rgba(0,0,0,.03)}
 .quad .q .kx{display:flex;flex-wrap:wrap;gap:4px}
 .quad .q .kx span{font-size:11px;border:1px solid var(--line);border-radius:7px;padding:2px 7px;display:inline-flex;align-items:center;gap:5px}
 .openchip{font-size:10.5px;padding:2px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:600;flex:none}
+/* Monatsmenü: waagerecht scrollbar, springt zum Monat */
+.mnav{display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px;margin:0 -20px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.mnav::-webkit-scrollbar{display:none}
+.mnav button{flex:none;text-align:left;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:inherit;line-height:1.25}
+.mnav button.on{border-color:var(--accent-line);background:var(--accent-soft);color:var(--text-strong)}
+.mnav button .mm{display:block;font-size:12px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+.mnav button .mu{display:block;font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--silver)}
+/* Monatstrenner: klebt unter der Kopfleiste (--barh wird nach dem Render gemessen) */
+.mhead{position:sticky;top:var(--barh,64px);z-index:5;scroll-margin-top:var(--barh,64px);
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  margin:22px -20px 0;padding:9px 20px;background:var(--bg);border-bottom:1px solid var(--line-strong)}
+.mhead:first-child{margin-top:6px}
+.mhead h3{margin:0;font-weight:800;font-size:17px;letter-spacing:-.3px;color:var(--text-strong)}
+.mhead .msum{font-size:13px;font-weight:700;color:var(--silver);font-variant-numeric:tabular-nums}
+.mhead .msub{font-size:11px;color:var(--faint);font-weight:500}
 </style>
 </head>
 <body>
@@ -153,9 +173,7 @@ body.light .day:active{background:rgba(0,0,0,.03)}
   <div class="seg" id="seg"><button data-tab="einsaetze" class="on">Einsätze</button><button data-tab="kunden">Kunden</button><button data-tab="stats">Statistik</button><button data-tab="set">Einstellungen</button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-facts"><span>USt- und Steuer-Rücklage getrennt</span><span>Splits auf das Verfügbare</span><span>Daten bleiben lokal</span></div>
-    <div class="foot-note">Kein Server, kein Konto · alle Angaben ohne Gewähr, keine Steuerberatung</div>
-    <div class="foot-v">Kontor <b>V1.0</b></div>
+    <div class="foot-v">Kontor <b>V1.1</b></div>
   </div>
 </div>
 <input type="file" id="backupInput" accept="application/json,.json" class="hidden">
@@ -187,6 +205,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const WD=["So","Mo","Di","Mi","Do","Fr","Sa"];
 const MN=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 function fmtMonth(mk){return MN[+mk.slice(5,7)-1]+" "+mk.slice(0,4);}
+function fmtMonthShort(mk){return (MN[+mk.slice(5,7)-1]||"").slice(0,3)+" "+mk.slice(2,4);}
 function fmtDate(iso){if(!iso)return "–";const d=new Date(iso+"T00:00");if(isNaN(d))return iso;return WD[d.getDay()]+". "+String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
 function fmtDE(dt){const d=dt||new Date();return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();}
 function fmtEUR0(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+" €";}
@@ -223,6 +242,12 @@ function years(){const s=new Set(DB.einsaetze.map(e=>(e.datum||"").slice(0,4)).f
 let state={tab:"einsaetze",year:null};
 const view=document.getElementById("view"),seg=document.getElementById("seg");
 seg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.tab=b.dataset.tab;[...seg.children].forEach(c=>c.classList.toggle("on",c===b));render();});
+/* Kopfleisten-Hoehe messen: variiert mit der Safe Area des Geraets. Die klebenden
+   Monatstrenner brauchen den Wert, damit sie nicht hinter der Leiste verschwinden. */
+function measureBar(){const b=document.querySelector(".bar");
+  if(b)document.documentElement.style.setProperty("--barh",Math.round(b.getBoundingClientRect().height)+"px");}
+window.addEventListener("resize",measureBar);
+window.addEventListener("orientationchange",measureBar);
 function applyTheme(){const l=S.theme==="light";document.body.classList.toggle("light",l);document.getElementById("themeBtn").textContent=l?"☾":"☀";const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=l?"#F5F4F1":"#15171A";}
 document.getElementById("themeBtn").onclick=()=>{S.theme=(S.theme==="light"?"dark":"light");persist();applyTheme();};
 const SUB={einsaetze:"Einsätze",kunden:"Kunden",stats:"Übersicht",set:"Einstellungen"};
@@ -237,10 +262,18 @@ function renderEinsaetze(){
   const needBak=DB.einsaetze.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>30*864e5)&&(!S.bakSnooze||Date.now()-S.bakSnooze>7*864e5);
   if(needBak)h+=`<div class="remind">💾 ${S.lastBackup?"Dein letztes Backup ist über einen Monat her.":"Du hast noch kein Backup deiner Daten."}<div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="remBak" style="margin-bottom:0;padding:9px">Backup teilen</button><button class="btn ghost" id="remLater" style="margin-bottom:0;padding:9px">Später</button></div></div>`;
   const list=DB.einsaetze.slice().sort((a,b)=>((b.datum||"")+(b.beginn||"")).localeCompare((a.datum||"")+(a.beginn||"")));
+  /* Umsatz und Anzahl je Monat, fuer Menue und Trenner */
+  const mon={};
+  list.forEach(e=>{const mk=(e.datum||"").slice(0,7);const m=mon[mk]??={n:0,hon:0};m.n++;m.hon+=(+e.tagessatz||0);});
+  const mks=Object.keys(mon).sort().reverse();
   if(!list.length)h+=`<div class="empty"><div class="big">🎬</div><p>Noch keine Einsätze.</p></div>`;
-  else{let curM="";
+  else{
+    if(mks.length>1)h+=`<div class="mnav" id="mnav">${mks.map((mk,i)=>
+      `<button data-mk="${esc(mk)}"${i===0?' class="on"':''}><span class="mm">${esc(fmtMonthShort(mk))}</span><span class="mu">${fmtEUR0(mon[mk].hon)}</span></button>`).join("")}</div>`;
+    let curM="";
     list.forEach(e=>{const mk=(e.datum||"").slice(0,7);
-      if(mk!==curM){curM=mk;h+=`<div class="section-h"><h3>${esc(fmtMonth(mk))}</h3></div>`;}
+      if(mk!==curM){curM=mk;const m=mon[mk];
+        h+=`<div class="mhead" id="m-${esc(mk)}"><h3>${esc(fmtMonth(mk))}</h3><span class="msum">${fmtEUR0(m.hon)} <span class="msub">· ${m.n} Einsätze</span></span></div>`;}
       const c=calcEinsatz(e,S);
       h+=`<div class="day" data-e="${e.id}">
         <div class="top"><div class="date" style="display:flex;align-items:center;gap:7px">${esc(fmtDate(e.datum))} · ${esc(kName(e.kundeId))}${[1,2,3].includes(e.stimmung)?`<span class="mdot m${e.stimmung}"></span>`:""}</div>
@@ -251,6 +284,24 @@ function renderEinsaetze(){
   document.getElementById("addEins").onclick=()=>editEinsatz(null,null);
   const rb=document.getElementById("remBak");if(rb)rb.onclick=exportBackup;
   const rl=document.getElementById("remLater");if(rl)rl.onclick=()=>{S.bakSnooze=Date.now();persist();render();};
+  /* Monatsmenü: springt zum Trenner. Der klebende Trenner ist danach die Kopfzeile. */
+  /* Monatsmenü springt zum Trenner. Direkt statt smooth: ein Index-Sprung darf sofort sein,
+     scroll-margin-top haelt den Trenner unter der Kopfleiste.
+     Der Chip markiert, wohin gesprungen wurde. Wo man GERADE ist, sagt der klebende
+     Trenner selbst, deshalb hier bewusst kein Scroll-Listener. */
+  const mnav=document.getElementById("mnav");
+  if(mnav){
+    const btns=[...mnav.querySelectorAll("[data-mk]")];
+    btns.forEach(b=>b.onclick=()=>{
+      const t=document.getElementById("m-"+b.dataset.mk);
+      if(!t)return;
+      btns.forEach(x=>x.classList.toggle("on",x===b));
+      /* Chip waagerecht mittig ziehen: NUR scrollLeft des Menues anfassen.
+         b.scrollIntoView({block:"nearest"}) wuerde die Seite senkrecht zurueckholen. */
+      mnav.scrollLeft=b.offsetLeft-(mnav.clientWidth-b.offsetWidth)/2;
+      t.scrollIntoView({block:"start"});
+    });
+  }
   view.querySelectorAll("[data-e]").forEach(el=>el.onclick=()=>editEinsatz(el.dataset.e,null));
   view.querySelectorAll("[data-again]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const src=DB.einsaetze.find(x=>x.id===b.dataset.again);
@@ -376,16 +427,16 @@ function renderStats(){
     <div class="s"><div class="n">${fmtEUR0(sum("splitSparen"))}</div><div class="l">Sparen/Inv. (${Math.round(S.splitSparen*100)} %)</div></div>
     <div class="s"><div class="n mono">${E.length} · ${fmtStd(std)}</div><div class="l">Einsätze · Stunden</div></div>
     <div class="s"><div class="n">${fmtSatz(std?hon/std:null)}</div><div class="l">Ø-Stundensatz (netto)</div></div>
-    <div class="s"><div class="n" style="color:var(--accent)">${E.filter(e=>!e.abgerechnet).length} · ${fmtEUR0(E.filter(e=>!e.abgerechnet).reduce((a,e)=>a+(+e.tagessatz||0),0))}</div><div class="l">Offen · noch nicht abgerechnet</div></div>
+    <div class="s mark"><div class="n">${E.filter(e=>!e.abgerechnet).length} · ${fmtEUR0(E.filter(e=>!e.abgerechnet).reduce((a,e)=>a+(+e.tagessatz||0),0))}</div><div class="l">Offen · noch nicht abgerechnet</div></div>
   </div>`;
   /* Verdienst pro Kunde, sortiert nach Ø-Stundensatz */
-  const perK={};cs.forEach(({e,c})=>{const p=perK[e.kundeId]??={n:0,std:0,hon:0,ue:0,m:[0,0,0,0]};
-    p.n++;p.std+=c.stunden||0;p.hon+=(+e.tagessatz||0);p.ue+=Math.max(0,c.ueberstunden||0);if([1,2,3].includes(e.stimmung))p.m[e.stimmung]++;});
+  const perK={};cs.forEach(({e,c})=>{const p=perK[e.kundeId]??={n:0,std:0,hon:0,m:[0,0,0,0]};
+    p.n++;p.std+=c.stunden||0;p.hon+=(+e.tagessatz||0);if([1,2,3].includes(e.stimmung))p.m[e.stimmung]++;});
   const rows=Object.entries(perK).map(([kid,p])=>({kid,...p,satz:p.std?p.hon/p.std:null})).sort((a,b)=>(b.satz||0)-(a.satz||0));
   h+=`<div class="section-h"><h3>Verdienst pro Kunde</h3><span class="tot">Ziel ${fmtSatz(S.zielStundensatz)}</span></div>`;
   rows.forEach(r=>{const col=r.satz==null?"":(r.satz>=S.zielStundensatz?"ot-pos":"ot-neg");
     const md=[1,2,3].filter(i=>r.m[i]).map(i=>`<span class="mdot m${i}"></span>${r.m[i]}`).join(" ");
-    h+=`<div class="srow"><div class="nm">${esc(kName(r.kid))}<small>${r.n} Einsätze · ${fmtStd(r.std)} Std · ${hon?Math.round(r.hon/hon*100):0} % Umsatz${r.ue?` · +${fmtStd(r.ue)} Ü-Std`:""}${md?` · ${md}`:""}</small></div><div class="v ${col}">${fmtSatz(r.satz)}</div></div>`;});
+    h+=`<div class="srow"><div class="nm">${esc(kName(r.kid))}<small>${r.n} Einsätze · ${fmtStd(r.std)} Std · ${hon?Math.round(r.hon/hon*100):0} % Umsatz${md?` · ${md}`:""}</small></div><div class="v ${col}">${fmtSatz(r.satz)}</div></div>`;});
   /* Quadrant: X = Stunden (Schwelle Median), Y = Satz (Schwelle Ziel) */
   if(rows.length>=2){
     const hs=rows.map(r=>r.std).sort((a,b)=>a-b);
@@ -566,6 +617,7 @@ let toastT;function toast(m){const el=document.getElementById("toast");el.textCo
 function askConfirm(msg,onYes,yesLabel){const el=document.getElementById("confirmBox");el.querySelector(".cmsg").textContent=msg;el.classList.remove("out");el.classList.add("on");const yes=document.getElementById("cYes"),no=document.getElementById("cNo");yes.textContent=yesLabel||"Löschen";const close=()=>{el.classList.add("out");setTimeout(()=>{el.classList.remove("on","out");},150);yes.onclick=null;no.onclick=null;};yes.onclick=()=>{close();onYes();};no.onclick=close;}
 if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 applyTheme();
+measureBar();
 render();
 </script>
 </body>
