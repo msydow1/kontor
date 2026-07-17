@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kontor">
+<meta name="theme-color" content="#15171A">
+<title>Kontor</title>
+<!-- Kontor V1.0 -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link href="vendor/inter.css" rel="stylesheet">
+<style>
+:root{--bg:#15171A;--surface:#1E2228;--surface-2:#262B31;--field:#34393F;--line:#2A2F35;--line-strong:#3A4048;--text:#E8E8E8;--text-strong:#FFFFFF;--muted:#999999;--silver:#C3C3C3;--faint:#6E747B;--accent:#C9A227;--accent-soft:rgba(201,162,39,.14);--accent-line:rgba(201,162,39,.40);--pos:#54BE86;--pos-soft:rgba(84,190,134,.15);--pos-line:rgba(84,190,134,.45);--info:#6B87A2;--info-soft:rgba(107,135,162,.16);--info-line:rgba(107,135,162,.40);--danger:#E0705C}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.45;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.mono{font-variant-numeric:tabular-nums}
+.app{max-width:560px;margin:0 auto;min-height:100vh}
+.bar{position:sticky;top:0;z-index:30;background:rgba(21,23,26,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:calc(env(safe-area-inset-top) + 16px) 18px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.bar .logo{width:30px;height:30px;border-radius:9px;flex:none;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#15171A;font-size:16px;letter-spacing:-.5px}
+.bar h1{font-weight:700;font-size:18px;margin:0;letter-spacing:-.2px;flex:1;color:var(--text-strong)}
+.bar h1 small{display:block;font-weight:500;font-size:10px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase;margin-top:3px}
+.iconbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.iconbtn:active{background:var(--surface)}
+.seg{display:flex;gap:22px;padding:14px 20px 0;border-bottom:1px solid var(--line)}
+.seg button{flex:none;padding:8px 0 11px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:14px;font-weight:600;border-bottom:2px solid transparent;margin-bottom:-1px}
+.seg button.on{color:var(--text-strong);border-bottom-color:var(--accent)}
+.view{padding:14px 20px 120px;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.empty{text-align:center;color:var(--muted);padding:70px 20px}
+.empty .big{font-size:42px;margin-bottom:10px;opacity:.4}
+.empty p{font-size:14px;line-height:1.6}
+.ot-pos{color:var(--pos)} .ot-zero{color:var(--muted)} .ot-neg{color:var(--info)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:none;font-family:inherit;font-size:15px;font-weight:700;background:var(--accent);color:#15171A;margin-bottom:10px}
+.btn:active{filter:brightness(.92)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line);font-weight:600}
+.btn.ghost:active{background:var(--surface)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid rgba(224,112,92,.4);font-weight:600}
+.btnrow{display:flex;gap:10px}.btnrow .btn{margin-bottom:10px}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 6px}
+.section-h h3{font-weight:700;font-size:13px;margin:0;letter-spacing:.4px;text-transform:uppercase;color:var(--silver)}
+.section-h .tot{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.day{background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;padding:14px 2px;margin-bottom:0}
+.day:active{background:rgba(255,255,255,.02)}
+.day .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.day .date{font-weight:700;font-size:15px;color:var(--text-strong)}
+.day .ot{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.day .line{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;align-items:center}
+.day .line .v{color:var(--silver);font-variant-numeric:tabular-nums}
+.statbig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center;margin-bottom:14px}
+.statbig .n{font-weight:800;font-size:46px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.statbig .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:8px}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.statgrid .s{background:transparent;border:1px solid var(--line);border-radius:13px;padding:15px}
+.statgrid .s .n{font-weight:700;font-size:22px;font-variant-numeric:tabular-nums;color:var(--text-strong)}
+.statgrid .s .l{font-size:11px;color:var(--muted);margin-top:4px}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:14px 2px;background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;margin-bottom:0}
+.srow .nm{font-size:14px;font-weight:600;margin:0 10px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-strong)}
+.srow .nm small{display:block;color:var(--faint);font-size:11px;font-weight:400}
+.srow .v{font-weight:700;font-size:15px;flex:none;font-variant-numeric:tabular-nums}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;backdrop-filter:blur(3px)}
+.scrim.on{display:block;animation:fadein .25s ease}
+.scrim.out{animation:fadeout .2s ease forwards}
+.sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;background:var(--bg);width:auto;max-width:560px;border-radius:22px 22px 0 0;border-top:1px solid var(--line-strong);max-height:92vh;overflow-y:auto;overflow-x:hidden;padding:8px 20px calc(env(safe-area-inset-bottom) + 24px);animation:up .3s cubic-bezier(.2,.8,.2,1)}
+.sheet.out{animation:down .2s ease forwards}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes down{to{transform:translateY(100%)}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes fadeout{to{opacity:0}}
+.grip{width:38px;height:5px;border-radius:3px;background:var(--line-strong);margin:8px auto 16px}
+.sheet h3{font-weight:800;font-size:21px;margin:0 0 18px;letter-spacing:-.4px;color:var(--text-strong)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.field .lblrow{display:flex;justify-content:space-between;align-items:baseline}
+.field .lblrow button{background:none;border:none;color:var(--accent);font-family:inherit;font-size:11.5px;font-weight:600;padding:0}
+.field input{width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--text);font-family:inherit;font-size:16px;font-variant-numeric:tabular-nums}
+.field input[type="time"],.field input[type="date"]{text-align:center}
+.field input.txt{font-variant-numeric:normal}
+.field input:focus{outline:none;border-color:var(--accent-line);background:var(--surface-2)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.field input:disabled{opacity:.4}
+.toggles{display:flex;gap:8px;flex-wrap:wrap}
+.toggles button{flex:1;min-width:52px;padding:11px 4px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--muted);font-family:inherit;font-size:13.5px;font-weight:600}
+.toggles button.on{background:var(--accent);color:#15171A;border-color:var(--accent)}
+.toggles.mono button{font-variant-numeric:tabular-nums}
+.toggles.wrap{flex-wrap:wrap}
+.toggles.wrap button{flex:0 1 auto;min-width:0;padding:9px 12px}
+.calc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:4px 0 12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px}
+.calc .c .l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.calc .c .n{font-weight:700;font-size:18px;margin-top:3px;font-variant-numeric:tabular-nums}
+.note{font-size:12px;color:var(--faint);line-height:1.5;margin:8px 0 0}
+.note b{color:var(--muted);font-weight:600}
+.remind{border:1px solid var(--info-line);background:var(--info-soft);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text);line-height:1.5;margin:0 0 14px}
+details.exp{margin-top:10px}
+details.exp summary{list-style:none;cursor:pointer;font-size:12px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
+details.exp summary::-webkit-details-marker{display:none}
+details.exp summary::before{content:"+";display:inline-flex;width:20px;height:20px;border:1px solid var(--line-strong);border-radius:6px;align-items:center;justify-content:center;color:var(--accent);font-weight:700;flex:none}
+details.exp[open] summary::before{content:"–"}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%) translateY(20px);background:var(--field);border:1px solid var(--accent-line);color:var(--text);padding:12px 20px;border-radius:12px;font-size:14px;z-index:80;opacity:0;transition:.3s;box-shadow:0 10px 40px rgba(0,0,0,.5);pointer-events:none;max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.divider{height:1px;background:var(--line);margin:18px 0}
+.hidden{display:none!important}
+.foot{text-align:center;padding:34px 20px 18px}
+.foot-facts{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0 0 11px}
+.foot-facts span{font-size:10.5px;color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:7px;padding:3px 9px;font-variant-numeric:tabular-nums}
+.foot-note{font-size:10.5px;color:var(--faint);line-height:1.5}
+.foot-v{font-size:11.5px;font-weight:600;color:var(--faint);letter-spacing:.2px;margin-top:14px}
+.foot-v b{color:var(--accent);font-weight:700}
+.cscrim{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:120;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
+.cscrim.on{display:flex;animation:fadein .25s ease}
+.cscrim.out{animation:fadeout .15s ease forwards}
+.cdlg{background:var(--surface);border:1px solid var(--line-strong);border-radius:16px;padding:22px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:pop .25s cubic-bezier(.2,.8,.2,1)}
+.cscrim.out .cdlg{animation:popout .15s ease forwards}
+@keyframes pop{from{opacity:0;transform:scale(.95) translateY(8px)}}
+@keyframes popout{to{opacity:0;transform:scale(.97)}}
+@media (prefers-reduced-motion:reduce){.scrim,.scrim.on,.scrim.out,.sheet,.sheet.out,.cscrim.on,.cscrim.out,.cdlg,.cscrim.out .cdlg,.toast{animation-duration:0s!important;transition-duration:0s!important}}
+.cdlg .cmsg{margin:0 0 18px;font-size:15px;line-height:1.5;color:var(--text)}
+.crow{display:flex;gap:10px}.crow .btn{flex:1}
+/* Hell-Modus */
+body.light{--bg:#F5F4F1;--surface:#FFFFFF;--surface-2:#EFEDE8;--field:#E9E7E1;--line:#DEDBD3;--line-strong:#C9C5BC;--text:#28251F;--text-strong:#141210;--muted:#7A756C;--silver:#545048;--faint:#9B968C;--accent:#9A7B14;--accent-soft:rgba(154,123,20,.12);--accent-line:rgba(154,123,20,.5);--pos:#1E9E60;--pos-soft:rgba(30,158,96,.12);--pos-line:rgba(30,158,96,.5);--info:#49688C;--info-soft:rgba(73,104,140,.12);--info-line:rgba(73,104,140,.45);--danger:#C24E3B}
+body.light .bar{background:rgba(245,244,241,.85)}
+body.light .day:active{background:rgba(0,0,0,.03)}
+/* Anleitung */
+.help .hsec{border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-bottom:14px;background:var(--surface)}
+.help h4{margin:0 0 12px;font-size:15.5px;font-weight:700;color:var(--text-strong);letter-spacing:-.2px}
+.help p{font-size:14px;line-height:1.75;color:var(--text);margin:0 0 12px}
+.help p:last-child{margin-bottom:0}
+.help b{color:var(--text-strong);font-weight:600}
+.help ol{margin:0 0 12px;padding-left:22px;font-size:14px;line-height:1.9;color:var(--text)}
+.help ol:last-child{margin-bottom:0}
+.help li{margin-bottom:4px}
+.help .tip{background:var(--field);border-radius:10px;padding:11px 13px;font-size:13px;color:var(--muted);line-height:1.65}
+/* Kontor-Ergänzungen */
+.btn:disabled{opacity:.35;pointer-events:none}
+.mdot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.mdot.m1{background:var(--pos)}.mdot.m2{background:var(--muted)}.mdot.m3{background:var(--danger)}
+.again{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--accent);font-size:15px;line-height:1;flex:none;display:flex;align-items:center;justify-content:center}
+.again:active{background:var(--accent-soft)}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 4px}
+.quad .q{border:1px solid var(--line);border-radius:12px;padding:10px;min-height:74px}
+.quad .q h5{margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.quad .q .kx{display:flex;flex-wrap:wrap;gap:4px}
+.quad .q .kx span{font-size:11px;border:1px solid var(--line);border-radius:7px;padding:2px 7px;display:inline-flex;align-items:center;gap:5px}
+.openchip{font-size:10.5px;padding:2px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:600;flex:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar"><div class="logo">K</div><h1>Kontor<small id="barsub">Einsätze</small></h1><button class="iconbtn" id="themeBtn" aria-label="Hell/Dunkel">☀</button></div>
+  <div class="seg" id="seg"><button data-tab="einsaetze" class="on">Einsätze</button><button data-tab="kunden">Kunden</button><button data-tab="stats">Statistik</button><button data-tab="set">Einstellungen</button></div>
+  <div class="view" id="view"></div>
+  <div class="foot">
+    <div class="foot-facts"><span>USt- und Steuer-Rücklage getrennt</span><span>Splits auf das Verfügbare</span><span>Daten bleiben lokal</span></div>
+    <div class="foot-note">Kein Server, kein Konto · alle Angaben ohne Gewähr, keine Steuerberatung</div>
+    <div class="foot-v">Kontor <b>V1.0</b></div>
+  </div>
+</div>
+<input type="file" id="backupInput" accept="application/json,.json" class="hidden">
+<div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<div class="cscrim" id="confirmBox"><div class="cdlg"><p class="cmsg"></p><div class="crow"><button id="cNo" class="btn ghost" style="margin:0">Abbrechen</button><button id="cYes" class="btn danger" style="margin:0">Löschen</button></div></div></div>
+
+<script>
+"use strict";
+/* ===== Persistenz (Fallback falls localStorage gesperrt) ===== */
+const KEY="kontor_v1";
+const Store={mem:{},load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return this.mem[KEY]||null}},save(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){this.mem[KEY]=o}}};
+let DB=Store.load()||{kunden:[],einsaetze:[],settings:{}};
+DB.kunden??=[];DB.einsaetze??=[];DB.settings??={};
+const S=DB.settings;
+/* Migration beim Laden: einzige Stelle, durch die alle Daten müssen (localStorage wie Backup-Import).
+   Normalisiert Typen, damit der restliche Code sich auf sie verlassen kann. */
+const numS=(v,d)=>{const n=(v==null||v==="")?NaN:+v;return Number.isFinite(n)?n:d;};
+S.mwst=numS(S.mwst,0.19);S.steuersatz=numS(S.steuersatz,0.38);S.sollStunden=numS(S.sollStunden,10);
+S.splitFix=numS(S.splitFix,0.5);S.splitPersoenlich=numS(S.splitPersoenlich,0.3);S.splitSparen=numS(S.splitSparen,0.2);
+S.zielStundensatz=numS(S.zielStundensatz,100);S.theme=(S.theme==="light"?"light":"dark");
+DB.kunden.forEach(k=>{k.name=String(k.name??"");k.tagessatz=numS(k.tagessatz,0);k.notiz=String(k.notiz??"");});
+DB.einsaetze.forEach(e=>{e.stimmung=[1,2,3].includes(e.stimmung)?e.stimmung:null;
+  e.notiz=String(e.notiz??"");e.abgerechnet=!!e.abgerechnet;e.tagessatz=numS(e.tagessatz,0);});
+function persist(){Store.save(DB);}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* ===== Format-Helfer ===== */
+const WD=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const MN=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+function fmtMonth(mk){return MN[+mk.slice(5,7)-1]+" "+mk.slice(0,4);}
+function fmtDate(iso){if(!iso)return "–";const d=new Date(iso+"T00:00");if(isNaN(d))return iso;return WD[d.getDay()]+". "+String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
+function fmtDE(dt){const d=dt||new Date();return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();}
+function fmtEUR0(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+" €";}
+function fmtStd(h){return h==null?"–":h.toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1});}
+function fmtSatz(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+" €/Std";}
+function kunde(id){return DB.kunden.find(k=>k.id===id);}
+function kName(id){const k=kunde(id);return k?k.name:"?";}
+
+/* ===== Rechenmodul (pur, von tools/test-calc.mjs getestet) ===== */
+/*[calc]*/
+function hm2min(s){if(!s)return null;const m=String(s).match(/^\s*(\d{1,2}):(\d{2})\s*$/);if(!m)return null;const h=+m[1],mm=+m[2];return(h>23||mm>59)?null:h*60+mm;}
+function calcEinsatz(e,P){
+  const b=hm2min(e.beginn),x=hm2min(e.ende);
+  let stunden=null;
+  if(b!=null&&x!=null){let d=x-b;if(d<0)d+=1440;stunden=d/60;} /* ende < beginn = Nachtdreh über 0:00 */
+  const raw=(e.tagessatz==null||e.tagessatz==="")?NaN:+e.tagessatz;
+  const ts=Number.isFinite(raw)?raw:null;
+  const stundensatz=(stunden&&ts!=null)?ts/stunden:null;
+  const ueberstunden=stunden==null?null:stunden-P.sollStunden;
+  if(ts==null)return{stunden,stundensatz,ueberstunden,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
+  const rechnungsbetrag=ts*(1+P.mwst);
+  const ustRuecklage=ts*P.mwst;              /* gehört dem Finanzamt */
+  const steuerRuecklage=ts*P.steuersatz;     /* 38 % auf NETTO, nicht auf brutto */
+  const verfuegbar=ts-steuerRuecklage;
+  return{stunden,stundensatz,ueberstunden,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
+    splitFix:verfuegbar*P.splitFix,splitPersoenlich:verfuegbar*P.splitPersoenlich,splitSparen:verfuegbar*P.splitSparen};
+}
+/*[/calc]*/
+/* Jahres-Helfer */
+function einsJahr(y){return DB.einsaetze.filter(e=>(e.datum||"").slice(0,4)===y);}
+function years(){const s=new Set(DB.einsaetze.map(e=>(e.datum||"").slice(0,4)).filter(Boolean));const a=[...s].sort().reverse();return a.length?a:[String(new Date().getFullYear())];}
+
+/* ===== Routing ===== */
+let state={tab:"einsaetze",year:null};
+const view=document.getElementById("view"),seg=document.getElementById("seg");
+seg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.tab=b.dataset.tab;[...seg.children].forEach(c=>c.classList.toggle("on",c===b));render();});
+function applyTheme(){const l=S.theme==="light";document.body.classList.toggle("light",l);document.getElementById("themeBtn").textContent=l?"☾":"☀";const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=l?"#F5F4F1":"#15171A";}
+document.getElementById("themeBtn").onclick=()=>{S.theme=(S.theme==="light"?"dark":"light");persist();applyTheme();};
+const SUB={einsaetze:"Einsätze",kunden:"Kunden",stats:"Übersicht",set:"Einstellungen"};
+function render(){document.getElementById("barsub").textContent=SUB[state.tab];
+  if(state.tab==="kunden")return renderKunden();
+  if(state.tab==="stats")return renderStats();
+  if(state.tab==="set")return renderSettings();
+  return renderEinsaetze();}
+/* ===== Einsätze (Startscreen) ===== */
+function renderEinsaetze(){
+  let h=`<button class="btn" id="addEins">＋ Einsatz erfassen</button>`;
+  const needBak=DB.einsaetze.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>30*864e5)&&(!S.bakSnooze||Date.now()-S.bakSnooze>7*864e5);
+  if(needBak)h+=`<div class="remind">💾 ${S.lastBackup?"Dein letztes Backup ist über einen Monat her.":"Du hast noch kein Backup deiner Daten."}<div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="remBak" style="margin-bottom:0;padding:9px">Backup teilen</button><button class="btn ghost" id="remLater" style="margin-bottom:0;padding:9px">Später</button></div></div>`;
+  const list=DB.einsaetze.slice().sort((a,b)=>((b.datum||"")+(b.beginn||"")).localeCompare((a.datum||"")+(a.beginn||"")));
+  if(!list.length)h+=`<div class="empty"><div class="big">🎬</div><p>Noch keine Einsätze.</p></div>`;
+  else{let curM="";
+    list.forEach(e=>{const mk=(e.datum||"").slice(0,7);
+      if(mk!==curM){curM=mk;h+=`<div class="section-h"><h3>${esc(fmtMonth(mk))}</h3></div>`;}
+      const c=calcEinsatz(e,S);
+      h+=`<div class="day" data-e="${e.id}">
+        <div class="top"><div class="date" style="display:flex;align-items:center;gap:7px">${esc(fmtDate(e.datum))} · ${esc(kName(e.kundeId))}${[1,2,3].includes(e.stimmung)?`<span class="mdot m${e.stimmung}"></span>`:""}</div>
+          <div style="display:flex;align-items:center;gap:10px"><div class="ot">${fmtEUR0(e.tagessatz)}</div><button class="again" data-again="${e.id}" aria-label="Nochmal – gleicher Job heute">↻</button></div></div>
+        <div class="line"><span><span class="v">${esc(e.beginn||"–")}–${esc(e.ende||"–")}</span> · <span class="v">${fmtStd(c.stunden)} Std</span></span><span>Satz <span class="v">${fmtSatz(c.stundensatz)}</span></span>${c.ueberstunden>0?`<span style="color:var(--info)">+${fmtStd(c.ueberstunden)} Ü-Std</span>`:""}${e.abgerechnet?"":'<span class="openchip">offen</span>'}</div>
+      </div>`;});}
+  view.innerHTML=h;
+  document.getElementById("addEins").onclick=()=>editEinsatz(null,null);
+  const rb=document.getElementById("remBak");if(rb)rb.onclick=exportBackup;
+  const rl=document.getElementById("remLater");if(rl)rl.onclick=()=>{S.bakSnooze=Date.now();persist();render();};
+  view.querySelectorAll("[data-e]").forEach(el=>el.onclick=()=>editEinsatz(el.dataset.e,null));
+  view.querySelectorAll("[data-again]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
+    const src=DB.einsaetze.find(x=>x.id===b.dataset.again);
+    editEinsatz(null,{kundeId:src.kundeId,beginn:src.beginn,ende:src.ende,tagessatz:src.tagessatz});});
+}
+
+/* ===== Erfassungs-Sheet ===== */
+let tmpKunde,tmpStim,tmpAbr,satzTouched;
+function lastUse(kid){return DB.einsaetze.filter(e=>e.kundeId===kid).map(e=>e.datum||"").sort().pop()||"0";}
+function editEinsatz(id,pre){
+  const e=id?DB.einsaetze.find(x=>x.id===id):Object.assign({datum:new Date().toISOString().slice(0,10),beginn:"",ende:"",tagessatz:"",stimmung:null,abgerechnet:false,notiz:"",kundeId:null},pre||{});
+  tmpKunde=e.kundeId||null;tmpStim=e.stimmung||null;tmpAbr=!!e.abgerechnet; /* Nochmal/neu: immer false (pre enthält kein abgerechnet) */
+  satzTouched=!!id||!!(pre&&pre.tagessatz!=null); /* Nochmal/Bearbeiten: Satz nicht mehr vom Kunden überschreiben */
+  openSheet(`<h3>${id?"Einsatz bearbeiten":"Einsatz erfassen"}</h3>
+    <div class="field"><label>Kunde</label><div class="toggles wrap" id="e_chips"></div>
+      <div id="e_newBox" class="hidden" style="margin-top:10px"><div class="two"><input type="text" class="txt" id="nk_name" placeholder="Kundenname"><input type="number" id="nk_satz" placeholder="Tagessatz €" min="0" step="50"></div><button class="btn ghost" id="nk_add" style="margin:10px 0 0;padding:10px">Kunde anlegen &amp; wählen</button></div></div>
+    <div class="field"><label>Datum</label><input type="date" id="e_datum" value="${esc(e.datum||"")}"></div>
+    <div class="two"><div class="field"><label>Beginn</label><input type="time" id="e_beginn" value="${esc(e.beginn||"")}"></div><div class="field"><label>Ende</label><input type="time" id="e_ende" value="${esc(e.ende||"")}"></div></div>
+    <div class="field"><label>Tagessatz (netto, €)</label><input type="number" id="e_satz" value="${esc(e.tagessatz??"")}" min="0" step="50" placeholder="z. B. 650"></div>
+    <div class="field"><label>Stimmung (optional)</label><div class="toggles" id="e_stim"><button data-s="1">🟢 entspannt</button><button data-s="2">· okay</button><button data-s="3">🔴 Stress</button></div></div>
+    <div class="field"><label>Abgerechnet? (Rechnung gestellt)</label><div class="toggles" id="e_abr"><button data-a="0">Nein · offen</button><button data-a="1">Ja</button></div></div>
+    <div class="field"><label>Notiz (optional)</label><input type="text" class="txt" id="e_notiz" value="${esc(e.notiz||"")}" placeholder="z. B. Jobbeschreibung"></div>
+    <div class="calc" id="e_calc"></div><div id="e_warn"></div>
+    <button class="btn" id="saveEins">Speichern</button>
+    <div class="btnrow">${id?'<button class="btn danger" id="delEins" style="margin-bottom:0">Löschen</button>':''}<button class="btn ghost" id="cancelEins" style="margin-bottom:0">Abbrechen</button></div>`);
+  const g=i=>document.getElementById(i);
+  let showAll=false;
+  function paintChips(){
+    const ks=DB.kunden.slice().sort((a,b)=>lastUse(b.id).localeCompare(lastUse(a.id)));
+    const shown=showAll?ks:ks.slice(0,6);
+    g("e_chips").innerHTML=shown.map(k=>`<button type="button" data-k="${k.id}"${tmpKunde===k.id?' class="on"':''}>${esc(k.name)}</button>`).join("")
+      +(!showAll&&ks.length>6?'<button type="button" id="e_all">Alle…</button>':"")
+      +'<button type="button" id="e_newK">＋ Neu</button>';
+    g("e_chips").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{tmpKunde=b.dataset.k;
+      const k=kunde(tmpKunde);if(!satzTouched&&k&&k.tagessatz)g("e_satz").value=k.tagessatz;
+      paintChips();recalc();});
+    const all=g("e_all");if(all)all.onclick=()=>{showAll=true;paintChips();};
+    g("e_newK").onclick=()=>g("e_newBox").classList.toggle("hidden");
+  }
+  g("nk_add").onclick=()=>{
+    const name=val("nk_name").trim();if(!name){toast("Bitte Namen angeben");return;}
+    const nk={id:uid(),name,tagessatz:parseFloat(val("nk_satz"))||0,notiz:""};
+    DB.kunden.push(nk);persist();tmpKunde=nk.id;
+    if(!satzTouched&&nk.tagessatz)g("e_satz").value=nk.tagessatz;
+    g("e_newBox").classList.add("hidden");paintChips();recalc();toast("Kunde angelegt");};
+  function paintStim(){g("e_stim").querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.s===tmpStim));}
+  g("e_stim").querySelectorAll("button").forEach(b=>b.onclick=()=>{const s=+b.dataset.s;tmpStim=(tmpStim===s?null:s);paintStim();});
+  function paintAbr(){g("e_abr").querySelectorAll("button").forEach(b=>b.classList.toggle("on",(b.dataset.a==="1")===tmpAbr));}
+  g("e_abr").querySelectorAll("button").forEach(b=>b.onclick=()=>{tmpAbr=b.dataset.a==="1";paintAbr();});
+  function recalc(){
+    const c=calcEinsatz({beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:val("e_satz")===""?null:parseFloat(val("e_satz"))},S);
+    g("e_calc").innerHTML=`
+      <div class="c"><div class="l">Stunden</div><div class="n">${fmtStd(c.stunden)}</div></div>
+      <div class="c"><div class="l">Stundensatz</div><div class="n">${fmtSatz(c.stundensatz)}</div></div>
+      <div class="c"><div class="l">Ü-Stunden</div><div class="n">${c.ueberstunden==null?"–":(c.ueberstunden>0?"+":"")+fmtStd(c.ueberstunden)}</div></div>
+      <div class="c"><div class="l">Rechnung brutto</div><div class="n">${fmtEUR0(c.rechnungsbetrag)}</div></div>
+      <div class="c"><div class="l">Rücklagen</div><div class="n">${fmtEUR0(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)}</div></div>
+      <div class="c"><div class="l">Verfügbar</div><div class="n" style="color:var(--pos)">${fmtEUR0(c.verfuegbar)}</div></div>`;
+    g("e_warn").innerHTML=(c.stunden!=null&&c.stunden>=16)?'<p class="note" style="color:var(--accent)">⚠ Über 16 Std – bitte Zeiten prüfen (Speichern trotzdem möglich).</p>':"";
+    const satz=parseFloat(val("e_satz"));
+    g("saveEins").disabled=!(tmpKunde&&val("e_datum")&&c.stunden!=null&&c.stunden>0&&satz>0);
+  }
+  ["e_datum","e_beginn","e_ende"].forEach(i=>g(i).oninput=recalc);
+  g("e_satz").oninput=()=>{satzTouched=true;recalc();};
+  paintChips();paintStim();paintAbr();recalc();
+  g("cancelEins").onclick=closeSheet;
+  if(id)g("delEins").onclick=()=>askConfirm("Diesen Einsatz wirklich löschen?",()=>{DB.einsaetze=DB.einsaetze.filter(x=>x.id!==id);persist();closeSheet();render();toast("Einsatz gelöscht");});
+  g("saveEins").onclick=()=>{
+    const data={kundeId:tmpKunde,datum:val("e_datum"),beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:parseFloat(val("e_satz")),stimmung:tmpStim,abgerechnet:tmpAbr,notiz:val("e_notiz")};
+    if(id)Object.assign(e,data);else DB.einsaetze.push({id:uid(),...data});
+    persist();closeSheet();render();toast(id?"Gespeichert":"Einsatz erfasst");};
+}
+/* ===== Kunden ===== */
+function renderKunden(){
+  const y=String(new Date().getFullYear());
+  let h=`<button class="btn" id="addK">＋ Kunde anlegen</button>`;
+  if(!DB.kunden.length)h+=`<div class="empty"><div class="big">👥</div><p>Noch keine Kunden.<br>Kunden entstehen auch direkt beim Erfassen eines Einsatzes.</p></div>`;
+  else DB.kunden.slice().sort((a,b)=>a.name.localeCompare(b.name,"de")).forEach(k=>{
+    const n=DB.einsaetze.filter(e=>e.kundeId===k.id&&(e.datum||"").slice(0,4)===y).length;
+    h+=`<div class="srow" data-k="${k.id}"><div class="nm">${esc(k.name)}<small>${n} Einsätze ${y}${k.notiz?" · "+esc(k.notiz):""}</small></div><div class="v">${fmtEUR0(k.tagessatz)}</div></div>`;});
+  view.innerHTML=h;
+  document.getElementById("addK").onclick=()=>editKunde(null);
+  view.querySelectorAll("[data-k]").forEach(el=>el.onclick=()=>editKunde(el.dataset.k));
+}
+function editKunde(id){
+  const k=id?DB.kunden.find(x=>x.id===id):{name:"",tagessatz:"",notiz:""};
+  openSheet(`<h3>${id?"Kunde bearbeiten":"Neuer Kunde"}</h3>
+    <div class="field"><label>Name</label><input type="text" class="txt" id="k_name" value="${esc(k.name)}" placeholder="Kundenname"></div>
+    <div class="field"><label>Standard-Tagessatz (netto, €)</label><input type="number" id="k_satz" value="${esc(k.tagessatz??"")}" min="0" step="50" placeholder="z. B. 650"><p class="note">Wird beim neuen Einsatz vorbelegt und ist dort überschreibbar. Eine Änderung hier lässt bestehende Einsätze unverändert.</p></div>
+    <div class="field"><label>Notiz (optional)</label><input type="text" class="txt" id="k_notiz" value="${esc(k.notiz||"")}"></div>
+    <button class="btn" id="saveK">Speichern</button>
+    <div class="btnrow">${id?'<button class="btn danger" id="delK" style="margin-bottom:0">Löschen</button>':''}<button class="btn ghost" id="cancelK" style="margin-bottom:0">Abbrechen</button></div>`);
+  document.getElementById("cancelK").onclick=closeSheet;
+  document.getElementById("saveK").onclick=()=>{
+    const name=val("k_name").trim();if(!name){toast("Bitte Namen angeben");return;}
+    const data={name,tagessatz:parseFloat(val("k_satz"))||0,notiz:val("k_notiz")};
+    if(id)Object.assign(k,data);else DB.kunden.push({id:uid(),...data});
+    persist();closeSheet();render();toast("Gespeichert");};
+  if(id)document.getElementById("delK").onclick=()=>{
+    const n=DB.einsaetze.filter(e=>e.kundeId===id).length;
+    if(n){toast("Nicht möglich: "+n+" Einsätze verweisen auf diesen Kunden");return;}
+    askConfirm("Diesen Kunden wirklich löschen?",()=>{DB.kunden=DB.kunden.filter(x=>x.id!==id);persist();closeSheet();render();toast("Kunde gelöscht");});};
+}
+/* ===== Statistik ===== */
+function domMood(m){let bi=0,best=0;for(const i of[3,2,1]){if(m[i]>best){best=m[i];bi=i;}}return bi;} /* Gleichstand: schlechtere gewinnt (3 zuerst geprüft) */
+function renderStats(){
+  const ys=years();if(!state.year||!ys.includes(state.year))state.year=ys[0];
+  const E=einsJahr(state.year);
+  let h="";
+  if(ys.length>1)h+=`<div class="toggles mono" style="margin-bottom:14px" id="yearSel">${ys.map(y=>`<button data-y="${esc(y)}"${y===state.year?' class="on"':''}>${esc(y)}</button>`).join("")}</div>`;
+  if(!E.length){view.innerHTML=h+`<div class="empty"><div class="big">📊</div><p>Keine Einsätze in ${esc(state.year)}.</p></div>`;bindYear();return;}
+  const cs=E.map(e=>({e,c:calcEinsatz(e,S)}));
+  const sum=k=>cs.reduce((a,x)=>a+(x.c[k]||0),0);
+  const std=sum("stunden"),hon=E.reduce((a,e)=>a+(+e.tagessatz||0),0);
+  h+=`<div class="statbig"><div class="n" style="color:var(--pos)">${fmtEUR0(sum("verfuegbar"))}</div><div class="l">Verfügbar ${esc(state.year)} · nach Rücklagen</div></div>
+  <div class="statgrid">
+    <div class="s"><div class="n">${fmtEUR0(hon)}</div><div class="l">Honorar netto</div></div>
+    <div class="s"><div class="n">${fmtEUR0(sum("rechnungsbetrag"))}</div><div class="l">Rechnungssumme brutto</div></div>
+    <div class="s"><div class="n" style="color:var(--info)">${fmtEUR0(sum("ustRuecklage"))}</div><div class="l">USt-Rücklage (${Math.round(S.mwst*100)} %)</div></div>
+    <div class="s"><div class="n" style="color:var(--info)">${fmtEUR0(sum("steuerRuecklage"))}</div><div class="l">Steuer-Rücklage (${Math.round(S.steuersatz*100)} %)</div></div>
+    <div class="s"><div class="n">${fmtEUR0(sum("splitFix"))}</div><div class="l">Fixkosten (${Math.round(S.splitFix*100)} %)</div></div>
+    <div class="s"><div class="n">${fmtEUR0(sum("splitPersoenlich"))}</div><div class="l">Persönliches (${Math.round(S.splitPersoenlich*100)} %)</div></div>
+    <div class="s"><div class="n">${fmtEUR0(sum("splitSparen"))}</div><div class="l">Sparen/Inv. (${Math.round(S.splitSparen*100)} %)</div></div>
+    <div class="s"><div class="n mono">${E.length} · ${fmtStd(std)}</div><div class="l">Einsätze · Stunden</div></div>
+    <div class="s"><div class="n">${fmtSatz(std?hon/std:null)}</div><div class="l">Ø-Stundensatz (netto)</div></div>
+    <div class="s"><div class="n" style="color:var(--accent)">${E.filter(e=>!e.abgerechnet).length} · ${fmtEUR0(E.filter(e=>!e.abgerechnet).reduce((a,e)=>a+(+e.tagessatz||0),0))}</div><div class="l">Offen · noch nicht abgerechnet</div></div>
+  </div>`;
+  /* Verdienst pro Kunde, sortiert nach Ø-Stundensatz */
+  const perK={};cs.forEach(({e,c})=>{const p=perK[e.kundeId]??={n:0,std:0,hon:0,ue:0,m:[0,0,0,0]};
+    p.n++;p.std+=c.stunden||0;p.hon+=(+e.tagessatz||0);p.ue+=Math.max(0,c.ueberstunden||0);if([1,2,3].includes(e.stimmung))p.m[e.stimmung]++;});
+  const rows=Object.entries(perK).map(([kid,p])=>({kid,...p,satz:p.std?p.hon/p.std:null})).sort((a,b)=>(b.satz||0)-(a.satz||0));
+  h+=`<div class="section-h"><h3>Verdienst pro Kunde</h3><span class="tot">Ziel ${fmtSatz(S.zielStundensatz)}</span></div>`;
+  rows.forEach(r=>{const col=r.satz==null?"":(r.satz>=S.zielStundensatz?"ot-pos":"ot-neg");
+    const md=[1,2,3].filter(i=>r.m[i]).map(i=>`<span class="mdot m${i}"></span>${r.m[i]}`).join(" ");
+    h+=`<div class="srow"><div class="nm">${esc(kName(r.kid))}<small>${r.n} Einsätze · ${fmtStd(r.std)} Std · ${hon?Math.round(r.hon/hon*100):0} % Umsatz${r.ue?` · +${fmtStd(r.ue)} Ü-Std`:""}${md?` · ${md}`:""}</small></div><div class="v ${col}">${fmtSatz(r.satz)}</div></div>`;});
+  /* Quadrant: X = Stunden (Schwelle Median), Y = Satz (Schwelle Ziel) */
+  if(rows.length>=2){
+    const hs=rows.map(r=>r.std).sort((a,b)=>a-b);
+    const med=hs.length%2?hs[(hs.length-1)/2]:(hs[hs.length/2-1]+hs[hs.length/2])/2;
+    const cell=(t,hand,f)=>{const ks=rows.filter(f).map(r=>{const dm=domMood(r.m);
+        return `<span>${dm?`<span class="mdot m${dm}"></span>`:""}${esc(kName(r.kid))}</span>`;}).join("");
+      return `<div class="q"><h5>${t}</h5><div class="kx">${ks||'<span style="border:none;color:var(--faint)">–</span>'}</div><p class="note" style="margin-top:6px">${hand}</p></div>`;};
+    h+=`<div class="section-h"><h3>Quadrant</h3><span class="tot">Schwellen: ${fmtSatz(S.zielStundensatz)} · ${fmtStd(med)} Std</span></div>
+    <div class="quad">
+      ${cell("Mitnehmen","Guter Satz, wenig Volumen.",r=>r.satz>=S.zielStundensatz&&r.std<med)}
+      ${cell("Ausbauen","Guter Satz, viel Volumen.",r=>r.satz>=S.zielStundensatz&&r.std>=med)}
+      ${cell("Ziehen lassen","Unter Ziel, wenig Volumen.",r=>r.satz<S.zielStundensatz&&r.std<med)}
+      ${cell("Preis erhöhen","Unter Ziel, viel Volumen – Verhandlungsmacht.",r=>r.satz<S.zielStundensatz&&r.std>=med)}
+    </div><p class="note">Relativer Vergleich innerhalb des Jahres, kein absolutes Urteil. Stunden-Schwelle = Median deiner Kunden.</p>`;
+  }
+  /* Pro Monat */
+  const pm={};cs.forEach(({e,c})=>{const mk=(e.datum||"").slice(0,7);const p=pm[mk]??={n:0,std:0,hon:0};p.n++;p.std+=c.stunden||0;p.hon+=(+e.tagessatz||0);});
+  h+=`<div class="section-h"><h3>Pro Monat</h3></div>`;
+  Object.keys(pm).sort().reverse().forEach(mk=>{const p=pm[mk];
+    h+=`<div class="srow"><div class="nm">${esc(fmtMonth(mk))}<small>${p.n} Einsätze · ${fmtStd(p.std)} Std</small></div><div class="v">${fmtEUR0(p.hon)}</div></div>`;});
+  view.innerHTML=h;bindYear();
+}
+function bindYear(){const ysel=document.getElementById("yearSel");
+  if(ysel)ysel.querySelectorAll("button").forEach(b=>b.onclick=()=>{state.year=b.dataset.y;render();});}
+/* ===== Einstellungen ===== */
+function renderSettings(){
+  const lastBak=S.lastBackup?fmtDE(new Date(S.lastBackup)):"noch keins";
+  let h=`<button class="btn ghost" id="helpBtn">📖 Anleitung – so funktioniert Kontor</button>
+  <div class="divider"></div>
+  <div class="field"><label>Datensicherung</label>
+    <div class="btnrow"><button class="btn ghost" id="bakOut" style="margin-bottom:0">⤴ Backup teilen</button><button class="btn ghost" id="bakIn" style="margin-bottom:0">⤵ Backup einlesen</button></div>
+    <p class="note" style="margin-top:9px">Letztes Backup: <b id="lastBak">${esc(lastBak)}</b></p>
+    <details class="exp"><summary>Was macht das Backup?</summary><p class="note"><b>„Backup teilen"</b> legt eine Sicherungsdatei mit allen Kunden, Einsätzen und Einstellungen an – in „Dateien" ablegen oder dir selbst mailen.<br><b>„Backup einlesen"</b> ersetzt den aktuellen Stand komplett.</p></details></div>
+  <div class="divider"></div>
+  <div class="field"><label>CSV für die Buchhaltung</label>
+    <div class="btnrow">${years().map(y=>`<button class="btn ghost" data-csv="${esc(y)}" style="margin-bottom:0">⤓ CSV ${esc(y)}</button>`).join("")}</div>
+    <p class="note" style="margin-top:9px">Eine Zeile pro Einsatz mit allen Beträgen, ohne Stimmung. Öffnet direkt in Numbers/Excel.</p></div>
+  <div class="divider"></div>
+  <button class="btn ghost" id="paramBtn">⚙ Parameter · MwSt, Steuer, Soll, Splits, Zielsatz</button>
+  <div class="divider"></div><button class="btn danger" id="wipe" style="margin-bottom:0">Alle Daten löschen</button>`;
+  view.innerHTML=h;
+  document.getElementById("helpBtn").onclick=openHelp;
+  document.getElementById("bakOut").onclick=exportBackup;
+  document.getElementById("bakIn").onclick=()=>document.getElementById("backupInput").click();
+  document.getElementById("paramBtn").onclick=openParams;
+  view.querySelectorAll("[data-csv]").forEach(b=>b.onclick=()=>csvYear(b.dataset.csv));
+  document.getElementById("wipe").onclick=()=>askConfirm("Wirklich ALLE Kunden und Einsätze löschen?",()=>{DB.kunden=[];DB.einsaetze=[];persist();render();toast("Alle Daten gelöscht");});
+}
+function openParams(){
+  openSheet(`<h3>Parameter</h3>
+    <div class="two"><div class="field"><label>MwSt-Satz (%)</label><input type="number" id="p_mwst" min="0" max="30" value="${Math.round(S.mwst*100)}"></div>
+    <div class="field"><label>Steuer-/Abgabensatz (%)</label><input type="number" id="p_st" min="0" max="60" value="${Math.round(S.steuersatz*100)}"></div></div>
+    <p class="note" style="margin-top:-6px">Der Steuersatz ist eine Näherung aufs Netto-Honorar. ZDF-Lohn erhöht real die Progression – den passenden Wert kennt dein Steuerberater. Keine Steuerberatung.</p>
+    <div class="two"><div class="field"><label>Soll-Stunden pro Tag</label><input type="number" id="p_soll" min="1" max="16" value="${esc(S.sollStunden)}"></div>
+    <div class="field"><label>Ziel-Stundensatz (€, netto)</label><input type="number" id="p_ziel" min="0" step="5" value="${esc(S.zielStundensatz)}"></div></div>
+    <div class="field"><label>Splits vom Verfügbaren (%, Summe 100)</label>
+      <div class="two"><input type="number" id="p_fix" min="0" max="100" value="${Math.round(S.splitFix*100)}"><input type="number" id="p_per" min="0" max="100" value="${Math.round(S.splitPersoenlich*100)}"></div>
+      <input type="number" id="p_spa" min="0" max="100" value="${Math.round(S.splitSparen*100)}" style="margin-top:12px">
+      <p class="note">Fixkosten · Persönliches · Sparen/Investieren</p></div>
+    <button class="btn" id="saveP">Speichern</button><button class="btn ghost" id="cancelP" style="margin-bottom:0">Abbrechen</button>`);
+  document.getElementById("cancelP").onclick=closeSheet;
+  document.getElementById("saveP").onclick=()=>{
+    const f=parseInt(val("p_fix"))||0,p=parseInt(val("p_per"))||0,s=parseInt(val("p_spa"))||0;
+    if(f+p+s!==100){toast("Splits müssen zusammen 100 % ergeben (aktuell "+(f+p+s)+")");return;}
+    S.mwst=(parseInt(val("p_mwst"))||0)/100;S.steuersatz=(parseInt(val("p_st"))||0)/100;
+    S.sollStunden=parseFloat(val("p_soll"))||10;S.zielStundensatz=parseFloat(val("p_ziel"))||0;
+    S.splitFix=f/100;S.splitPersoenlich=p/100;S.splitSparen=s/100;
+    persist();closeSheet();render();toast("Parameter gespeichert");};
+}
+/* ===== Datensicherung ===== */
+function dlBlob(blob,fname){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fname;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast("Datei gespeichert");}
+function shareOrDl(blob,fname,mime){const file=new File([blob],fname,{type:mime});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file]}).then(()=>toast("Geteilt")).catch(err=>{if(err&&err.name!=="AbortError")dlBlob(blob,fname);});
+  }else dlBlob(blob,fname);}
+function exportBackup(){
+  const fname="Kontor-Backup_"+new Date().toISOString().slice(0,10)+".json";
+  const blob=new Blob([JSON.stringify({app:"kontor",exportedAt:new Date().toISOString(),data:DB},null,1)],{type:"application/json"});
+  const file=new File([blob],fname,{type:"application/json"});
+  const mark=()=>{S.lastBackup=Date.now();persist();const lb=document.getElementById("lastBak");if(lb)lb.textContent=fmtDE(new Date(S.lastBackup));};
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file]}).then(()=>{mark();toast("Backup geteilt");render();}).catch(err=>{if(err&&err.name!=="AbortError"){dlBlob(blob,fname);mark();render();}});
+  }else{dlBlob(blob,fname);mark();render();}
+}
+document.getElementById("backupInput").addEventListener("change",e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{
+    const j=JSON.parse(r.result);
+    const db=j&&j.app==="kontor"&&j.data&&Array.isArray(j.data.kunden)&&Array.isArray(j.data.einsaetze)?j.data:null;
+    if(!db){toast("Keine gültige Kontor-Sicherungsdatei");return;}
+    askConfirm("Backup mit "+db.einsaetze.length+" Einsätzen und "+db.kunden.length+" Kunden einlesen? Ersetzt den aktuellen Stand ("+DB.einsaetze.length+" Einsätze).",()=>{
+      /* Die eingelesene Datei IST ein Backup: sonst mahnt der Banner direkt nach dem
+         Wiederherstellen ein Backup an (exportBackup schreibt lastBackup erst nach dem Serialisieren). */
+      DB=db;DB.settings??={};DB.settings.lastBackup??=Date.now();persist();location.reload();
+    },"Einlesen");
+  }catch(err){console.error(err);toast("Backup konnte nicht gelesen werden");}};
+  r.readAsText(f);
+});
+/* ===== CSV-Export (für Steuerberater – OHNE Stimmung) ===== */
+function csvEsc(s){s=String(s||"");return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+function csvYear(y){
+  const E=einsJahr(y).slice().sort((a,b)=>((a.datum||"")+(a.beginn||"")).localeCompare((b.datum||"")+(b.beginn||"")));
+  if(!E.length){toast("Keine Einsätze in "+y);return;}
+  const num=n=>n==null?"":n.toFixed(2).replace(".",",");
+  const rows=[["Kunde","Datum","Beginn","Ende","Stunden","Tagessatz (netto)","Stundensatz","Rechnungsbetrag (brutto)",
+    "USt-Rücklage ("+Math.round(S.mwst*100)+" %)","Steuer-Rücklage ("+Math.round(S.steuersatz*100)+" %)","Verfügbar",
+    "Fixkosten ("+Math.round(S.splitFix*100)+" %)","Persönliches ("+Math.round(S.splitPersoenlich*100)+" %)","Sparen ("+Math.round(S.splitSparen*100)+" %)","Abgerechnet","Notiz"].join(";")];
+  E.forEach(e=>{const c=calcEinsatz(e,S);
+    rows.push([csvEsc(kName(e.kundeId)),fmtDE(new Date(e.datum+"T00:00")),e.beginn,e.ende,num(c.stunden),num(+e.tagessatz),
+      num(c.stundensatz),num(c.rechnungsbetrag),num(c.ustRuecklage),num(c.steuerRuecklage),num(c.verfuegbar),
+      num(c.splitFix),num(c.splitPersoenlich),num(c.splitSparen),e.abgerechnet?"Ja":"Nein",csvEsc(e.notiz)].join(";"));});
+  const blob=new Blob(["﻿"+rows.join("\r\n")],{type:"text/csv"});
+  shareOrDl(blob,"Kontor_"+y+".csv","text/csv");
+}
+/* ===== Anleitung ===== */
+function openHelp(){
+  openSheet(`<h3>Anleitung</h3><div class="help">
+    <div class="hsec"><h4>📋 So ist Kontor aufgebaut</h4>
+      <p>Du erfasst <b>Einsätze</b> für deine <b>Kunden</b> – Datum, Beginn, Ende, Tagessatz. Kontor rechnet daraus Stunden, Stundensatz und dein Geld.</p>
+      <p>Menüs wie dieses schiebst du zum Schließen <b>nach unten</b> – oder du tippst „Abbrechen".</p>
+      <p class="tip">Alle Daten bleiben nur auf diesem Gerät. Kein Server, kein Konto. ZDF-Arbeit gehört nicht hierher – die läuft auf Lohnsteuerkarte und hat ihre eigene App.</p></div>
+    <div class="hsec"><h4>⏱ Einsatz erfassen – 3 Tipps bis fertig</h4>
+      <p>Kunden-Chip antippen (Tagessatz füllt sich selbst), Beginn und Ende wählen, speichern. Neue Kunden legst du mit <b>„＋ Neu"</b> direkt im Formular an.</p>
+      <p><b>↻ Nochmal</b> an einem Einsatz übernimmt Kunde, Zeiten und Satz – nur das Datum steht auf heute. Endet ein Dreh nach Mitternacht (22:00–06:00), rechnet Kontor automatisch über 0:00 hinweg.</p>
+      <p>Die <b>Stimmung</b> (🟢 · 😐 · 🔴) ist optional – am Jahresende siehst du pro Kunde, wie sich die Zusammenarbeit angefühlt hat.</p></div>
+    <div class="hsec"><h4>💶 Wohin dein Geld fließt</h4>
+      <p>Vom Tagessatz (netto) gehen zwei Rücklagen ab, die dir nie gehört haben:</p>
+      <p><b>USt-Rücklage</b> (19 %) · steht auf deiner Rechnung, gehört dem Finanzamt.<br><b>Steuer-Rücklage</b> (38 % aufs Netto) · für Einkommensteuer und Abgaben.</p>
+      <p>Was übrig bleibt, ist dein <b>Verfügbar</b> – darauf laufen die Splits 50/30/20 (Fixkosten · Persönliches · Sparen).</p>
+      <p class="tip">Die Sätze sind Näherungen und unter „Parameter" einstellbar. Den richtigen Steuersatz kennt dein Steuerberater – Kontor gibt keine Steuerberatung.</p></div>
+    <div class="hsec"><h4>📊 Statistik lesen</h4>
+      <p>Die Kundenliste sortiert nach <b>Ø-Stundensatz</b>: grün = über deinem Ziel, blau = darunter. Daneben stehen immer Einsätze, Stunden und Umsatzanteil – ein hoher Satz bei 6 Stunden im Jahr ist kein Top-Kunde.</p>
+      <p>Der <b>Quadrant</b> zeigt vier Handlungen: Ausbauen, Mitnehmen, Preis erhöhen, Ziehen lassen. Die Schwellen stehen dabei – es ist ein Vergleich deiner Kunden untereinander, kein Urteil.</p></div>
+    <div class="hsec"><h4>💾 Backup – wichtig!</h4>
+      <ol><li>Einstellungen → <b>„Backup teilen"</b></li><li>In „Dateien"/Cloud sichern oder dir selbst mailen</li><li>Wiederherstellen mit <b>„Backup einlesen"</b></li></ol>
+      <p class="tip">Deine Daten liegen nur im Browser dieses Geräts – iOS kann sie unter Speicherdruck löschen. Einlesen ersetzt den aktuellen Stand komplett.</p></div>
+    <div class="hsec"><h4>📄 CSV für die Buchhaltung</h4>
+      <p>Pro Jahr eine Datei mit allen Einsätzen und Beträgen – ohne Stimmung, die bleibt privat. Öffnet direkt in Numbers oder Excel.</p></div>
+    <div class="hsec"><h4>📡 Offline &amp; Installation</h4>
+      <p>Nach dem ersten Laden läuft Kontor auch ohne Internet. Installieren: in Safari öffnen → Teilen → <b>„Zum Home-Bildschirm"</b>.</p></div>
+  </div>
+  <button class="btn" id="helpClose">Schließen</button>`);
+  document.getElementById("helpClose").onclick=closeSheet;
+}
+
+/* ===== Sheet ===== */
+const scrim=document.getElementById("scrim"),sheet=document.getElementById("sheet");
+let shT=null;
+function openSheet(html){clearTimeout(shT);scrim.classList.remove("out");sheet.classList.remove("out");sheet.innerHTML='<div class="grip"></div>'+html;scrim.classList.add("on");sheet.scrollTop=0;}
+function closeSheet(){
+  if(!scrim.classList.contains("on")||scrim.classList.contains("out"))return;
+  scrim.classList.add("out");
+  if(!sheet.style.transform)sheet.classList.add("out");/* Swipe hat das Sheet schon rausgeschoben */
+  shT=setTimeout(()=>{scrim.classList.remove("on","out");sheet.classList.remove("out");sheet.style.transform="";sheet.style.transition="";},200);
+}
+scrim.addEventListener("click",e=>{if(e.target===scrim)closeSheet();});
+/* Wisch nach unten schließt das Sheet (nur wenn der Inhalt oben steht) */
+let swY=null,swActive=false;
+sheet.addEventListener("touchstart",e=>{swY=e.touches[0].clientY;swActive=sheet.scrollTop<=0;},{passive:true});
+sheet.addEventListener("touchmove",e=>{
+  if(swY==null||!swActive)return;
+  const dy=e.touches[0].clientY-swY;
+  if(dy>0&&sheet.scrollTop<=0){sheet.style.transition="none";sheet.style.transform="translateY("+dy+"px)";e.preventDefault();}
+},{passive:false});
+sheet.addEventListener("touchend",e=>{
+  if(swY==null)return;
+  const dy=e.changedTouches[0].clientY-swY;swY=null;
+  if(swActive&&dy>110){sheet.style.transition="transform .22s ease";sheet.style.transform="translateY(100%)";setTimeout(closeSheet,210);}
+  else{sheet.style.transition="transform .22s ease";sheet.style.transform="";setTimeout(()=>{sheet.style.transition="";},240);}
+  swActive=false;
+});
+
+/* ===== Utils ===== */
+function val(id){return (document.getElementById(id)||{}).value||"";}
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+let toastT;function toast(m){const el=document.getElementById("toast");el.textContent=m;el.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("on"),2600);}
+function askConfirm(msg,onYes,yesLabel){const el=document.getElementById("confirmBox");el.querySelector(".cmsg").textContent=msg;el.classList.remove("out");el.classList.add("on");const yes=document.getElementById("cYes"),no=document.getElementById("cNo");yes.textContent=yesLabel||"Löschen";const close=()=>{el.classList.add("out");setTimeout(()=>{el.classList.remove("on","out");},150);yes.onclick=null;no.onclick=null;};yes.onclick=()=>{close();onYes();};no.onclick=close;}
+if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+applyTheme();
+render();
+</script>
+</body>
+</html>
