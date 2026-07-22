@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor">
 <meta name="theme-color" content="#15171A">
 <title>Kontor</title>
-<!-- Kontor V1.2 -->
+<!-- Kontor V1.3 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -159,6 +159,7 @@ body.light .day:active{background:rgba(0,0,0,.03)}
 .quad .q .kx{display:flex;flex-wrap:wrap;gap:4px}
 .quad .q .kx span{font-size:11px;border:1px solid var(--line);border-radius:7px;padding:2px 7px;display:inline-flex;align-items:center;gap:5px}
 .openchip{font-size:10.5px;padding:2px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:600;flex:none}
+.sublab{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500}
 /* Monatsmenü: waagerecht scrollbar, springt zum Monat */
 .mnav{display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px;margin:0 -20px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .mnav::-webkit-scrollbar{display:none}
@@ -181,7 +182,7 @@ body.light .day:active{background:rgba(0,0,0,.03)}
   <div class="bar"><div class="logo">K</div><h1>Kontor<small id="barsub">Einsätze</small></h1><button class="iconbtn" id="themeBtn" aria-label="Hell/Dunkel">☀</button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V1.2</b></div>
+    <div class="foot-v">Kontor <b>V1.3</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -508,10 +509,13 @@ function openParams(){
     <p class="note" style="margin-top:-6px">Der Steuersatz ist eine Näherung aufs Netto-Honorar. ZDF-Lohn erhöht real die Progression – den passenden Wert kennt dein Steuerberater. Keine Steuerberatung.</p>
     <div class="two"><div class="field"><label>Soll-Stunden pro Tag</label><input type="number" id="p_soll" min="1" max="16" value="${esc(S.sollStunden)}"></div>
     <div class="field"><label>Ziel-Stundensatz (€, netto)</label><input type="number" id="p_ziel" min="0" step="5" value="${esc(S.zielStundensatz)}"></div></div>
-    <div class="field"><label>Splits vom Verfügbaren (%, Summe 100)</label>
-      <div class="two"><input type="number" id="p_fix" min="0" max="100" value="${Math.round(S.splitFix*100)}"><input type="number" id="p_per" min="0" max="100" value="${Math.round(S.splitPersoenlich*100)}"></div>
-      <input type="number" id="p_spa" min="0" max="100" value="${Math.round(S.splitSparen*100)}" style="margin-top:12px">
-      <p class="note">Fixkosten · Persönliches · Sparen/Investieren</p></div>
+    <div class="field"><label>Splits vom Verfügbaren (%, zusammen 100)</label>
+      <div class="two">
+        <div><span class="sublab">Fixkosten</span><input type="number" id="p_fix" min="0" max="100" value="${Math.round(S.splitFix*100)}"></div>
+        <div><span class="sublab">Persönliches</span><input type="number" id="p_per" min="0" max="100" value="${Math.round(S.splitPersoenlich*100)}"></div>
+      </div>
+      <div style="margin-top:12px"><span class="sublab">Sparen/Investieren</span><input type="number" id="p_spa" min="0" max="100" value="${Math.round(S.splitSparen*100)}"></div>
+      <p class="note">So teilst du auf, was nach den Rücklagen übrig bleibt – Anteile frei wählbar, zusammen 100 %.</p></div>
     <button class="btn" id="saveP">Speichern</button><button class="btn ghost" id="cancelP" style="margin-bottom:0">Abbrechen</button>`);
   document.getElementById("cancelP").onclick=closeSheet;
   document.getElementById("saveP").onclick=()=>{
