@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor">
 <meta name="theme-color" content="#15171A">
 <title>Kontor</title>
-<!-- Kontor V1.4 -->
+<!-- Kontor V1.5 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -59,9 +59,10 @@ body.light .tabbar{background:rgba(245,244,241,.92)}
 .section-h .tot{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .day{background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;padding:14px 2px;margin-bottom:0}
 .day:active{background:rgba(255,255,255,.02)}
-.day .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:7px}
-.day .date{font-weight:700;font-size:15px;color:var(--text-strong);flex:1;min-width:0}
-.day .ot{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.day .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.day .date{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.2px}
+.day .cust{font-weight:700;font-size:16px;color:var(--text-strong);margin:2px 0 6px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;line-height:1.25}
+.day .ot{font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .day .amt{display:flex;align-items:center;gap:10px;flex:none}
 .day .line{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;align-items:center}
 .day .line .v{color:var(--silver);font-variant-numeric:tabular-nums}
@@ -176,7 +177,7 @@ body.light .day:active{background:rgba(0,0,0,.03)}
   <div class="bar"><div class="logo">K</div><h1>Kontor<small id="barsub">Einsätze</small></h1><button class="iconbtn" id="themeBtn" aria-label="Hell/Dunkel">☀</button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V1.4</b></div>
+    <div class="foot-v">Kontor <b>V1.5</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -283,8 +284,9 @@ function renderEinsaetze(){
         h+=`<div class="mhead" id="m-${esc(mk)}"><h3>${esc(fmtMonth(mk))}</h3><span class="msum">${fmtEUR0(m.hon)} <span class="msub">· ${m.n} Einsätze</span></span></div>`;}
       const c=calcEinsatz(e,S);
       h+=`<div class="day" data-e="${e.id}">
-        <div class="top"><div class="date" style="display:flex;align-items:center;gap:7px">${esc(fmtDate(e.datum))} · ${esc(kName(e.kundeId))}${[1,2,3].includes(e.stimmung)?`<span class="mdot m${e.stimmung}"></span>`:""}</div>
+        <div class="top"><div class="date">${esc(fmtDate(e.datum))}</div>
           <div class="amt"><div class="ot">${fmtEUR0(e.tagessatz)}</div><button class="again" data-again="${e.id}" aria-label="Nochmal – gleicher Job heute">↻</button></div></div>
+        <div class="cust">${esc(kName(e.kundeId))}${[1,2,3].includes(e.stimmung)?`<span class="mdot m${e.stimmung}"></span>`:""}</div>
         <div class="line"><span><span class="v">${esc(e.beginn||"–")}–${esc(e.ende||"–")}</span> · <span class="v">${fmtStd(c.stunden)} Std</span></span><span>Satz <span class="v">${fmtSatz(c.stundensatz)}</span></span>${c.ueberstunden>0?`<span style="color:var(--info)">+${fmtStd(c.ueberstunden)} Ü-Std</span>`:""}${e.abgerechnet?"":'<span class="openchip">offen</span>'}</div>
       </div>`;});}
   view.innerHTML=h;
