@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor">
 <meta name="theme-color" content="#15171A">
 <title>Kontor</title>
-<!-- Kontor V1.3 -->
+<!-- Kontor V1.4 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -59,9 +59,10 @@ body.light .tabbar{background:rgba(245,244,241,.92)}
 .section-h .tot{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .day{background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;padding:14px 2px;margin-bottom:0}
 .day:active{background:rgba(255,255,255,.02)}
-.day .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-.day .date{font-weight:700;font-size:15px;color:var(--text-strong)}
-.day .ot{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.day .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:7px}
+.day .date{font-weight:700;font-size:15px;color:var(--text-strong);flex:1;min-width:0}
+.day .ot{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.day .amt{display:flex;align-items:center;gap:10px;flex:none}
 .day .line{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;align-items:center}
 .day .line .v{color:var(--silver);font-variant-numeric:tabular-nums}
 .statbig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center;margin-bottom:14px}
@@ -160,13 +161,6 @@ body.light .day:active{background:rgba(0,0,0,.03)}
 .quad .q .kx span{font-size:11px;border:1px solid var(--line);border-radius:7px;padding:2px 7px;display:inline-flex;align-items:center;gap:5px}
 .openchip{font-size:10.5px;padding:2px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:600;flex:none}
 .sublab{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500}
-/* Monatsmenü: waagerecht scrollbar, springt zum Monat */
-.mnav{display:flex;gap:8px;overflow-x:auto;padding:2px 20px 12px;margin:0 -20px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.mnav::-webkit-scrollbar{display:none}
-.mnav button{flex:none;text-align:left;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:inherit;line-height:1.25}
-.mnav button.on{border-color:var(--accent-line);background:var(--accent-soft);color:var(--text-strong)}
-.mnav button .mm{display:block;font-size:12px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
-.mnav button .mu{display:block;font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--silver)}
 /* Monatstrenner: klebt unter der Kopfleiste (--barh wird nach dem Render gemessen) */
 .mhead{position:sticky;top:var(--barh,64px);z-index:5;scroll-margin-top:var(--barh,64px);
   display:flex;align-items:baseline;justify-content:space-between;gap:10px;
@@ -182,7 +176,7 @@ body.light .day:active{background:rgba(0,0,0,.03)}
   <div class="bar"><div class="logo">K</div><h1>Kontor<small id="barsub">Einsätze</small></h1><button class="iconbtn" id="themeBtn" aria-label="Hell/Dunkel">☀</button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V1.3</b></div>
+    <div class="foot-v">Kontor <b>V1.4</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -220,7 +214,6 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const WD=["So","Mo","Di","Mi","Do","Fr","Sa"];
 const MN=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 function fmtMonth(mk){return MN[+mk.slice(5,7)-1]+" "+mk.slice(0,4);}
-function fmtMonthShort(mk){return (MN[+mk.slice(5,7)-1]||"").slice(0,3)+" "+mk.slice(2,4);}
 function fmtDate(iso){if(!iso)return "–";const d=new Date(iso+"T00:00");if(isNaN(d))return iso;return WD[d.getDay()]+". "+String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
 function fmtDE(dt){const d=dt||new Date();return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();}
 function fmtEUR0(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+" €";}
@@ -282,11 +275,8 @@ function renderEinsaetze(){
   /* Umsatz und Anzahl je Monat, fuer Menue und Trenner */
   const mon={};
   list.forEach(e=>{const mk=(e.datum||"").slice(0,7);const m=mon[mk]??={n:0,hon:0};m.n++;m.hon+=(+e.tagessatz||0);});
-  const mks=Object.keys(mon).sort().reverse();
   if(!list.length)h+=`<div class="empty"><div class="big">🎬</div><p>Noch keine Einsätze.</p></div>`;
   else{
-    if(mks.length>1)h+=`<div class="mnav" id="mnav">${mks.map((mk,i)=>
-      `<button data-mk="${esc(mk)}"${i===0?' class="on"':''}><span class="mm">${esc(fmtMonthShort(mk))}</span><span class="mu">${fmtEUR0(mon[mk].hon)}</span></button>`).join("")}</div>`;
     let curM="";
     list.forEach(e=>{const mk=(e.datum||"").slice(0,7);
       if(mk!==curM){curM=mk;const m=mon[mk];
@@ -294,31 +284,13 @@ function renderEinsaetze(){
       const c=calcEinsatz(e,S);
       h+=`<div class="day" data-e="${e.id}">
         <div class="top"><div class="date" style="display:flex;align-items:center;gap:7px">${esc(fmtDate(e.datum))} · ${esc(kName(e.kundeId))}${[1,2,3].includes(e.stimmung)?`<span class="mdot m${e.stimmung}"></span>`:""}</div>
-          <div style="display:flex;align-items:center;gap:10px"><div class="ot">${fmtEUR0(e.tagessatz)}</div><button class="again" data-again="${e.id}" aria-label="Nochmal – gleicher Job heute">↻</button></div></div>
+          <div class="amt"><div class="ot">${fmtEUR0(e.tagessatz)}</div><button class="again" data-again="${e.id}" aria-label="Nochmal – gleicher Job heute">↻</button></div></div>
         <div class="line"><span><span class="v">${esc(e.beginn||"–")}–${esc(e.ende||"–")}</span> · <span class="v">${fmtStd(c.stunden)} Std</span></span><span>Satz <span class="v">${fmtSatz(c.stundensatz)}</span></span>${c.ueberstunden>0?`<span style="color:var(--info)">+${fmtStd(c.ueberstunden)} Ü-Std</span>`:""}${e.abgerechnet?"":'<span class="openchip">offen</span>'}</div>
       </div>`;});}
   view.innerHTML=h;
   document.getElementById("addEins").onclick=()=>editEinsatz(null,null);
   const rb=document.getElementById("remBak");if(rb)rb.onclick=exportBackup;
   const rl=document.getElementById("remLater");if(rl)rl.onclick=()=>{S.bakSnooze=Date.now();persist();render();};
-  /* Monatsmenü: springt zum Trenner. Der klebende Trenner ist danach die Kopfzeile. */
-  /* Monatsmenü springt zum Trenner. Direkt statt smooth: ein Index-Sprung darf sofort sein,
-     scroll-margin-top haelt den Trenner unter der Kopfleiste.
-     Der Chip markiert, wohin gesprungen wurde. Wo man GERADE ist, sagt der klebende
-     Trenner selbst, deshalb hier bewusst kein Scroll-Listener. */
-  const mnav=document.getElementById("mnav");
-  if(mnav){
-    const btns=[...mnav.querySelectorAll("[data-mk]")];
-    btns.forEach(b=>b.onclick=()=>{
-      const t=document.getElementById("m-"+b.dataset.mk);
-      if(!t)return;
-      btns.forEach(x=>x.classList.toggle("on",x===b));
-      /* Chip waagerecht mittig ziehen: NUR scrollLeft des Menues anfassen.
-         b.scrollIntoView({block:"nearest"}) wuerde die Seite senkrecht zurueckholen. */
-      mnav.scrollLeft=b.offsetLeft-(mnav.clientWidth-b.offsetWidth)/2;
-      t.scrollIntoView({block:"start"});
-    });
-  }
   view.querySelectorAll("[data-e]").forEach(el=>el.onclick=()=>editEinsatz(el.dataset.e,null));
   view.querySelectorAll("[data-again]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const src=DB.einsaetze.find(x=>x.id===b.dataset.again);
