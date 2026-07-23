@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor">
 <meta name="theme-color" content="#15171A">
 <title>Kontor</title>
-<!-- Kontor V1.5 -->
+<!-- Kontor V1.6 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -177,7 +177,7 @@ body.light .day:active{background:rgba(0,0,0,.03)}
   <div class="bar"><div class="logo">K</div><h1>Kontor<small id="barsub">Einsätze</small></h1><button class="iconbtn" id="themeBtn" aria-label="Hell/Dunkel">☀</button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V1.5</b></div>
+    <div class="foot-v">Kontor <b>V1.6</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -416,9 +416,10 @@ function renderStats(){
     <div class="s"><div class="n">${fmtEUR0(sum("splitFix"))}</div><div class="l">Fixkosten (${Math.round(S.splitFix*100)} %)</div></div>
     <div class="s"><div class="n">${fmtEUR0(sum("splitPersoenlich"))}</div><div class="l">Persönliches (${Math.round(S.splitPersoenlich*100)} %)</div></div>
     <div class="s"><div class="n">${fmtEUR0(sum("splitSparen"))}</div><div class="l">Sparen/Inv. (${Math.round(S.splitSparen*100)} %)</div></div>
-    <div class="s"><div class="n mono">${E.length} · ${fmtStd(std)}</div><div class="l">Einsätze · Stunden</div></div>
+    <div class="s"><div class="n mono">${E.length}</div><div class="l">Einsätze ${esc(state.year)}</div></div>
+    <div class="s"><div class="n mono">${fmtStd(std)} Std</div><div class="l">Stunden ${esc(state.year)}</div></div>
     <div class="s"><div class="n">${fmtSatz(std?hon/std:null)}</div><div class="l">Ø-Stundensatz (netto)</div></div>
-    <div class="s mark"><div class="n">${E.filter(e=>!e.abgerechnet).length} · ${fmtEUR0(E.filter(e=>!e.abgerechnet).reduce((a,e)=>a+(+e.tagessatz||0),0))}</div><div class="l">Offen · noch nicht abgerechnet</div></div>
+    <div class="s mark"><div class="n">${fmtEUR0(E.filter(e=>!e.abgerechnet).reduce((a,e)=>a+(+e.tagessatz||0),0))}</div><div class="l">Noch nicht abgerechnet · ${E.filter(e=>!e.abgerechnet).length} Einsätze</div></div>
   </div>`;
   /* Verdienst pro Kunde, sortiert nach Ø-Stundensatz */
   const perK={};cs.forEach(({e,c})=>{const p=perK[e.kundeId]??={n:0,std:0,hon:0,m:[0,0,0,0]};
