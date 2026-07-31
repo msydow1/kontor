@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.1 -->
+<!-- Kontor V2.2 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -79,10 +79,10 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
 .field .lblrow{display:flex;justify-content:space-between;align-items:baseline}
 .field .lblrow button{background:none;border:none;color:var(--accent);font-family:inherit;font-size:11.5px;font-weight:600;padding:0}
-.field input{width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--field);color:var(--text);font-family:inherit;font-size:16px;font-variant-numeric:tabular-nums}
+.field input,.zz input{width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--field);color:var(--text);font-family:inherit;font-size:16px;font-variant-numeric:tabular-nums}
 .field input[type="time"],.field input[type="date"]{text-align:center}
 .field input.txt{font-variant-numeric:normal}
-.field input:focus{outline:none;border-color:var(--accent-line);background:var(--surface-2)}
+.field input:focus,.zz input:focus{outline:none;border-color:var(--accent-line);background:var(--surface-2)}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .field input:disabled{opacity:.4}
 .toggles{display:flex;gap:8px;flex-wrap:wrap}
@@ -324,6 +324,13 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .privacy .pvttl{font-size:13px;font-weight:600;color:var(--text-strong)}
 .privacy p{margin:0;font-size:11.5px;line-height:1.5;color:var(--ink-55)}
 .setnote{font-size:11px;color:var(--ink-55);line-height:1.5}
+/* Wegzeit: eingeklappter Block, bleibt im Normalfall unsichtbar */
+.zz{border:1px solid var(--border);border-radius:12px;padding:0 14px;margin:0 0 16px}
+.zz>summary{list-style:none;cursor:pointer;padding:13px 0;font-size:12px;color:var(--muted);font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.zz>summary::-webkit-details-marker{display:none}
+.zz>summary .zzv{color:var(--text-strong);font-variant-numeric:tabular-nums}
+.zz .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-bottom:14px}
+.zz .three .sublab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -331,7 +338,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.1</b></div>
+    <div class="foot-v">Kontor <b>V2.2</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -358,13 +365,14 @@ const S=DB.settings;
 const numS=(v,d)=>{const n=(v==null||v==="")?NaN:+v;return Number.isFinite(n)?n:d;};
 S.mwst=numS(S.mwst,0.19);S.steuersatz=numS(S.steuersatz,0.38);S.sollStunden=numS(S.sollStunden,10);
 S.splitFix=numS(S.splitFix,0.5);S.splitPersoenlich=numS(S.splitPersoenlich,0.3);S.splitSparen=numS(S.splitSparen,0.2);
-S.zielStundensatz=numS(S.zielStundensatz,100);S.jahresziel=numS(S.jahresziel,40000);S.theme=["auto","light","dark"].includes(S.theme)?S.theme:"auto";
+S.zielStundensatz=numS(S.zielStundensatz,100);S.jahresziel=numS(S.jahresziel,40000);S.zeitbasis=["arbeit","gesamt"].includes(S.zeitbasis)?S.zeitbasis:"arbeit";S.theme=["auto","light","dark"].includes(S.theme)?S.theme:"auto";
 S.defaultModus=(S.defaultModus==="stunde")?"stunde":"tag";
 S.onboarded=!!S.onboarded;
 S.timer=(S.timer&&typeof S.timer==="object"&&Number.isFinite(+S.timer.start)&&DB.kunden.some(k=>k.id===S.timer.kundeId))?{kundeId:S.timer.kundeId,start:+S.timer.start}:null;
 DB.kunden.forEach(k=>{k.name=String(k.name??"");k.tagessatz=numS(k.tagessatz,0);k.notiz=String(k.notiz??"");k.modus=(k.modus==="stunde")?"stunde":"tag";});
 DB.einsaetze.forEach(e=>{e.stimmung=[1,2,3].includes(e.stimmung)?e.stimmung:null;
-  e.notiz=String(e.notiz??"");e.status=["offen","gestellt","bezahlt"].includes(e.status)?e.status:(e.abgerechnet?"bezahlt":"offen");e.abgerechnet=(e.status==="bezahlt");e.tagessatz=numS(e.tagessatz,0);e.modus=(e.modus==="stunde")?"stunde":"tag";});
+  e.notiz=String(e.notiz??"");e.status=["offen","gestellt","bezahlt"].includes(e.status)?e.status:(e.abgerechnet?"bezahlt":"offen");e.abgerechnet=(e.status==="bezahlt");e.tagessatz=numS(e.tagessatz,0);e.modus=(e.modus==="stunde")?"stunde":"tag";
+  e.fahrtHin=Math.max(0,numS(e.fahrtHin,0));e.fahrtZurueck=Math.max(0,numS(e.fahrtZurueck,0));e.nachbereitung=Math.max(0,numS(e.nachbereitung,0));});
 if(DB.kunden.length||DB.einsaetze.length)S.onboarded=true; /* Bestandsdaten sehen nie ein Onboarding */
 function persist(){Store.save(DB);}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -382,6 +390,11 @@ function fmtSatz(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+"
 function eur2(n){return '<span class="eur">'+(n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €")+'</span>';}
 function fmtSatzH(n){return n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €/h";}
 function fmtSatzBare(n){return n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2});}
+/* Zeitbasis-Schalter (S.zeitbasis): entscheidet an EINER Stelle, ob Anzeigen auf reiner
+   Arbeitszeit oder auf Gesamtzeit inkl. Fahrt/Nachbereitung rechnen. Honorar nie betroffen. */
+function stdOf(c){return S.zeitbasis==="gesamt"?c.stundenGesamt:c.stunden;}
+function satzOf(c){return S.zeitbasis==="gesamt"?c.stundensatzGesamt:c.stundensatz;}
+const zbSuffix=()=>S.zeitbasis==="gesamt"?" inkl. Fahrt":"";
 /* Warm Paper: Kunden-Quadrant als Streudiagramm. rows=[{kid,hon,std,satz}], avg=Ø-Satz gesamt.
    Achsen wie Cloud-Prototyp: x = Honoraranteil (8..70 %, Label passt rechts), y = Stundensatz absolut (hoher Satz oben). */
 function quadrantSVG(rows,avg){
@@ -443,13 +456,19 @@ function calcEinsatz(e,P){
      aus Backup-Kompatibilitaet; die UI beschriftet je Modus. */
   const honorar=(satz==null)?null:(modus==="stunde"?(stunden==null?null:stunden*satz):satz);
   const stundensatz=(modus==="stunde")?satz:((stunden&&honorar!=null)?honorar/stunden:null);
-  const ueberstunden=stunden==null?null:stunden-P.sollStunden;
-  if(honorar==null)return{stunden,stundensatz,ueberstunden,honorar:null,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
+  const ueberstunden=stunden==null?null:stunden-P.sollStunden; /* bewusst auf Arbeitszeit: Fahrt ist keine Mehrarbeit */
+  /* Zusatzzeit (Fahrt hin/zurueck, Vor-/Nachbereitung) ist ZEIT, KEIN GELD:
+     sie geht NIE ins honorar, sondern nur in die Bewertung (stundensatzGesamt). */
+  const nz=v=>{const n=+v;return Number.isFinite(n)&&n>0?n:0;};
+  const zusatzStunden=nz(e.fahrtHin)+nz(e.fahrtZurueck)+nz(e.nachbereitung);
+  const stundenGesamt=stunden==null?null:stunden+zusatzStunden;
+  const stundensatzGesamt=(stundenGesamt&&honorar!=null)?honorar/stundenGesamt:null;
+  if(honorar==null)return{stunden,stundensatz,ueberstunden,zusatzStunden,stundenGesamt,stundensatzGesamt,honorar:null,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
   const rechnungsbetrag=honorar*(1+P.mwst);
   const ustRuecklage=honorar*P.mwst;              /* gehört dem Finanzamt */
   const steuerRuecklage=honorar*P.steuersatz;     /* auf NETTO */
   const verfuegbar=honorar-steuerRuecklage;
-  return{stunden,stundensatz,ueberstunden,honorar,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
+  return{stunden,stundensatz,ueberstunden,zusatzStunden,stundenGesamt,stundensatzGesamt,honorar,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
     splitFix:verfuegbar*P.splitFix,splitPersoenlich:verfuegbar*P.splitPersoenlich,splitSparen:verfuegbar*P.splitSparen};
 }
 /*[/calc]*/
@@ -461,7 +480,7 @@ function years(){const s=new Set(DB.einsaetze.map(e=>(e.datum||"").slice(0,4)).f
 function kundeStats(kid,y){
   const es=DB.einsaetze.filter(e=>e.kundeId===kid&&(e.datum||"").slice(0,4)===y);
   let hon=0,std=0,n=0;const m=[0,0,0,0];const mon={};
-  es.forEach(e=>{const c=calcEinsatz(e,S);hon+=c.honorar||0;std+=c.stunden||0;n++;
+  es.forEach(e=>{const c=calcEinsatz(e,S);hon+=c.honorar||0;std+=stdOf(c)||0;n++;
     if([1,2,3].includes(e.stimmung))m[e.stimmung]++;
     const mk=(e.datum||"").slice(0,7);const p=mon[mk]??={paid:0,open:0};
     if(e.status==="bezahlt")p.paid+=c.honorar||0;else p.open+=c.honorar||0;});
@@ -566,7 +585,7 @@ function renderEinsaetze(){
         const chip=e.status==="bezahlt"?`<button type="button" class="badge green cyc" data-cyc="${e.id}">✓ bezahlt</button>`:e.status==="gestellt"?`<button type="button" class="badge blue cyc" data-cyc="${e.id}">gestellt</button>`:`<button type="button" class="badge neutral cyc" data-cyc="${e.id}">offen</button>`;
         const notiz=e.notiz?` · ${esc(e.notiz)}`:"";
         h+=`<div class="erow" data-e="${e.id}"><div class="dchip"><div class="d">${dd}</div><div class="mo">${esc(mm)}</div></div>
-          <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub">${esc(e.beginn||"–")}–${esc(e.ende||"–")} · ${fmtStd(c.stunden)} h · ${fmtSatzH(c.stundensatz)}</div>${chip}</div>
+          <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub">${esc(e.beginn||"–")}–${esc(e.ende||"–")} · ${fmtStd(stdOf(c))} h · ${fmtSatzH(satzOf(c))}</div>${chip}</div>
           <div class="eamt"><div class="b">${eur2(c.rechnungsbetrag)}</div><div class="f">${eur(c.verfuegbar)} frei</div><div class="r">${eur(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)} Rücklage</div><button class="again" data-again="${e.id}" aria-label="Nochmal">↻</button></div></div>`;});
       h+=`</div>`;});}
   h+=`<button class="fab" id="addEins">＋ Einsatz</button>`;
@@ -640,6 +659,14 @@ function editEinsatz(id,pre){
     <div class="field"><label>Stimmung (optional)</label><div class="toggles" id="e_stim"><button data-s="1">🟢 entspannt</button><button data-s="2">· okay</button><button data-s="3">🔴 Stress</button></div></div>
     <div class="field"><label>Status</label><div class="toggles" id="e_status"><button data-st="offen">offen</button><button data-st="gestellt">gestellt</button><button data-st="bezahlt">bezahlt</button></div></div>
     <div class="field"><label>Notiz (optional)</label><input type="text" class="txt" id="e_notiz" value="${esc(e.notiz||"")}" placeholder="z. B. Jobbeschreibung"></div>
+    <details class="zz" id="e_zz"${(+(e.fahrtHin||0)+ +(e.fahrtZurueck||0)+ +(e.nachbereitung||0))>0?" open":""}>
+      <summary>Wegzeit &amp; Nachbereitung <span class="zzv" id="e_zzsum"></span></summary>
+      <div class="three">
+        <div><span class="sublab">Hinfahrt (h)</span><input type="number" id="e_fh" min="0" step="0.25" value="${esc(e.fahrtHin||"")}" placeholder="0"></div>
+        <div><span class="sublab">Rückfahrt (h)</span><input type="number" id="e_fz" min="0" step="0.25" value="${esc(e.fahrtZurueck||"")}" placeholder="0"></div>
+        <div><span class="sublab">Nachber. (h)</span><input type="number" id="e_nb" min="0" step="0.25" value="${esc(e.nachbereitung||"")}" placeholder="0"></div>
+      </div>
+    </details>
     <div class="calc" id="e_calc"></div><div id="e_warn"></div>
     <button class="btn" id="saveEins">Speichern</button>
     <div class="btnrow">${id?'<button class="btn danger" id="delEins" style="margin-bottom:0">Löschen</button>':''}<button class="btn ghost" id="cancelEins" style="margin-bottom:0">Abbrechen</button></div>`);
@@ -672,26 +699,31 @@ function editEinsatz(id,pre){
     g("e_satzlab").textContent=tmpModus==="stunde"?"Stundensatz (netto, €)":"Tagessatz (netto, €)";}
   g("e_modus").querySelectorAll("button").forEach(b=>b.onclick=()=>{tmpModus=b.dataset.m;modusTouched=true;paintModus();recalc();});
   function recalc(){
-    const c=calcEinsatz({beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:val("e_satz")===""?null:parseFloat(val("e_satz")),modus:tmpModus},S);
+    /* Zusatzzeiten mitgeben, sonst rechnet die Vorschau ohne Fahrt. calcEinsatz klemmt Leer/Muell selbst auf 0. */
+    const c=calcEinsatz({beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:val("e_satz")===""?null:parseFloat(val("e_satz")),modus:tmpModus,
+      fahrtHin:val("e_fh"),fahrtZurueck:val("e_fz"),nachbereitung:val("e_nb")},S);
     g("e_calc").innerHTML=`
       <div class="c"><div class="l">Stunden</div><div class="n">${fmtStd(c.stunden)}</div></div>
-      <div class="c"><div class="l">${tmpModus==="stunde"?"Honorar":"Stundensatz"}</div><div class="n">${tmpModus==="stunde"?eur(c.honorar):fmtSatz(c.stundensatz)}</div></div>
+      <div class="c"><div class="l">${tmpModus==="stunde"?"Honorar":"Ø Arbeit"}</div><div class="n">${tmpModus==="stunde"?eur(c.honorar):fmtSatz(c.stundensatz)}</div></div>
+      ${c.zusatzStunden>0?`<div class="c"><div class="l">Ø Tür zu Tür</div><div class="n">${fmtSatz(c.stundensatzGesamt)}</div></div>`:""}
       <div class="c"><div class="l">Ü-Stunden</div><div class="n">${c.ueberstunden==null?"–":(c.ueberstunden>0?"+":"")+fmtStd(c.ueberstunden)}</div></div>
       <div class="c"><div class="l">Brutto</div><div class="n">${eur(c.rechnungsbetrag)}</div></div>
       ${S.mwst>0?`<div class="c"><div class="l">USt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.ustRuecklage)}</div></div>`:""}
       <div class="c"><div class="l">ESt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.steuerRuecklage)}</div></div>
       <div class="c full"><div class="l">Verfügbar</div><div class="n" style="color:var(--pos)">${eur(c.verfuegbar)}</div></div>`;
-    g("e_warn").innerHTML=(c.stunden!=null&&c.stunden>=16)?'<p class="note" style="color:var(--accent)">⚠ Über 16 Std – bitte Zeiten prüfen (Speichern trotzdem möglich).</p>':"";
+    {const zs=g("e_zzsum");if(zs)zs.textContent=c.zusatzStunden>0?fmtStd(c.zusatzStunden)+" h":"";}
+    g("e_warn").innerHTML=(c.stundenGesamt!=null&&c.stundenGesamt>=16)?'<p class="note" style="color:var(--accent)">⚠ Über 16 Std inkl. Fahrt – bitte Zeiten prüfen (Speichern trotzdem möglich).</p>':"";
     const satz=parseFloat(val("e_satz"));
     g("saveEins").disabled=!(tmpKunde&&val("e_datum")&&c.stunden!=null&&c.stunden>0&&satz>0);
   }
-  ["e_datum","e_beginn","e_ende"].forEach(i=>g(i).oninput=recalc);
+  ["e_datum","e_beginn","e_ende","e_fh","e_fz","e_nb"].forEach(i=>g(i).oninput=recalc);
   g("e_satz").oninput=()=>{satzTouched=true;recalc();};
   paintChips();paintStim();paintStatus();paintModus();recalc();
   g("cancelEins").onclick=closeSheet;
   if(id)g("delEins").onclick=()=>askConfirm("Diesen Einsatz wirklich löschen?",()=>{DB.einsaetze=DB.einsaetze.filter(x=>x.id!==id);persist();closeSheet();render();toast("Einsatz gelöscht");});
   g("saveEins").onclick=()=>{
-    const data={kundeId:tmpKunde,datum:val("e_datum"),beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:parseFloat(val("e_satz")),modus:tmpModus,stimmung:tmpStim,status:tmpStatus,abgerechnet:(tmpStatus==="bezahlt"),notiz:val("e_notiz")};
+    const data={kundeId:tmpKunde,datum:val("e_datum"),beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:parseFloat(val("e_satz")),modus:tmpModus,stimmung:tmpStim,status:tmpStatus,abgerechnet:(tmpStatus==="bezahlt"),notiz:val("e_notiz"),
+      fahrtHin:Math.max(0,parseFloat(val("e_fh"))||0),fahrtZurueck:Math.max(0,parseFloat(val("e_fz"))||0),nachbereitung:Math.max(0,parseFloat(val("e_nb"))||0)};
     if(id)Object.assign(e,data);else DB.einsaetze.push({id:uid(),...data});
     persist();closeSheet();render();toast(id?"Gespeichert":"Einsatz erfasst");};
 }
@@ -708,7 +740,7 @@ function renderKunden(){
     document.getElementById("addK").onclick=()=>editKunde(null);bindYear();return;}
   const E=y?einsJahr(y):[];
   const totHon=E.reduce((a,e)=>a+(calcEinsatz(e,S).honorar||0),0);
-  const totStd=E.reduce((a,e)=>a+(calcEinsatz(e,S).stunden||0),0);
+  const totStd=E.reduce((a,e)=>a+(stdOf(calcEinsatz(e,S))||0),0);
   const jahresAvg=totStd?totHon/totStd:0;
   const rows=DB.kunden.map(k=>({k,st:kundeStats(k.id,y)}));
   const maxHon=Math.max(...rows.map(r=>r.st.hon),1);
@@ -721,7 +753,7 @@ function renderKunden(){
     const note=dev==null?"":dev>=0?`Liegt ${dev} % über deinem Ø-Stundensatz.`:`Liegt ${Math.abs(dev)} % unter deinem Ø-Stundensatz – Tagessatz nachverhandeln.`;
     h+=`<div class="kcard" data-k="${k.id}">
       <div class="khead"><div><div class="kname">${esc(k.name)}</div><div class="ksub">${esc(subLine(k,st.n))}</div></div><span class="badge ${good?"green":"blue"} wide">${good?"HALTEN":"PRÜFEN"}</span></div>
-      <div class="kpi"><div><span class="kl">Honorar</span><span class="kv">${eur(st.hon)}</span></div><div><span class="kl">Ø Satz</span><span class="kv">${st.satz!=null?esc(fmtSatzBare(st.satz))+" €":"–"}</span></div><div><span class="kl">Anteil</span><span class="kv">${ant} %</span></div></div>
+      <div class="kpi"><div><span class="kl">Honorar</span><span class="kv">${eur(st.hon)}</span></div><div><span class="kl">Ø Satz${zbSuffix()}</span><span class="kv">${st.satz!=null?esc(fmtSatzBare(st.satz))+" €":"–"}</span></div><div><span class="kl">Anteil</span><span class="kv">${ant} %</span></div></div>
       <div class="kbar"><i class="${good?"pos":"info"}" style="width:${Math.min(100,st.hon/maxHon*100).toFixed(1)}%"></i></div>
       ${note?`<div class="knote">${esc(note)}</div>`:""}</div>`;});
   noE.forEach(({k})=>{
@@ -774,7 +806,7 @@ function renderKundenDetail(){
   const overZiel=cur.satz!=null&&cur.satz>=S.zielStundensatz;
   const trend=(c,p)=>{if(p==null||p===0||c==null)return "";const d=(c-p)/p*100;const up=d>=0;return `<b class="${up?"up":"down"}">${up?"▲":"▼"} ${Math.abs(Math.round(d))} %</b>`;};
   const tS=trend(cur.satz,prev.satz),tH=trend(cur.hon,prev.hon);
-  h+=`<div class="hero"><div class="lab">Effektiver Ø-Stundensatz</div><div class="kd-big" style="color:var(--${overZiel?"pos":"info"})">${esc(fmtSatz(cur.satz))}</div>${(tS||tH)?`<div class="kd-trends">${tS?`<span>Ø-Satz ${tS} vs. ${+y-1}</span>`:""}${tH?`<span>Umsatz ${tH} vs. ${+y-1}</span>`:""}</div>`:""}${barTargetHTML(cur.satz,S.zielStundensatz)}<div class="kd-zlab">Ziel ${esc(fmtSatz(S.zielStundensatz))}</div></div>`;
+  h+=`<div class="hero"><div class="lab">Effektiver Ø-Stundensatz${zbSuffix()}</div><div class="kd-big" style="color:var(--${overZiel?"pos":"info"})">${esc(fmtSatz(cur.satz))}</div>${(tS||tH)?`<div class="kd-trends">${tS?`<span>Ø-Satz ${tS} vs. ${+y-1}</span>`:""}${tH?`<span>Umsatz ${tH} vs. ${+y-1}</span>`:""}</div>`:""}${barTargetHTML(cur.satz,S.zielStundensatz)}<div class="kd-zlab">Ziel ${esc(fmtSatz(S.zielStundensatz))}</div></div>`;
   h+=`<div class="krow c2" style="margin-top:14px">
     <div class="kt"><div class="l">Umsatz ${esc(y)} · netto</div><div class="n">${eur(cur.hon)}</div></div>
     <div class="kt"><div class="l">Umsatz gesamt · alle Jahre</div><div class="n">${eur(honAll)}</div></div>
@@ -808,7 +840,7 @@ function renderStats(){
   if(!E.length){view.innerHTML=h+`<div class="empty"><p>Keine Einsätze in ${esc(state.year)}.</p></div>`;bindYear();return;}
   const cs=E.map(e=>({e,c:calcEinsatz(e,S)}));
   const sum=k=>cs.reduce((a,x)=>a+(x.c[k]||0),0);
-  const std=sum("stunden"),hon=sum("honorar"),vf=sum("verfuegbar"),ust=sum("ustRuecklage"),est=sum("steuerRuecklage");
+  const std=cs.reduce((a,x)=>a+(stdOf(x.c)||0),0),hon=sum("honorar"),vf=sum("verfuegbar"),ust=sum("ustRuecklage"),est=sum("steuerRuecklage");
   const ziel=S.jahresziel||0;const pct=ziel>0?Math.round(vf/ziel*100):0;const pw=ziel>0?Math.min(100,vf/ziel*100):0;
   /* Jahres-Hero */
   h+=`<div class="hero"><div class="lab">${esc(state.year)} · verfügbar nach Rücklagen</div><div class="big">${eur(vf)}</div>
@@ -821,8 +853,8 @@ function renderStats(){
   </div>
   <div class="krow c3">
     <div class="kt"><div class="l">Einsätze</div><div class="n">${E.length}</div></div>
-    <div class="kt"><div class="l">Stunden</div><div class="n">${fmtStd(std)}</div></div>
-    <div class="kt"><div class="l">Ø €/h</div><div class="n">${fmtSatzBare(std?hon/std:null)}</div></div>
+    <div class="kt"><div class="l">Stunden${zbSuffix()}</div><div class="n">${fmtStd(std)}</div></div>
+    <div class="kt"><div class="l">Ø €/h${zbSuffix()}</div><div class="n">${fmtSatzBare(std?hon/std:null)}</div></div>
   </div>`;
   /* Offene Forderungen (Beta) */
   const offN=cs.filter(x=>x.e.status!=="bezahlt").length,offB=cs.filter(x=>x.e.status!=="bezahlt").reduce((a,x)=>a+(x.c.rechnungsbetrag||0),0);
@@ -835,7 +867,7 @@ function renderStats(){
     <div class="budgetrow"><span class="bl">Rücklage</span><span class="bt"><i style="width:40%;background:var(--ink-35)"></i></span><span class="bv">${eur(sum("splitSparen"))}</span></div>
   </div>`;
   /* Aggregation je Kunde */
-  const perK={};cs.forEach(({e,c})=>{const p=perK[e.kundeId]??={n:0,std:0,hon:0};p.n++;p.std+=c.stunden||0;p.hon+=c.honorar||0;});
+  const perK={};cs.forEach(({e,c})=>{const p=perK[e.kundeId]??={n:0,std:0,hon:0};p.n++;p.std+=stdOf(c)||0;p.hon+=c.honorar||0;});
   const rows=Object.entries(perK).map(([kid,p])=>({kid,...p,satz:p.std?p.hon/p.std:null}));
   const avg=std?hon/std:0;
   /* Kunden-Quadrant */
@@ -845,7 +877,7 @@ function renderStats(){
     const top=byHon[0];const topPct=hon?Math.round(top.hon/hon*100):0;
     const tip=(worst?`${esc(kName(worst.kid))} bringt Zeit für ${esc(fmtSatzH(worst.satz))} – nachverhandeln. `:"")+(top?`${esc(kName(top.kid))} trägt ${topPct} % des Honorars.`:"");
     const mehr=rows.length>6?` Beschriftet sind die 6 größten Kunden, die übrigen ${rows.length-6} sind als blasse Punkte eingezeichnet.`:"";
-    h+=`<div class="qcard"><div class="qh"><h3>Kunden-Quadrant</h3><span>Umsatz × Stundensatz</span></div>${quadrantSVG(rows,avg)}<p class="qhint">${tip}${mehr}</p></div>`;
+    h+=`<div class="qcard"><div class="qh"><h3>Kunden-Quadrant</h3><span>Umsatz × Stundensatz${zbSuffix()}</span></div>${quadrantSVG(rows,avg)}<p class="qhint">${tip}${mehr}</p></div>`;
   }
   /* Verdienst pro Kunde (antippbar → Detail) */
   const vsorted=rows.slice().sort((a,b)=>(b.hon||0)-(a.hon||0));const maxFee=Math.max(...vsorted.map(r=>r.hon||0),1);
@@ -888,6 +920,8 @@ function renderSettings(){
     <div class="slrow"><div class="sllab"><span>Einkommensteuer-Rücklage</span><span class="slval" id="estVal">${est} %</span></div><input type="range" class="slider" id="estSl" min="0" max="60" step="1" value="${est}"></div>
     <div class="setnote">Näherung aufs Netto-Honorar, keine Steuerberatung. USt 0 % = Kleinunternehmer §19.</div>
     <div class="zrow" id="zielRow"><div><div class="srk">Jahresziel</div><div class="srs">verfügbar nach Rücklagen</div></div><span class="srv">${eur(S.jahresziel)}</span></div>
+    <div class="zrow" style="cursor:default"><div><div class="srk">Stundensatz rechnen auf</div><div class="srs">Gesamtzeit zählt Fahrt und Nachbereitung mit. Dein Honorar ändert sich dadurch nicht, nur dein effektiver Stundensatz.</div></div></div>
+    <div class="toggles" id="zbSel"><button data-zb="arbeit"${S.zeitbasis!=="gesamt"?' class="on"':''}>Arbeitszeit</button><button data-zb="gesamt"${S.zeitbasis==="gesamt"?' class="on"':''}>Gesamtzeit</button></div>
     <div class="impact" id="impactBox">${impactText(iy)}</div>
   </div>
   <div class="setcard nopad"><div class="setrow tap" id="paramRow"><span class="srk">Budget-Splits, Soll-Stunden & Zielsatz</span><span class="chev">›</span></div></div>
@@ -912,6 +946,7 @@ function renderSettings(){
   uSl.oninput=setUst;eSl.oninput=setEst;
   uSl.onchange=()=>{setUst();persist();};eSl.onchange=()=>{setEst();persist();};
   document.getElementById("zielRow").onclick=openJahresziel;
+  view.querySelectorAll("#zbSel button").forEach(b=>b.onclick=()=>{S.zeitbasis=b.dataset.zb==="gesamt"?"gesamt":"arbeit";persist();render();});
   document.getElementById("paramRow").onclick=openParams;
   document.getElementById("helpBtn").onclick=openHelp;
   document.getElementById("onbBtn").onclick=showOnboarding;
@@ -978,12 +1013,14 @@ function csvYear(y){
   const num=n=>n==null?"":n.toFixed(2).replace(".",",");
   const rows=[["Kunde","Datum","Beginn","Ende","Stunden","Modus","Satz (netto)","Honorar (netto)","Stundensatz","Rechnungsbetrag (brutto)",
     "USt-Rücklage ("+Math.round(S.mwst*100)+" %)","Steuer-Rücklage ("+Math.round(S.steuersatz*100)+" %)","Verfügbar",
-    "Fixkosten ("+Math.round(S.splitFix*100)+" %)","Persönliches ("+Math.round(S.splitPersoenlich*100)+" %)","Sparen ("+Math.round(S.splitSparen*100)+" %)","Status","Notiz"].join(";")];
+    "Fixkosten ("+Math.round(S.splitFix*100)+" %)","Persönliches ("+Math.round(S.splitPersoenlich*100)+" %)","Sparen ("+Math.round(S.splitSparen*100)+" %)","Status",
+    "Fahrt hin","Fahrt zurück","Nachbereitung","Stunden gesamt","Notiz"].join(";")];
   E.forEach(e=>{const c=calcEinsatz(e,S);
     rows.push([csvEsc(kName(e.kundeId)),fmtDE(new Date(e.datum+"T00:00")),e.beginn,e.ende,num(c.stunden),
       e.modus==="stunde"?"Stunde":"Tag",num(+e.tagessatz),num(c.honorar),
       num(c.stundensatz),num(c.rechnungsbetrag),num(c.ustRuecklage),num(c.steuerRuecklage),num(c.verfuegbar),
-      num(c.splitFix),num(c.splitPersoenlich),num(c.splitSparen),csvEsc(e.status),csvEsc(e.notiz)].join(";"));});
+      num(c.splitFix),num(c.splitPersoenlich),num(c.splitSparen),csvEsc(e.status),
+      num(e.fahrtHin||0),num(e.fahrtZurueck||0),num(e.nachbereitung||0),num(c.stundenGesamt),csvEsc(e.notiz)].join(";"));});
   const blob=new Blob(["﻿"+rows.join("\r\n")],{type:"text/csv"});
   shareOrDl(blob,"Kontor_"+y+".csv","text/csv");
 }
