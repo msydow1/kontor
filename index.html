@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.2 -->
+<!-- Kontor V2.3 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -329,8 +329,8 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .zz>summary{list-style:none;cursor:pointer;padding:13px 0;font-size:12px;color:var(--muted);font-weight:500;display:flex;justify-content:space-between;align-items:center}
 .zz>summary::-webkit-details-marker{display:none}
 .zz>summary .zzv{color:var(--text-strong);font-variant-numeric:tabular-nums}
-.zz .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-bottom:14px}
-.zz .three .sublab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zz .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-bottom:14px}
+.zz .two .sublab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -338,7 +338,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.2</b></div>
+    <div class="foot-v">Kontor <b>V2.3</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -372,7 +372,8 @@ S.timer=(S.timer&&typeof S.timer==="object"&&Number.isFinite(+S.timer.start)&&DB
 DB.kunden.forEach(k=>{k.name=String(k.name??"");k.tagessatz=numS(k.tagessatz,0);k.notiz=String(k.notiz??"");k.modus=(k.modus==="stunde")?"stunde":"tag";});
 DB.einsaetze.forEach(e=>{e.stimmung=[1,2,3].includes(e.stimmung)?e.stimmung:null;
   e.notiz=String(e.notiz??"");e.status=["offen","gestellt","bezahlt"].includes(e.status)?e.status:(e.abgerechnet?"bezahlt":"offen");e.abgerechnet=(e.status==="bezahlt");e.tagessatz=numS(e.tagessatz,0);e.modus=(e.modus==="stunde")?"stunde":"tag";
-  e.fahrtHin=Math.max(0,numS(e.fahrtHin,0));e.fahrtZurueck=Math.max(0,numS(e.fahrtZurueck,0));e.nachbereitung=Math.max(0,numS(e.nachbereitung,0));});
+  e.fahrtHin=Math.max(0,numS(e.fahrtHin,0));e.fahrtZurueck=Math.max(0,numS(e.fahrtZurueck,0));
+  e.vorbereitung=Math.max(0,numS(e.vorbereitung,0));e.nachbereitung=Math.max(0,numS(e.nachbereitung,0));});
 if(DB.kunden.length||DB.einsaetze.length)S.onboarded=true; /* Bestandsdaten sehen nie ein Onboarding */
 function persist(){Store.save(DB);}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -390,10 +391,10 @@ function fmtSatz(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+"
 function eur2(n){return '<span class="eur">'+(n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €")+'</span>';}
 function fmtSatzH(n){return n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €/h";}
 function fmtSatzBare(n){return n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2});}
-/* Zeitbasis-Schalter (S.zeitbasis): entscheidet an EINER Stelle, ob Anzeigen auf reiner
-   Arbeitszeit oder auf Gesamtzeit inkl. Fahrt/Nachbereitung rechnen. Honorar nie betroffen. */
-function stdOf(c){return S.zeitbasis==="gesamt"?c.stundenGesamt:c.stunden;}
-function satzOf(c){return S.zeitbasis==="gesamt"?c.stundensatzGesamt:c.stundensatz;}
+/* Zeitbasis-Schalter (S.zeitbasis): entscheidet an EINER Stelle, ob Anzeigen auf Arbeitszeit
+   (vor Ort + Vor-/Nachbereitung) oder auf Gesamtzeit inkl. Fahrt rechnen. Honorar nie betroffen. */
+function stdOf(c){return S.zeitbasis==="gesamt"?c.stundenGesamt:c.arbeitStunden;}
+function satzOf(c){return S.zeitbasis==="gesamt"?c.stundensatzGesamt:c.stundensatzArbeit;}
 const zbSuffix=()=>S.zeitbasis==="gesamt"?" inkl. Fahrt":"";
 /* Warm Paper: Kunden-Quadrant als Streudiagramm. rows=[{kid,hon,std,satz}], avg=Ø-Satz gesamt.
    Achsen wie Cloud-Prototyp: x = Honoraranteil (8..70 %, Label passt rechts), y = Stundensatz absolut (hoher Satz oben). */
@@ -445,6 +446,10 @@ function kName(id){const k=kunde(id);return k?k.name:"?";}
 /* ===== Rechenmodul (pur, von tools/test-calc.mjs getestet) ===== */
 /*[calc]*/
 function hm2min(s){if(!s)return null;const m=String(s).match(/^\s*(\d{1,2}):(\d{2})\s*$/);if(!m)return null;const h=+m[1],mm=+m[2];return(h>23||mm>59)?null:h*60+mm;}
+/* Zusatzzeiten werden in MINUTEN eingegeben, aber in STUNDEN gespeichert (Backup-Kompat).
+   Umgerechnet wird nur an der Eingabegrenze des Sheets. */
+function minToH(v){const n=+v;return Number.isFinite(n)&&n>0?n/60:0;}
+function hToMin(h){const n=+h;return Number.isFinite(n)&&n>0?String(Math.round(n*60)):"";}
 function calcEinsatz(e,P){
   const b=hm2min(e.beginn),x=hm2min(e.ende);
   let stunden=null;
@@ -456,19 +461,24 @@ function calcEinsatz(e,P){
      aus Backup-Kompatibilitaet; die UI beschriftet je Modus. */
   const honorar=(satz==null)?null:(modus==="stunde"?(stunden==null?null:stunden*satz):satz);
   const stundensatz=(modus==="stunde")?satz:((stunden&&honorar!=null)?honorar/stunden:null);
-  const ueberstunden=stunden==null?null:stunden-P.sollStunden; /* bewusst auf Arbeitszeit: Fahrt ist keine Mehrarbeit */
-  /* Zusatzzeit (Fahrt hin/zurueck, Vor-/Nachbereitung) ist ZEIT, KEIN GELD:
-     sie geht NIE ins honorar, sondern nur in die Bewertung (stundensatzGesamt). */
+  /* Zusatzzeit ist ZEIT, KEIN GELD: sie geht NIE ins honorar, sondern nur in die Bewertung.
+     ZWEI STUFEN (V2.3): Vor-/Nachbereitung ist ARBEIT und zaehlt in arbeitStunden;
+     Fahrt kommt erst in der Stufe "Tuer zu Tuer" (stundenGesamt) dazu. */
   const nz=v=>{const n=+v;return Number.isFinite(n)&&n>0?n:0;};
-  const zusatzStunden=nz(e.fahrtHin)+nz(e.fahrtZurueck)+nz(e.nachbereitung);
+  const arbeitZusatz=nz(e.vorbereitung)+nz(e.nachbereitung);
+  const fahrtStunden=nz(e.fahrtHin)+nz(e.fahrtZurueck);
+  const zusatzStunden=arbeitZusatz+fahrtStunden;
+  const arbeitStunden=stunden==null?null:stunden+arbeitZusatz;
   const stundenGesamt=stunden==null?null:stunden+zusatzStunden;
+  const ueberstunden=arbeitStunden==null?null:arbeitStunden-P.sollStunden; /* Vor-/Nachbereitung ist Mehrarbeit, Fahrt nicht */
+  const stundensatzArbeit=(arbeitStunden&&honorar!=null)?honorar/arbeitStunden:null;
   const stundensatzGesamt=(stundenGesamt&&honorar!=null)?honorar/stundenGesamt:null;
-  if(honorar==null)return{stunden,stundensatz,ueberstunden,zusatzStunden,stundenGesamt,stundensatzGesamt,honorar:null,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
+  if(honorar==null)return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,honorar:null,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
   const rechnungsbetrag=honorar*(1+P.mwst);
   const ustRuecklage=honorar*P.mwst;              /* gehört dem Finanzamt */
   const steuerRuecklage=honorar*P.steuersatz;     /* auf NETTO */
   const verfuegbar=honorar-steuerRuecklage;
-  return{stunden,stundensatz,ueberstunden,zusatzStunden,stundenGesamt,stundensatzGesamt,honorar,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
+  return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,honorar,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
     splitFix:verfuegbar*P.splitFix,splitPersoenlich:verfuegbar*P.splitPersoenlich,splitSparen:verfuegbar*P.splitSparen};
 }
 /*[/calc]*/
@@ -586,7 +596,7 @@ function renderEinsaetze(){
         const notiz=e.notiz?` · ${esc(e.notiz)}`:"";
         h+=`<div class="erow" data-e="${e.id}"><div class="dchip"><div class="d">${dd}</div><div class="mo">${esc(mm)}</div></div>
           <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub">${esc(e.beginn||"–")}–${esc(e.ende||"–")} · ${fmtStd(stdOf(c))} h · ${fmtSatzH(satzOf(c))}</div>${chip}</div>
-          <div class="eamt"><div class="b">${eur2(c.rechnungsbetrag)}</div><div class="f">${eur(c.verfuegbar)} frei</div><div class="r">${eur(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)} Rücklage</div><button class="again" data-again="${e.id}" aria-label="Nochmal">↻</button></div></div>`;});
+          <div class="eamt"><div class="b">${eur2(c.rechnungsbetrag)}</div><div class="f">${eur(c.verfuegbar)} frei</div><div class="r">${eur(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)} Rücklage</div><button class="again" data-again="${e.id}" aria-label="Als neuen Einsatz anlegen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></button></div></div>`;});
       h+=`</div>`;});}
   h+=`<button class="fab" id="addEins">＋ Einsatz</button>`;
   view.innerHTML=h;
@@ -604,9 +614,10 @@ function renderEinsaetze(){
   const fk=document.getElementById("firstKunde");if(fk)fk.onclick=()=>editKunde(null);
   const fe=document.getElementById("firstEins");if(fe)fe.onclick=()=>editEinsatz(null,null);
   view.querySelectorAll("[data-e]").forEach(el=>el.onclick=()=>editEinsatz(el.dataset.e,null));
+  /* Rueckfrage, weil ein Fehltipp hier stillschweigend echte Daten dupliziert (Max 3x betroffen). */
   view.querySelectorAll("[data-again]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
-    const src=DB.einsaetze.find(x=>x.id===b.dataset.again);
-    editEinsatz(null,{kundeId:src.kundeId,beginn:src.beginn,ende:src.ende,tagessatz:src.tagessatz,modus:src.modus});});
+    const src=DB.einsaetze.find(x=>x.id===b.dataset.again);if(!src)return;
+    askConfirm("Diesen Einsatz als neuen anlegen?",()=>editEinsatz(null,{kundeId:src.kundeId,beginn:src.beginn,ende:src.ende,tagessatz:src.tagessatz,modus:src.modus}),"Anlegen",true);});
   view.querySelectorAll("[data-cyc]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const e=DB.einsaetze.find(x=>x.id===b.dataset.cyc);if(!e)return;
     const next={offen:"gestellt",gestellt:"bezahlt",bezahlt:"offen"};
@@ -654,19 +665,19 @@ function editEinsatz(id,pre){
       <div id="e_newBox" class="hidden" style="margin-top:10px"><div class="two"><input type="text" class="txt" id="nk_name" placeholder="Kundenname"><input type="number" id="nk_satz" placeholder="Tagessatz €" min="0" step="50"></div><button class="btn ghost" id="nk_add" style="margin:10px 0 0;padding:10px">Kunde anlegen &amp; wählen</button></div></div>
     <div class="field"><label>Datum</label><input type="date" id="e_datum" value="${esc(e.datum||"")}"></div>
     <div class="two"><div class="field"><label>Beginn</label><input type="time" id="e_beginn" value="${esc(e.beginn||"")}"></div><div class="field"><label>Ende</label><input type="time" id="e_ende" value="${esc(e.ende||"")}"></div></div>
+    <div class="two"><div class="field"><label>Fahrt hin (Min.)</label><input type="number" id="e_fh" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.fahrtHin))}" placeholder="0"></div><div class="field"><label>Fahrt zurück (Min.)</label><input type="number" id="e_fz" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.fahrtZurueck))}" placeholder="0"></div></div>
+    <details class="zz" id="e_zz"${(+(e.vorbereitung||0)+ +(e.nachbereitung||0))>0?" open":""}>
+      <summary>＋ Vor- und Nachbereitung <span class="zzv" id="e_zzsum"></span></summary>
+      <div class="two">
+        <div><span class="sublab">Vorbereitung (Min.)</span><input type="number" id="e_vb" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.vorbereitung))}" placeholder="0"></div>
+        <div><span class="sublab">Nachbereitung (Min.)</span><input type="number" id="e_nb" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.nachbereitung))}" placeholder="0"></div>
+      </div>
+    </details>
     <div class="field"><label>Abrechnung</label><div class="toggles" id="e_modus"><button data-m="tag">Tagessatz</button><button data-m="stunde">Stundensatz</button></div></div>
     <div class="field"><label id="e_satzlab">Tagessatz (netto, €)</label><input type="number" id="e_satz" value="${esc(e.tagessatz??"")}" min="0" step="50" placeholder="z. B. 650"></div>
     <div class="field"><label>Stimmung (optional)</label><div class="toggles" id="e_stim"><button data-s="1">🟢 entspannt</button><button data-s="2">· okay</button><button data-s="3">🔴 Stress</button></div></div>
     <div class="field"><label>Status</label><div class="toggles" id="e_status"><button data-st="offen">offen</button><button data-st="gestellt">gestellt</button><button data-st="bezahlt">bezahlt</button></div></div>
     <div class="field"><label>Notiz (optional)</label><input type="text" class="txt" id="e_notiz" value="${esc(e.notiz||"")}" placeholder="z. B. Jobbeschreibung"></div>
-    <details class="zz" id="e_zz"${(+(e.fahrtHin||0)+ +(e.fahrtZurueck||0)+ +(e.nachbereitung||0))>0?" open":""}>
-      <summary>Wegzeit &amp; Nachbereitung <span class="zzv" id="e_zzsum"></span></summary>
-      <div class="three">
-        <div><span class="sublab">Hinfahrt (h)</span><input type="number" id="e_fh" min="0" step="0.25" value="${esc(e.fahrtHin||"")}" placeholder="0"></div>
-        <div><span class="sublab">Rückfahrt (h)</span><input type="number" id="e_fz" min="0" step="0.25" value="${esc(e.fahrtZurueck||"")}" placeholder="0"></div>
-        <div><span class="sublab">Nachber. (h)</span><input type="number" id="e_nb" min="0" step="0.25" value="${esc(e.nachbereitung||"")}" placeholder="0"></div>
-      </div>
-    </details>
     <div class="calc" id="e_calc"></div><div id="e_warn"></div>
     <button class="btn" id="saveEins">Speichern</button>
     <div class="btnrow">${id?'<button class="btn danger" id="delEins" style="margin-bottom:0">Löschen</button>':''}<button class="btn ghost" id="cancelEins" style="margin-bottom:0">Abbrechen</button></div>`);
@@ -699,31 +710,34 @@ function editEinsatz(id,pre){
     g("e_satzlab").textContent=tmpModus==="stunde"?"Stundensatz (netto, €)":"Tagessatz (netto, €)";}
   g("e_modus").querySelectorAll("button").forEach(b=>b.onclick=()=>{tmpModus=b.dataset.m;modusTouched=true;paintModus();recalc();});
   function recalc(){
-    /* Zusatzzeiten mitgeben, sonst rechnet die Vorschau ohne Fahrt. calcEinsatz klemmt Leer/Muell selbst auf 0. */
+    /* Zusatzzeiten mitgeben, sonst rechnet die Vorschau ohne sie. Eingabe ist in MINUTEN,
+       calcEinsatz erwartet STUNDEN – daher hier umrechnen. */
     const c=calcEinsatz({beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:val("e_satz")===""?null:parseFloat(val("e_satz")),modus:tmpModus,
-      fahrtHin:val("e_fh"),fahrtZurueck:val("e_fz"),nachbereitung:val("e_nb")},S);
+      fahrtHin:minToH(val("e_fh")),fahrtZurueck:minToH(val("e_fz")),vorbereitung:minToH(val("e_vb")),nachbereitung:minToH(val("e_nb"))},S);
     g("e_calc").innerHTML=`
-      <div class="c"><div class="l">Stunden</div><div class="n">${fmtStd(c.stunden)}</div></div>
-      <div class="c"><div class="l">${tmpModus==="stunde"?"Honorar":"Ø Arbeit"}</div><div class="n">${tmpModus==="stunde"?eur(c.honorar):fmtSatz(c.stundensatz)}</div></div>
-      ${c.zusatzStunden>0?`<div class="c"><div class="l">Ø Tür zu Tür</div><div class="n">${fmtSatz(c.stundensatzGesamt)}</div></div>`:""}
+      <div class="c"><div class="l">${c.arbeitZusatz>0?"Vor Ort":"Stunden"}</div><div class="n">${fmtStd(c.stunden)}</div></div>
+      ${c.arbeitZusatz>0?`<div class="c"><div class="l">Arbeit</div><div class="n">${fmtStd(c.arbeitStunden)}</div></div>`:""}
+      ${tmpModus==="stunde"?`<div class="c"><div class="l">Honorar</div><div class="n">${eur(c.honorar)}</div></div>`:""}
+      <div class="c"><div class="l">Ø Arbeit</div><div class="n">${fmtSatz(c.stundensatzArbeit)}</div></div>
+      ${c.fahrtStunden>0?`<div class="c"><div class="l">Ø Tür zu Tür</div><div class="n">${fmtSatz(c.stundensatzGesamt)}</div></div>`:""}
       <div class="c"><div class="l">Ü-Stunden</div><div class="n">${c.ueberstunden==null?"–":(c.ueberstunden>0?"+":"")+fmtStd(c.ueberstunden)}</div></div>
       <div class="c"><div class="l">Brutto</div><div class="n">${eur(c.rechnungsbetrag)}</div></div>
       ${S.mwst>0?`<div class="c"><div class="l">USt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.ustRuecklage)}</div></div>`:""}
       <div class="c"><div class="l">ESt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.steuerRuecklage)}</div></div>
       <div class="c full"><div class="l">Verfügbar</div><div class="n" style="color:var(--pos)">${eur(c.verfuegbar)}</div></div>`;
-    {const zs=g("e_zzsum");if(zs)zs.textContent=c.zusatzStunden>0?fmtStd(c.zusatzStunden)+" h":"";}
+    {const zs=g("e_zzsum");if(zs)zs.textContent=c.arbeitZusatz>0?fmtStd(c.arbeitZusatz)+" h":"";}
     g("e_warn").innerHTML=(c.stundenGesamt!=null&&c.stundenGesamt>=16)?'<p class="note" style="color:var(--accent)">⚠ Über 16 Std inkl. Fahrt – bitte Zeiten prüfen (Speichern trotzdem möglich).</p>':"";
     const satz=parseFloat(val("e_satz"));
     g("saveEins").disabled=!(tmpKunde&&val("e_datum")&&c.stunden!=null&&c.stunden>0&&satz>0);
   }
-  ["e_datum","e_beginn","e_ende","e_fh","e_fz","e_nb"].forEach(i=>g(i).oninput=recalc);
+  ["e_datum","e_beginn","e_ende","e_fh","e_fz","e_vb","e_nb"].forEach(i=>g(i).oninput=recalc);
   g("e_satz").oninput=()=>{satzTouched=true;recalc();};
   paintChips();paintStim();paintStatus();paintModus();recalc();
   g("cancelEins").onclick=closeSheet;
   if(id)g("delEins").onclick=()=>askConfirm("Diesen Einsatz wirklich löschen?",()=>{DB.einsaetze=DB.einsaetze.filter(x=>x.id!==id);persist();closeSheet();render();toast("Einsatz gelöscht");});
   g("saveEins").onclick=()=>{
     const data={kundeId:tmpKunde,datum:val("e_datum"),beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:parseFloat(val("e_satz")),modus:tmpModus,stimmung:tmpStim,status:tmpStatus,abgerechnet:(tmpStatus==="bezahlt"),notiz:val("e_notiz"),
-      fahrtHin:Math.max(0,parseFloat(val("e_fh"))||0),fahrtZurueck:Math.max(0,parseFloat(val("e_fz"))||0),nachbereitung:Math.max(0,parseFloat(val("e_nb"))||0)};
+      fahrtHin:minToH(val("e_fh")),fahrtZurueck:minToH(val("e_fz")),vorbereitung:minToH(val("e_vb")),nachbereitung:minToH(val("e_nb"))};
     if(id)Object.assign(e,data);else DB.einsaetze.push({id:uid(),...data});
     persist();closeSheet();render();toast(id?"Gespeichert":"Einsatz erfasst");};
 }
@@ -920,8 +934,8 @@ function renderSettings(){
     <div class="slrow"><div class="sllab"><span>Einkommensteuer-Rücklage</span><span class="slval" id="estVal">${est} %</span></div><input type="range" class="slider" id="estSl" min="0" max="60" step="1" value="${est}"></div>
     <div class="setnote">Näherung aufs Netto-Honorar, keine Steuerberatung. USt 0 % = Kleinunternehmer §19.</div>
     <div class="zrow" id="zielRow"><div><div class="srk">Jahresziel</div><div class="srs">verfügbar nach Rücklagen</div></div><span class="srv">${eur(S.jahresziel)}</span></div>
-    <div class="zrow" style="cursor:default"><div><div class="srk">Stundensatz rechnen auf</div><div class="srs">Gesamtzeit zählt Fahrt und Nachbereitung mit. Dein Honorar ändert sich dadurch nicht, nur dein effektiver Stundensatz.</div></div></div>
-    <div class="toggles" id="zbSel"><button data-zb="arbeit"${S.zeitbasis!=="gesamt"?' class="on"':''}>Arbeitszeit</button><button data-zb="gesamt"${S.zeitbasis==="gesamt"?' class="on"':''}>Gesamtzeit</button></div>
+    <div class="zrow" style="cursor:default"><div><div class="srk">Stundensatz rechnen auf</div><div class="srs">Arbeitszeit zählt Vor- und Nachbereitung mit, Tür zu Tür zusätzlich die Fahrt. Dein Honorar ändert sich dadurch nicht, nur dein effektiver Stundensatz.</div></div></div>
+    <div class="toggles" id="zbSel"><button data-zb="arbeit"${S.zeitbasis!=="gesamt"?' class="on"':''}>Arbeitszeit</button><button data-zb="gesamt"${S.zeitbasis==="gesamt"?' class="on"':''}>Tür zu Tür</button></div>
     <div class="impact" id="impactBox">${impactText(iy)}</div>
   </div>
   <div class="setcard nopad"><div class="setrow tap" id="paramRow"><span class="srk">Budget-Splits, Soll-Stunden & Zielsatz</span><span class="chev">›</span></div></div>
@@ -1014,13 +1028,13 @@ function csvYear(y){
   const rows=[["Kunde","Datum","Beginn","Ende","Stunden","Modus","Satz (netto)","Honorar (netto)","Stundensatz","Rechnungsbetrag (brutto)",
     "USt-Rücklage ("+Math.round(S.mwst*100)+" %)","Steuer-Rücklage ("+Math.round(S.steuersatz*100)+" %)","Verfügbar",
     "Fixkosten ("+Math.round(S.splitFix*100)+" %)","Persönliches ("+Math.round(S.splitPersoenlich*100)+" %)","Sparen ("+Math.round(S.splitSparen*100)+" %)","Status",
-    "Fahrt hin","Fahrt zurück","Nachbereitung","Stunden gesamt","Notiz"].join(";")];
+    "Vorbereitung","Nachbereitung","Fahrt hin","Fahrt zurück","Arbeit gesamt","Tür zu Tür","Notiz"].join(";")];
   E.forEach(e=>{const c=calcEinsatz(e,S);
     rows.push([csvEsc(kName(e.kundeId)),fmtDE(new Date(e.datum+"T00:00")),e.beginn,e.ende,num(c.stunden),
       e.modus==="stunde"?"Stunde":"Tag",num(+e.tagessatz),num(c.honorar),
       num(c.stundensatz),num(c.rechnungsbetrag),num(c.ustRuecklage),num(c.steuerRuecklage),num(c.verfuegbar),
       num(c.splitFix),num(c.splitPersoenlich),num(c.splitSparen),csvEsc(e.status),
-      num(e.fahrtHin||0),num(e.fahrtZurueck||0),num(e.nachbereitung||0),num(c.stundenGesamt),csvEsc(e.notiz)].join(";"));});
+      num(e.vorbereitung||0),num(e.nachbereitung||0),num(e.fahrtHin||0),num(e.fahrtZurueck||0),num(c.arbeitStunden),num(c.stundenGesamt),csvEsc(e.notiz)].join(";"));});
   const blob=new Blob(["﻿"+rows.join("\r\n")],{type:"text/csv"});
   shareOrDl(blob,"Kontor_"+y+".csv","text/csv");
 }
@@ -1128,7 +1142,8 @@ sheet.addEventListener("touchend",e=>{
 function val(id){return (document.getElementById(id)||{}).value||"";}
 function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 let toastT;function toast(m){const el=document.getElementById("toast");el.textContent=m;el.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("on"),2600);}
-function askConfirm(msg,onYes,yesLabel){const el=document.getElementById("confirmBox");el.querySelector(".cmsg").textContent=msg;el.classList.remove("out");el.classList.add("on");const yes=document.getElementById("cYes"),no=document.getElementById("cNo");yes.textContent=yesLabel||"Löschen";const close=()=>{el.classList.add("out");setTimeout(()=>{el.classList.remove("on","out");},150);yes.onclick=null;no.onclick=null;};yes.onclick=()=>{close();onYes();};no.onclick=close;}
+/* soft=true: nicht-destruktive Frage, der Ja-Knopf bleibt neutral statt rot. */
+function askConfirm(msg,onYes,yesLabel,soft){const el=document.getElementById("confirmBox");el.querySelector(".cmsg").textContent=msg;el.classList.remove("out");el.classList.add("on");const yes=document.getElementById("cYes"),no=document.getElementById("cNo");yes.textContent=yesLabel||"Löschen";yes.classList.toggle("danger",!soft);const close=()=>{el.classList.add("out");setTimeout(()=>{el.classList.remove("on","out");},150);yes.onclick=null;no.onclick=null;};yes.onclick=()=>{close();onYes();};no.onclick=close;}
 if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 applyTheme();
 measureBar();
