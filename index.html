@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.0 -->
+<!-- Kontor V2.1 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -94,6 +94,7 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .calc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:4px 0 12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px}
 .calc .c .l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 .calc .c .n{font-weight:700;font-size:18px;margin-top:3px;font-variant-numeric:tabular-nums}
+.calc .c.full{grid-column:1/-1}
 .note{font-size:12px;color:var(--faint);line-height:1.5;margin:8px 0 0}
 .note b{color:var(--muted);font-weight:600}
 .remind{border:1px solid var(--info-line);background:var(--info-soft);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text);line-height:1.5;margin:0 0 14px}
@@ -137,7 +138,8 @@ details.exp[open] summary::before{content:"–"}
 .btn:disabled{opacity:.35;pointer-events:none}
 .mdot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
 .mdot.m1{background:var(--pos)}.mdot.m2{background:var(--muted)}.mdot.m3{background:var(--danger)}
-.again{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--accent);font-size:15px;line-height:1;flex:none;display:flex;align-items:center;justify-content:center}
+.again{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--accent);font-size:15px;line-height:1;flex:none;display:flex;align-items:center;justify-content:center;position:relative}
+.again::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 .again:active{background:var(--accent-soft)}
 .openchip,.paidchip{font-size:10.5px;padding:3px 9px;border-radius:7px;font-weight:600;flex:none;font-family:inherit;line-height:1.3;cursor:pointer}
 .openchip{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
@@ -192,7 +194,9 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .bar{background:var(--bg);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);gap:12px;border-bottom:1px solid var(--hairline)}
 .bar .logo{width:24px;height:24px;border-radius:7px;background:var(--ink);color:var(--bg);font-size:14px;font-weight:700}
 .bar .wm{flex:1;font-size:14px;font-weight:600;letter-spacing:.16em;color:var(--text-strong)}
-.iconbtn{width:31px;height:31px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--ink-70);font-size:15px}
+.iconbtn{width:31px;height:31px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--ink-70);font-size:15px;position:relative}
+/* Trefferflaeche auf 44px ohne die Optik zu vergroessern (Apple HIG) */
+.iconbtn::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 .iconbtn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(21,23,26,.04)}
 .hero{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(21,23,26,.04)}
@@ -208,8 +212,11 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .badge.neutral{background:var(--fill-soft);color:var(--ink-55)}
 .badge.blue{background:var(--blue-bg);color:var(--blue-text)}
 .badge.green{background:var(--green-bg);color:var(--green-text)}
+/* Status-Chip ist tippbar: groesser plus 44px-Trefferflaeche */
+.badge.cyc{padding:8px 11px;position:relative;border:none;font-family:inherit}
+.badge.cyc::after{content:"";position:absolute;inset:-9px -5px}
 .tabbar{background:var(--surface);border-top:1px solid var(--hairline)}
-.fab{position:fixed;right:18px;bottom:calc(72px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg);border:none;border-radius:99px;padding:12px 18px;font-family:inherit;font-size:13.5px;font-weight:600;box-shadow:0 8px 22px rgba(21,23,26,.28);z-index:20}
+.fab{position:fixed;right:18px;bottom:calc(72px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg);border:none;border-radius:99px;padding:13px 18px;font-family:inherit;font-size:13.5px;font-weight:600;box-shadow:0 8px 22px rgba(21,23,26,.28);z-index:20}
 .mgroup{padding:0 4px;display:flex;justify-content:space-between;align-items:baseline;margin:2px 0 8px}
 .mgroup .m{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-50)}
 .mgroup .s{font-size:11.5px;color:var(--ink-50)}
@@ -228,7 +235,8 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .eamt{text-align:right;flex:none}
 .eamt .b{font-size:13.5px;font-weight:500;color:var(--text-strong)}
 .eamt .f{font-size:11.5px;font-weight:500;color:var(--green-text);margin-top:2px}
-.timerbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1px solid var(--border);border-radius:12px;padding:12px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-70)}
+.eamt .r{font-size:11px;font-weight:500;color:var(--blue-text);margin-top:1px}
+.timerbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1px solid var(--border);border-radius:12px;padding:13px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-70)}
 .view{padding-bottom:100px}
 /* Beta 0.7 Teil 2: Statistik */
 .yeartog{display:inline-flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:2px;margin-bottom:16px}
@@ -244,7 +252,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .kt .l{font-size:11px;color:var(--ink-50)}
 .kt .n{font-size:20px;font-weight:500;color:var(--text-strong);font-variant-numeric:tabular-nums}
 .kt .n.blue{color:var(--blue-text)}
-.kt .sub{font-size:10.5px;color:var(--ink-42)}
+.kt .sub{font-size:10.5px;color:var(--ink-55)}
 .budget{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(21,23,26,.04);padding:16px;margin-bottom:14px}
 .budget .bh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
 .budget .bh h4{margin:0;font-size:13px;font-weight:600;color:var(--text-strong)}
@@ -291,7 +299,12 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .slrow{display:flex;flex-direction:column;gap:9px}
 .slrow .sllab{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--ink-55)}
 .slrow .slval{font-size:14px;font-weight:500;color:var(--text-strong);font-variant-numeric:tabular-nums}
-.slider{width:100%;height:3px;border-radius:99px;-webkit-appearance:none;appearance:none;background:var(--hairline);accent-color:var(--info)}
+/* Regler: 44px greifbare Hoehe, Spur bleibt optisch duenn */
+.slider{width:100%;height:44px;margin:-14px 0;background:transparent;-webkit-appearance:none;appearance:none}
+.slider::-webkit-slider-runnable-track{height:3px;border-radius:99px;background:var(--hairline)}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9.5px;border:none;border-radius:50%;background:var(--info)}
+.slider::-moz-range-track{height:3px;border-radius:99px;background:var(--hairline)}
+.slider::-moz-range-thumb{width:22px;height:22px;border:none;border-radius:50%;background:var(--info)}
 .zrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px solid var(--hairline);cursor:pointer}
 .zrow .srk{font-size:13.5px;font-weight:500;color:var(--text-strong)}
 .zrow .srs{font-size:11px;color:var(--ink-50);margin-top:2px}
@@ -301,7 +314,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .setrow.tap{cursor:pointer}
 .setrow .srk{font-size:13.5px;font-weight:500;color:var(--text-strong)}
 .setrow .srs{font-size:11.5px;color:var(--ink-50)}
-.setrow .chev{color:var(--ink-42);font-size:16px}
+.setrow .chev{color:var(--ink-55);font-size:16px}
 .impact{background:var(--blue-bg);border-radius:10px;padding:13px 14px;display:flex;flex-direction:column;gap:4px}
 .impact .imttl{font-size:11.5px;font-weight:500;color:var(--blue-text)}
 .impact .imtx{font-size:12px;line-height:1.5;color:var(--ink-55)}
@@ -310,15 +323,15 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .privacy .pvdot{width:8px;height:8px;border-radius:50%;background:var(--pos);flex:none}
 .privacy .pvttl{font-size:13px;font-weight:600;color:var(--text-strong)}
 .privacy p{margin:0;font-size:11.5px;line-height:1.5;color:var(--ink-55)}
-.setnote{font-size:11px;color:var(--ink-42);line-height:1.5}
+.setnote{font-size:11px;color:var(--ink-55);line-height:1.5}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme">☀</button></div>
+  <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.0</b></div>
+    <div class="foot-v">Kontor <b>V2.1</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -372,33 +385,44 @@ function fmtSatzBare(n){return n==null?"–":n.toLocaleString("de-DE",{minimumFr
 /* Warm Paper: Kunden-Quadrant als Streudiagramm. rows=[{kid,hon,std,satz}], avg=Ø-Satz gesamt.
    Achsen wie Cloud-Prototyp: x = Honoraranteil (8..70 %, Label passt rechts), y = Stundensatz absolut (hoher Satz oben). */
 function quadrantSVG(rows,avg){
-  const W=312,H=200;
+  const W=312,H=260,LABELS=6;           // hoeher + nur die 6 groessten beschriften (mobil lesbar)
   const maxFee=Math.max(...rows.map(r=>r.hon||0),1);
   const maxH=Math.max(...rows.map(r=>r.satz||0),0.0001);
   let dots="";const placed=[];
-  rows.slice().sort((a,b)=>(b.hon||0)-(a.hon||0)).forEach(r=>{
+  rows.slice().sort((a,b)=>(b.hon||0)-(a.hon||0)).forEach((r,i)=>{
+    const label=i<LABELS;
     const xN=(r.hon||0)/maxFee;
     const xp=8+xN*62;                     // 8..70 % Breite – wie Prototyp
     let yp=84-((r.satz||0)/maxH)*68;      // hoher Satz oben, absolute Skala – wie Prototyp
-    while(placed.some(p=>Math.abs(p.y-yp)<11&&Math.abs(p.x-xp)<34)){yp+=11;}
-    if(yp>92)yp=92;                       // im Feld halten
-    placed.push({x:xp,y:yp});
-    const x=xp/100*W,y=yp/100*H;
     const rad=4+xN*3;const col=(r.satz||0)>=avg?"var(--pos)":"var(--info)";
-    const nm=esc(kName(r.kid));
-    const flip=x>W/2&&x+rad+6+nm.length*6.2>W-4; // nur rechte Punkte klappen nach links (links passt das Label ohnehin)
-    const tx=flip?x-rad-5:x+rad+5;const anc=flip?' text-anchor="end"':'';
-    dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad.toFixed(1)}" fill="${col}"/>`
-      +`<text x="${tx.toFixed(1)}" y="${(y+3.5).toFixed(1)}"${anc} fill="var(--text-strong)" font-size="11" font-weight="600">${nm}</text>`;});
+    let nm="",flip=false,x1=0,x2=0;
+    if(label){
+      nm=esc(kName(r.kid));
+      const xPx=xp/100*W, wPx=nm.length*6.2;   // Breitenschaetzung, bewusst etwas zu gross (sichere Seite)
+      flip=xPx>W/2&&xPx+rad+6+wPx>W-4;         // nur rechte Punkte klappen nach links
+      /* Belegte Textspanne, nicht nur der Punkt: sonst kollidieren lange Namen,
+         deren Punkte weit auseinander liegen (z. B. geflipptes Label laeuft nach links). */
+      x1=flip?(xPx-rad-5-wPx):(xPx-rad);
+      x2=flip?(xPx+rad):(xPx+rad+5+wPx);
+      while(placed.some(p=>Math.abs(p.y-yp)<7&&x1<p.x2&&x2>p.x1)){yp+=7;}
+      if(yp>88)yp=88;                     // Abstand zu den Ecklabels unten halten
+      placed.push({y:yp,x1,x2});
+    }
+    const x=xp/100*W,y=yp/100*H;
+    dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad.toFixed(1)}" fill="${col}"${label?"":' opacity="0.5"'}/>`;
+    if(label){
+      const tx=flip?x-rad-5:x+rad+5;const anc=flip?' text-anchor="end"':'';
+      dots+=`<text x="${tx.toFixed(1)}" y="${(y+3.5).toFixed(1)}"${anc} fill="var(--text-strong)" font-size="11" font-weight="600">${nm}</text>`;
+    }});
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Kunden-Quadrant: Umsatz mal Stundensatz">
     <defs><linearGradient id="qgrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="var(--info)" stop-opacity="0.07"/><stop offset="1" stop-color="var(--pos)" stop-opacity="0.09"/></linearGradient></defs>
     <rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="url(#qgrad)"/>
     <line x1="${W/2}" y1="8" x2="${W/2}" y2="${H-8}" stroke="var(--hairline)" stroke-width="1"/>
     <line x1="8" y1="${H/2}" x2="${W-8}" y2="${H/2}" stroke="var(--hairline)" stroke-width="1"/>
-    <text x="12" y="20" fill="var(--ink-42)" font-size="9.5" font-weight="600" letter-spacing="0.1em">AUSBAUEN</text>
-    <text x="${W-12}" y="20" fill="var(--ink-42)" font-size="9.5" font-weight="600" letter-spacing="0.1em" text-anchor="end">HALTEN</text>
-    <text x="12" y="${H-12}" fill="var(--ink-42)" font-size="9.5" font-weight="600" letter-spacing="0.1em">PRÜFEN</text>
-    <text x="${W-12}" y="${H-12}" fill="var(--ink-42)" font-size="9.5" font-weight="600" letter-spacing="0.1em" text-anchor="end">NACHVERHANDELN</text>
+    <text x="12" y="20" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em">AUSBAUEN</text>
+    <text x="${W-12}" y="20" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em" text-anchor="end">HALTEN</text>
+    <text x="12" y="${H-12}" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em">PRÜFEN</text>
+    <text x="${W-12}" y="${H-12}" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em" text-anchor="end">NACHVERHANDELN</text>
     ${dots}</svg>`;
 }
 function fmtElapsed(ms){let s=Math.max(0,Math.floor(ms/1000));const h=Math.floor(s/3600);s-=h*3600;const m=Math.floor(s/60);s-=m*60;return h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");}
@@ -485,10 +509,14 @@ function measureBar(){const b=document.querySelector(".bar");
   if(b)document.documentElement.style.setProperty("--barh",Math.round(b.getBoundingClientRect().height)+"px");}
 window.addEventListener("resize",measureBar);
 window.addEventListener("orientationchange",measureBar);
+/* Theme-Icons als SVG statt Unicode: Emoji-Zeichen rendert iOS teils farbig und schriftabhaengig. */
+const ICON_SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.6" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.4"/><line x1="2.6" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.4" y2="12"/><line x1="5.4" y1="5.4" x2="7.1" y2="7.1"/><line x1="16.9" y1="16.9" x2="18.6" y2="18.6"/><line x1="5.4" y1="18.6" x2="7.1" y2="16.9"/><line x1="16.9" y1="7.1" x2="18.6" y2="5.4"/></svg>';
+const ICON_MOON='<svg viewBox="0 0 24 24"><path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.6 8.6 0 1 0 11.3 11.3z"/></svg>';
+const ICON_AUTO='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 3.4a8.6 8.6 0 0 1 0 17.2z" style="fill:currentColor;stroke:none"/></svg>';
 function applyTheme(){const t=S.theme;
   if(t==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;
   const dark=t==="dark"||(t==="auto"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches);
-  const b=document.getElementById("themeBtn");b.textContent=t==="auto"?"◐":(dark?"☾":"☀");
+  const b=document.getElementById("themeBtn");b.innerHTML=t==="auto"?ICON_AUTO:(dark?ICON_MOON:ICON_SUN);
   b.setAttribute("aria-label",t==="auto"?"Theme: automatisch":(dark?"Theme: dunkel":"Theme: hell"));
   const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=dark?"#15171A":"#F4F2ED";}
 document.getElementById("themeBtn").onclick=()=>{S.theme=S.theme==="auto"?"light":S.theme==="light"?"dark":"auto";persist();applyTheme();};
@@ -525,7 +553,7 @@ function renderEinsaetze(){
     h+=`<div class="timer"><div><div class="tk">Läuft · ${esc(tk?tk.name:"?")}</div><div class="tt" id="timerText">${fmtElapsed(Date.now()-S.timer.start)}</div></div><button class="tstop" id="timerStop">■ Stopp</button></div>`;
   }else h+=`<button class="timerbtn" id="timerStart"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="7,5 19,12 7,19"/></svg> Zeit starten</button>`;
   const needBak=DB.einsaetze.length>0&&(!S.lastBackup||Date.now()-S.lastBackup>30*864e5)&&(!S.bakSnooze||Date.now()-S.bakSnooze>7*864e5);
-  if(needBak)h+=`<div class="remind">💾 ${S.lastBackup?"Dein letztes Backup ist über einen Monat her.":"Du hast noch kein Backup deiner Daten."}<div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="remBak" style="margin-bottom:0;padding:9px">Backup teilen</button><button class="btn ghost" id="remLater" style="margin-bottom:0;padding:9px">Später</button></div></div>`;
+  if(needBak)h+=`<div class="remind">💾 ${S.lastBackup?"Dein letztes Backup ist über einen Monat her.":"Du hast noch kein Backup deiner Daten."}<div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="remBak" style="margin-bottom:0;padding:12px">Backup teilen</button><button class="btn ghost" id="remLater" style="margin-bottom:0;padding:12px">Später</button></div></div>`;
   if(!list.length)h+=DB.kunden.length
     ?`<div class="empty"><p>Noch keine Einsätze.</p><button class="btn" id="firstEins" style="max-width:320px;margin:18px auto 0">Erfasse deinen ersten Einsatz</button></div>`
     :`<div class="empty"><p>Kontor rechnet pro Einsatz aus, was dir wirklich bleibt.</p><button class="btn" id="firstKunde" style="max-width:320px;margin:18px auto 0">Lege deinen ersten Kunden an</button></div>`;
@@ -539,7 +567,7 @@ function renderEinsaetze(){
         const notiz=e.notiz?` · ${esc(e.notiz)}`:"";
         h+=`<div class="erow" data-e="${e.id}"><div class="dchip"><div class="d">${dd}</div><div class="mo">${esc(mm)}</div></div>
           <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub">${esc(e.beginn||"–")}–${esc(e.ende||"–")} · ${fmtStd(c.stunden)} h · ${fmtSatzH(c.stundensatz)}</div>${chip}</div>
-          <div class="eamt"><div class="b">${eur2(c.rechnungsbetrag)}</div><div class="f">${eur(c.verfuegbar)} frei</div><button class="again" data-again="${e.id}" aria-label="Nochmal">↻</button></div></div>`;});
+          <div class="eamt"><div class="b">${eur2(c.rechnungsbetrag)}</div><div class="f">${eur(c.verfuegbar)} frei</div><div class="r">${eur(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)} Rücklage</div><button class="again" data-again="${e.id}" aria-label="Nochmal">↻</button></div></div>`;});
       h+=`</div>`;});}
   h+=`<button class="fab" id="addEins">＋ Einsatz</button>`;
   view.innerHTML=h;
@@ -649,9 +677,10 @@ function editEinsatz(id,pre){
       <div class="c"><div class="l">Stunden</div><div class="n">${fmtStd(c.stunden)}</div></div>
       <div class="c"><div class="l">${tmpModus==="stunde"?"Honorar":"Stundensatz"}</div><div class="n">${tmpModus==="stunde"?eur(c.honorar):fmtSatz(c.stundensatz)}</div></div>
       <div class="c"><div class="l">Ü-Stunden</div><div class="n">${c.ueberstunden==null?"–":(c.ueberstunden>0?"+":"")+fmtStd(c.ueberstunden)}</div></div>
-      <div class="c"><div class="l">Rechnung brutto</div><div class="n">${eur(c.rechnungsbetrag)}</div></div>
-      <div class="c"><div class="l">Rücklagen</div><div class="n">${eur(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)}</div></div>
-      <div class="c"><div class="l">Verfügbar</div><div class="n" style="color:var(--pos)">${eur(c.verfuegbar)}</div></div>`;
+      <div class="c"><div class="l">Brutto</div><div class="n">${eur(c.rechnungsbetrag)}</div></div>
+      ${S.mwst>0?`<div class="c"><div class="l">USt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.ustRuecklage)}</div></div>`:""}
+      <div class="c"><div class="l">ESt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.steuerRuecklage)}</div></div>
+      <div class="c full"><div class="l">Verfügbar</div><div class="n" style="color:var(--pos)">${eur(c.verfuegbar)}</div></div>`;
     g("e_warn").innerHTML=(c.stunden!=null&&c.stunden>=16)?'<p class="note" style="color:var(--accent)">⚠ Über 16 Std – bitte Zeiten prüfen (Speichern trotzdem möglich).</p>':"";
     const satz=parseFloat(val("e_satz"));
     g("saveEins").disabled=!(tmpKunde&&val("e_datum")&&c.stunden!=null&&c.stunden>0&&satz>0);
@@ -815,7 +844,8 @@ function renderStats(){
     const worst=rows.slice().filter(r=>r.satz!=null).sort((a,b)=>(a.satz||0)-(b.satz||0))[0];
     const top=byHon[0];const topPct=hon?Math.round(top.hon/hon*100):0;
     const tip=(worst?`${esc(kName(worst.kid))} bringt Zeit für ${esc(fmtSatzH(worst.satz))} – nachverhandeln. `:"")+(top?`${esc(kName(top.kid))} trägt ${topPct} % des Honorars.`:"");
-    h+=`<div class="qcard"><div class="qh"><h3>Kunden-Quadrant</h3><span>Umsatz × Stundensatz</span></div>${quadrantSVG(rows,avg)}<p class="qhint">${tip}</p></div>`;
+    const mehr=rows.length>6?` Beschriftet sind die 6 größten Kunden, die übrigen ${rows.length-6} sind als blasse Punkte eingezeichnet.`:"";
+    h+=`<div class="qcard"><div class="qh"><h3>Kunden-Quadrant</h3><span>Umsatz × Stundensatz</span></div>${quadrantSVG(rows,avg)}<p class="qhint">${tip}${mehr}</p></div>`;
   }
   /* Verdienst pro Kunde (antippbar → Detail) */
   const vsorted=rows.slice().sort((a,b)=>(b.hon||0)-(a.hon||0));const maxFee=Math.max(...vsorted.map(r=>r.hon||0),1);
@@ -963,7 +993,7 @@ function openHelp(){
     <div class="hsec"><h4>📋 So ist Kontor aufgebaut</h4>
       <p>Du erfasst <b>Einsätze</b> für deine <b>Kunden</b> – Datum, Beginn, Ende, Tagessatz. Kontor rechnet daraus Stunden, Stundensatz und dein Geld.</p>
       <p>Menüs wie dieses schiebst du zum Schließen <b>nach unten</b> – oder du tippst „Abbrechen".</p>
-      <p class="tip">Alle Daten bleiben nur auf diesem Gerät. Kein Server, kein Konto. ZDF-Arbeit gehört nicht hierher – die läuft auf Lohnsteuerkarte und hat ihre eigene App.</p></div>
+      <p class="tip">Alle Daten bleiben nur auf diesem Gerät. Kein Server, kein Konto. Kontor rechnet für deine <b>selbstständige</b> Arbeit. Angestellten-Tätigkeit gehört nicht hierher, die läuft über die Lohnabrechnung.</p></div>
     <div class="hsec"><h4>⏱ Einsatz erfassen – 3 Tipps bis fertig</h4>
       <p>Kunden-Chip antippen (Tagessatz füllt sich selbst), Beginn und Ende wählen, speichern. Neue Kunden legst du mit <b>„＋ Neu"</b> direkt im Formular an.</p>
       <p><b>↻ Nochmal</b> an einem Einsatz übernimmt Kunde, Zeiten und Satz – nur das Datum steht auf heute. Endet ein Dreh nach Mitternacht (22:00–06:00), rechnet Kontor automatisch über 0:00 hinweg.</p>
