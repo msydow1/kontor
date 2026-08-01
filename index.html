@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.3 -->
+<!-- Kontor V2.3.2 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -33,16 +33,20 @@ html,body{margin:0;padding:0;max-width:100%;overflow-x:clip}
 body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.45;padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .mono{font-variant-numeric:tabular-nums}
 .app{max-width:560px;margin:0 auto;min-height:100vh}
-.bar{position:sticky;top:0;z-index:30;background:rgba(21,23,26,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:calc(env(safe-area-inset-top) + 16px) 18px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.bar{position:sticky;top:0;z-index:30;background:rgb(21,23,26);padding:calc(env(safe-area-inset-top) + 16px) 18px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
 .bar .logo{width:30px;height:30px;border-radius:9px;flex:none;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--on-accent);font-size:16px;letter-spacing:-.5px}
 .bar h1{font-weight:700;font-size:18px;margin:0;letter-spacing:-.2px;flex:1;color:var(--text-strong)}
 .bar h1 small{display:block;font-weight:500;font-size:10px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase;margin-top:3px}
 .iconbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
 .iconbtn:active{background:var(--surface)}
 /* Tab-Leiste unten: daumenerreichbar auf grossen iPhones. Auf max-560 zentriert wie der Inhalt. */
+/* KEIN backdrop-filter hier. Der Hintergrund ist seit Warm Paper deckend (Zeile .tabbar unten),
+   der Blur waere unsichtbar – aber er zwingt WebKit, den Hintergrund pro Bild neu abzutasten.
+   Das laeuft auf iOS nicht auf dem Scroll-Thread, wodurch die Leiste beim Schwung-Scrollen an
+   veralteter Position gezeichnet wird und in die Bildmitte rutscht (Max, 01.08.2026). */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0 auto;max-width:560px;
-  display:flex;justify-content:space-around;background:rgba(21,23,26,.92);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;background:rgb(21,23,26);
+  border-top:1px solid var(--line);
   padding:8px 6px calc(env(safe-area-inset-bottom) + 6px)}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;
   background:none;color:var(--muted);font-family:inherit;font-size:10px;font-weight:600;
@@ -191,7 +195,7 @@ details.exp[open] summary::before{content:"–"}
 body.blur .eur{filter:blur(0.35em);user-select:none}
 /* Beta 0.7 Warm Paper: Fundament */
 body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
-.bar{background:var(--bg);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);gap:12px;border-bottom:1px solid var(--hairline)}
+.bar{background:var(--bg);gap:12px;border-bottom:1px solid var(--hairline)}
 .bar .logo{width:24px;height:24px;border-radius:7px;background:var(--ink);color:var(--bg);font-size:14px;font-weight:700}
 .bar .wm{flex:1;font-size:14px;font-weight:600;letter-spacing:.16em;color:var(--text-strong)}
 .iconbtn{width:31px;height:31px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--ink-70);font-size:15px;position:relative}
@@ -338,7 +342,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.3</b></div>
+    <div class="foot-v">Kontor <b>V2.3.2</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -509,15 +513,27 @@ function barTargetHTML(satz,ziel){
 }
 /* Gestapeltes Monats-Säulendiagramm (reines SVG). months=[{mk,paid,open}] (honorar netto). */
 function niceNum(v){if(v<=0)return 0;const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return (f<1.5?1:f<3?2:f<7?5:10)*p;}
+/* Achsen-Kurzform: 5000 -> "5k". NUR fuer Diagramm-Achsen, nie fuer Betraege im Fliesstext. */
+function fmtKurz(n){if(n==null)return "–";const a=Math.abs(n);
+  if(a>=1000)return (Math.round(n/100)/10).toLocaleString("de-DE")+"k";
+  return Math.round(n).toLocaleString("de-DE");}
 function colChartSVG(months){
   if(!months.length)return "";
   const W=312,base=140,top=20,plot=base-top,H=172;
+  /* Die Achse braucht eine EIGENE Spalte links. Vorher stand das Label bei x=6 mitten im
+     Diagramm und wurde von den Saeulen ueberdeckt – bei 12 Monaten lag "5.000 €" unter
+     Januar und Februar (Max, 01.08.2026). */
+  const padL=28;
   const max=Math.max(...months.map(m=>m.paid+m.open),1);const scale=max*1.1;
-  const n=months.length,gap=8;const bw=Math.min(40,(W-16-gap*(n-1))/n);
-  const x0=(W-(bw*n+gap*(n-1)))/2,step=bw+gap;
-  const gval=niceNum(scale/2);const gy=base-(gval/scale)*plot;
-  let s=`<line x1="6" y1="${base}" x2="${W-6}" y2="${base}" stroke="var(--line-strong)" stroke-width="1"/>`;
-  if(gval>0)s+=`<line x1="6" y1="${gy.toFixed(1)}" x2="${W-6}" y2="${gy.toFixed(1)}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 4"/><text class="eur" x="6" y="${(gy-4).toFixed(1)}" fill="var(--faint)" font-size="8.5">${esc(fmtEUR0(gval))}</text>`;
+  const n=months.length,gap=8,plotW=W-6-padL;
+  const bw=Math.min(40,(plotW-10-gap*(n-1))/n);
+  const x0=padL+(plotW-(bw*n+gap*(n-1)))/2,step=bw+gap;
+  let s=`<line x1="${padL}" y1="${base}" x2="${W-6}" y2="${base}" stroke="var(--line-strong)" stroke-width="1"/>`
+    +`<text x="${padL-5}" y="${base+3}" fill="var(--faint)" font-size="8.5" text-anchor="end">0</text>`;
+  const stepV=niceNum(scale/4);
+  if(stepV>0)for(let v=stepV,i=0;v<=scale&&i<8;v+=stepV,i++){const gy=base-(v/scale)*plot;
+    s+=`<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W-6}" y2="${gy.toFixed(1)}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 4"/>`
+      +`<text class="eur" x="${padL-5}" y="${(gy+3).toFixed(1)}" fill="var(--faint)" font-size="8.5" text-anchor="end">${esc(fmtKurz(v))}</text>`;}
   months.forEach((m,i)=>{const x=x0+i*step;const hPaid=m.paid/scale*plot,hOpen=m.open/scale*plot;
     const yPaid=base-hPaid,yOpen=yPaid-hOpen;const lab=MN[+m.mk.slice(5,7)-1].slice(0,3);
     if(hPaid>0.5)s+=`<rect x="${x.toFixed(1)}" y="${yPaid.toFixed(1)}" width="${bw.toFixed(1)}" height="${hPaid.toFixed(1)}" rx="2.5" fill="var(--pos)"/>`;
@@ -760,6 +776,8 @@ function renderKunden(){
   const maxHon=Math.max(...rows.map(r=>r.st.hon),1);
   const withE=rows.filter(r=>r.st.n>0).sort((a,b)=>b.st.hon-a.st.hon);
   const noE=rows.filter(r=>r.st.n===0).sort((a,b)=>a.k.name.localeCompare(b.k.name,"de"));
+  /* Anlegen gehoert nach OBEN: bei 20 Kunden scrollt man sonst ewig (Max, 01.08.2026). */
+  h+=`<div class="kadd" id="addK">＋ Kunde anlegen</div>`;
   withE.forEach(({k,st})=>{
     const good=st.satz!=null&&st.satz>=jahresAvg;
     const dev=(st.satz!=null&&jahresAvg)?Math.round((st.satz/jahresAvg-1)*100):null;
@@ -772,7 +790,6 @@ function renderKunden(){
       ${note?`<div class="knote">${esc(note)}</div>`:""}</div>`;});
   noE.forEach(({k})=>{
     h+=`<div class="kcard quiet" data-k="${k.id}"><div class="khead"><div><div class="kname">${esc(k.name)}</div><div class="ksub">${esc(subLine(k,0))}</div></div></div></div>`;});
-  h+=`<div class="kadd" id="addK">＋ Kunde anlegen</div>`;
   view.innerHTML=h;
   document.getElementById("addK").onclick=()=>editKunde(null);
   view.querySelectorAll("[data-k]").forEach(el=>el.onclick=()=>{state.detail=el.dataset.k;state.detailFrom="kunden";state.detailYear=null;window.scrollTo(0,0);render();});
