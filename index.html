@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.3.2 -->
+<!-- Kontor V2.5 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -83,10 +83,34 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
 .field .lblrow{display:flex;justify-content:space-between;align-items:baseline}
 .field .lblrow button{background:none;border:none;color:var(--accent);font-family:inherit;font-size:11.5px;font-weight:600;padding:0}
-.field input,.zz input{width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--field);color:var(--text);font-family:inherit;font-size:16px;font-variant-numeric:tabular-nums}
+.field input,.zz input,.field textarea{width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--field);color:var(--text);font-family:inherit;font-size:16px;font-variant-numeric:tabular-nums}
+.field textarea{resize:vertical;line-height:1.4;font-variant-numeric:normal}
+/* PDF-Ausgabe ohne Fremd-Library: #printroot ist am Bildschirm unsichtbar und wird beim
+   Drucken zum einzigen sichtbaren Element. Bewusst schwarz auf weiss, unabhaengig vom Theme. */
+#printroot{display:none}
+@media print{
+  @page{margin:16mm}
+  body.printing>.app,body.printing>.tabbar,body.printing>.scrim,body.printing>.cscrim,body.printing>.toast{display:none!important}
+  body.printing #printroot{display:block;color:#000;background:#fff;font-size:10pt}
+  body.printing .eur{filter:none!important}
+  #printroot .pr-head{display:flex;justify-content:space-between;gap:24px;font-size:9pt;line-height:1.45;margin-bottom:22mm}
+  #printroot .pr-emp{text-align:right}
+  #printroot h1{font-size:15pt;margin:0 0 2mm;font-weight:600}
+  #printroot .pr-sub{font-size:9pt;color:#444;margin-bottom:6mm}
+  #printroot table{width:100%;border-collapse:collapse}
+  #printroot th,#printroot td{border-bottom:.4pt solid #bbb;padding:2mm 1.5mm;text-align:left;vertical-align:top}
+  #printroot th{font-size:8.5pt;text-transform:uppercase;letter-spacing:.04em;color:#333;border-bottom:.8pt solid #333}
+  #printroot .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  #printroot tr{break-inside:avoid}
+  #printroot .pr-sum{margin-top:4mm;font-weight:600;text-align:right}
+  #printroot .pr-sig{display:flex;gap:16mm;margin-top:20mm;font-size:9pt;break-inside:avoid}
+  #printroot .pr-sig>div{flex:1}
+  #printroot .pr-line{border-bottom:.5pt solid #000;height:12mm}
+  #printroot .pr-foot{margin-top:10mm;font-size:7.5pt;color:#666}
+}
 .field input[type="time"],.field input[type="date"]{text-align:center}
 .field input.txt{font-variant-numeric:normal}
-.field input:focus,.zz input:focus{outline:none;border-color:var(--accent-line);background:var(--surface-2)}
+.field input:focus,.zz input:focus,.field textarea:focus{outline:none;border-color:var(--accent-line);background:var(--surface-2)}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .field input:disabled{opacity:.4}
 .toggles{display:flex;gap:8px;flex-wrap:wrap}
@@ -342,7 +366,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.3.2</b></div>
+    <div class="foot-v">Kontor <b>V2.5</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -351,6 +375,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <button data-tab="stats" aria-label="Statistik"><svg viewBox="0 0 24 24"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="14"/></svg>Statistik</button>
   <button data-tab="set" aria-label="Mehr"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" style="fill:currentColor"/><circle cx="12" cy="12" r="1.6" style="fill:currentColor"/><circle cx="19" cy="12" r="1.6" style="fill:currentColor"/></svg>Mehr</button>
 </nav>
+<div id="printroot" aria-hidden="true"></div>
 <input type="file" id="backupInput" accept="application/json,.json" class="hidden">
 <div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
@@ -373,11 +398,17 @@ S.zielStundensatz=numS(S.zielStundensatz,100);S.jahresziel=numS(S.jahresziel,400
 S.defaultModus=(S.defaultModus==="stunde")?"stunde":"tag";
 S.onboarded=!!S.onboarded;
 S.timer=(S.timer&&typeof S.timer==="object"&&Number.isFinite(+S.timer.start)&&DB.kunden.some(k=>k.id===S.timer.kundeId))?{kundeId:S.timer.kundeId,start:+S.timer.start}:null;
-DB.kunden.forEach(k=>{k.name=String(k.name??"");k.tagessatz=numS(k.tagessatz,0);k.notiz=String(k.notiz??"");k.modus=(k.modus==="stunde")?"stunde":"tag";});
+DB.kunden.forEach(k=>{k.name=String(k.name??"");k.tagessatz=numS(k.tagessatz,0);k.notiz=String(k.notiz??"");k.modus=(k.modus==="stunde")?"stunde":"tag";k.adresse=String(k.adresse??"");});
+/* Stammdaten (V2.5): NUR fuer Briefkoepfe in PDFs. Echte Anschriften – nie ins oeffentliche Repo. */
+S.profil=(S.profil&&typeof S.profil==="object")?S.profil:{};
+S.profil={name:String(S.profil.name??""),adresse:String(S.profil.adresse??""),kontakt:String(S.profil.kontakt??"")};
+/* Kein uid() hier: das ist ein const weiter unten und waere in der Migration noch in der TDZ. */
+S.exportVorlagen=Array.isArray(S.exportVorlagen)?S.exportVorlagen.filter(v=>v&&typeof v==="object"&&v.name).map((v,i)=>({id:String(v.id||("v"+i)),name:String(v.name),format:v.format==="pdf"?"pdf":"csv",zeitraum:["monat","jahr"].includes(v.zeitraum)?v.zeitraum:"jahr",felder:Array.isArray(v.felder)?v.felder.map(String):[],kundeGebunden:v.kundeGebunden===true})):[];
 DB.einsaetze.forEach(e=>{e.stimmung=[1,2,3].includes(e.stimmung)?e.stimmung:null;
   e.notiz=String(e.notiz??"");e.status=["offen","gestellt","bezahlt"].includes(e.status)?e.status:(e.abgerechnet?"bezahlt":"offen");e.abgerechnet=(e.status==="bezahlt");e.tagessatz=numS(e.tagessatz,0);e.modus=(e.modus==="stunde")?"stunde":"tag";
   e.fahrtHin=Math.max(0,numS(e.fahrtHin,0));e.fahrtZurueck=Math.max(0,numS(e.fahrtZurueck,0));
-  e.vorbereitung=Math.max(0,numS(e.vorbereitung,0));e.nachbereitung=Math.max(0,numS(e.nachbereitung,0));});
+  e.vorbereitung=Math.max(0,numS(e.vorbereitung,0));e.nachbereitung=Math.max(0,numS(e.nachbereitung,0));
+  e.wareneinsatz=Math.max(0,numS(e.wareneinsatz,0));e.wareneinsatzBerechnet=e.wareneinsatzBerechnet===true;});
 if(DB.kunden.length||DB.einsaetze.length)S.onboarded=true; /* Bestandsdaten sehen nie ein Onboarding */
 function persist(){Store.save(DB);}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -450,10 +481,11 @@ function kName(id){const k=kunde(id);return k?k.name:"?";}
 /* ===== Rechenmodul (pur, von tools/test-calc.mjs getestet) ===== */
 /*[calc]*/
 function hm2min(s){if(!s)return null;const m=String(s).match(/^\s*(\d{1,2}):(\d{2})\s*$/);if(!m)return null;const h=+m[1],mm=+m[2];return(h>23||mm>59)?null:h*60+mm;}
-/* Zusatzzeiten werden in MINUTEN eingegeben, aber in STUNDEN gespeichert (Backup-Kompat).
-   Umgerechnet wird nur an der Eingabegrenze des Sheets. */
-function minToH(v){const n=+v;return Number.isFinite(n)&&n>0?n/60:0;}
-function hToMin(h){const n=+h;return Number.isFinite(n)&&n>0?String(Math.round(n*60)):"";}
+/* Zusatzzeiten sind DAUER-Felder im Format H:MM (wie Beginn/Ende), gespeichert in STUNDEN
+   (Backup-Kompat). Umgerechnet wird nur an der Eingabegrenze des Sheets. Eine blosse Zahl
+   gilt als Stunden ("4" = 4:00). Muell und Negatives landen auf 0. */
+function hmDur2h(s){if(!s)return 0;const m=String(s).match(/^\s*(\d{1,2})(?::([0-5]?\d))?\s*$/);if(!m)return 0;return +m[1]+(+(m[2]||0))/60;}
+function h2hmDur(h){const n=+h;if(!Number.isFinite(n)||n<=0)return "";const t=Math.round(n*60);return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");}
 function calcEinsatz(e,P){
   const b=hm2min(e.beginn),x=hm2min(e.ende);
   let stunden=null;
@@ -464,7 +496,6 @@ function calcEinsatz(e,P){
   /* honorar: Pauschale (Tagessatz) ODER Stunden x Stundensatz. Feldname tagessatz bleibt
      aus Backup-Kompatibilitaet; die UI beschriftet je Modus. */
   const honorar=(satz==null)?null:(modus==="stunde"?(stunden==null?null:stunden*satz):satz);
-  const stundensatz=(modus==="stunde")?satz:((stunden&&honorar!=null)?honorar/stunden:null);
   /* Zusatzzeit ist ZEIT, KEIN GELD: sie geht NIE ins honorar, sondern nur in die Bewertung.
      ZWEI STUFEN (V2.3): Vor-/Nachbereitung ist ARBEIT und zaehlt in arbeitStunden;
      Fahrt kommt erst in der Stufe "Tuer zu Tuer" (stundenGesamt) dazu. */
@@ -475,14 +506,26 @@ function calcEinsatz(e,P){
   const arbeitStunden=stunden==null?null:stunden+arbeitZusatz;
   const stundenGesamt=stunden==null?null:stunden+zusatzStunden;
   const ueberstunden=arbeitStunden==null?null:arbeitStunden-P.sollStunden; /* Vor-/Nachbereitung ist Mehrarbeit, Fahrt nicht */
-  const stundensatzArbeit=(arbeitStunden&&honorar!=null)?honorar/arbeitStunden:null;
-  const stundensatzGesamt=(stundenGesamt&&honorar!=null)?honorar/stundenGesamt:null;
-  if(honorar==null)return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,honorar:null,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
-  const rechnungsbetrag=honorar*(1+P.mwst);
-  const ustRuecklage=honorar*P.mwst;              /* gehört dem Finanzamt */
-  const steuerRuecklage=honorar*P.steuersatz;     /* auf NETTO */
-  const verfuegbar=honorar-steuerRuecklage;
-  return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,honorar,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
+  /* Wareneinsatz (V2.4): Ausgaben je Einsatz (Material, Leihgebuehr). KEINE Steuerlogik –
+     kein Vorsteuerabzug, keine Minderung der ESt-Ruecklage; das rechnet der Steuerberater
+     (Entscheidung Max, 01.08.2026). Weiterberechnet wandert er 1:1 in die Rechnung,
+     selbst getragen mindert er nur den Netto-Ertrag. Die Ruecklage bleibt bewusst eher
+     zu hoch als zu niedrig. */
+  const ware=nz(e.wareneinsatz);
+  const wareBerechnet=!!e.wareneinsatzBerechnet;
+  const eigenerAufwand=wareBerechnet?0:ware;
+  if(honorar==null)return{stunden,stundensatz:null,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit:null,stundensatzGesamt:null,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag:null,honorar:null,rechnungNetto:null,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
+  const rechnungNetto=honorar+(wareBerechnet?ware:0);
+  const nettoErtrag=honorar-eigenerAufwand;
+  /* Effektive Saetze rechnen auf dem Netto-Ertrag: was nach eigenem Aufwand pro Stunde bleibt. */
+  const stundensatz=(stunden&&stunden>0)?nettoErtrag/stunden:null;
+  const stundensatzArbeit=(arbeitStunden&&arbeitStunden>0)?nettoErtrag/arbeitStunden:null;
+  const stundensatzGesamt=(stundenGesamt&&stundenGesamt>0)?nettoErtrag/stundenGesamt:null;
+  const rechnungsbetrag=rechnungNetto*(1+P.mwst);
+  const ustRuecklage=rechnungNetto*P.mwst;        /* gehört dem Finanzamt */
+  const steuerRuecklage=honorar*P.steuersatz;     /* auf NETTO, nur aufs Honorar */
+  const verfuegbar=nettoErtrag-steuerRuecklage;
+  return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag,honorar,rechnungNetto,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
     splitFix:verfuegbar*P.splitFix,splitPersoenlich:verfuegbar*P.splitPersoenlich,splitSparen:verfuegbar*P.splitSparen};
 }
 /*[/calc]*/
@@ -543,9 +586,9 @@ function colChartSVG(months){
 }
 
 /* ===== Routing ===== */
-let state={tab:"einsaetze",year:null,detail:null,detailFrom:null,detailYear:null,blur:false};
+let state={tab:"einsaetze",year:null,detail:null,detailFrom:null,detailYear:null,blur:false,export:false};
 const view=document.getElementById("view"),tabbar=document.getElementById("tabbar");
-tabbar.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.detail=null;state.tab=b.dataset.tab;window.scrollTo(0,0);render();});
+tabbar.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.detail=null;state.export=false;state.tab=b.dataset.tab;window.scrollTo(0,0);render();});
 /* Aktiven Tab immer aus state ableiten: bleibt korrekt auch nach programmatischem Wechsel (Import). */
 function syncNav(){tabbar.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.tab===state.tab));}
 /* Kopfleisten-Hoehe messen: variiert mit der Safe Area des Geraets. Die klebenden
@@ -576,6 +619,7 @@ applyBlur();
 const SUB={einsaetze:"KONTOR",kunden:"KUNDEN",stats:"STATISTIK",set:"MEHR"};
 function render(){{const _bs=document.getElementById("barsub");if(_bs)_bs.textContent=SUB[state.tab];}syncNav();
   if(view._timerCleanup){view._timerCleanup();view._timerCleanup=null;}
+  if(state.export)return renderExport();
   if(state.detail)return renderKundenDetail();
   if(state.tab==="kunden")return renderKunden();
   if(state.tab==="stats")return renderStats();
@@ -669,11 +713,17 @@ function stopTimer(){
   editEinsatz(null,{kundeId:k?k.id:null,beginn,ende,modus:k?k.modus:S.defaultModus,tagessatz:k?k.tagessatz:""});
 }
 /* ===== Erfassungs-Sheet ===== */
-let tmpKunde,tmpStim,tmpStatus,tmpModus,modusTouched,satzTouched;
+let tmpKunde,tmpStim,tmpStatus,tmpModus,modusTouched,satzTouched,tmpWareB;
 function lastUse(kid){return DB.einsaetze.filter(e=>e.kundeId===kid).map(e=>e.datum||"").sort().pop()||"0";}
+/* Notiz-Vorschlaege: aus den echten Einsaetzen abgeleitet (Haeufigkeit, dann Frische) –
+   bewusst KEIN eigener Datenbestand, der mit den Einsaetzen auseinanderlaufen koennte. */
+function notizVorschlaege(){const m=new Map();
+  DB.einsaetze.forEach(e=>{const t=(e.notiz||"").trim();if(!t)return;const o=m.get(t)||{n:0,last:""};o.n++;if((e.datum||"")>o.last)o.last=e.datum||"";m.set(t,o);});
+  return[...m.entries()].sort((a,b)=>b[1].n-a[1].n||b[1].last.localeCompare(a[1].last)).slice(0,6).map(x=>x[0]);}
 function editEinsatz(id,pre){
-  const e=id?DB.einsaetze.find(x=>x.id===id):Object.assign({datum:new Date().toISOString().slice(0,10),beginn:"",ende:"",tagessatz:"",modus:S.defaultModus,stimmung:null,status:"offen",abgerechnet:false,notiz:"",kundeId:null},pre||{});
+  const e=id?DB.einsaetze.find(x=>x.id===id):Object.assign({datum:new Date().toISOString().slice(0,10),beginn:"",ende:"",tagessatz:"",modus:S.defaultModus,stimmung:null,status:"offen",abgerechnet:false,notiz:"",kundeId:null,wareneinsatz:0,wareneinsatzBerechnet:false},pre||{});
   tmpKunde=e.kundeId||null;tmpStim=e.stimmung||null;tmpStatus=["offen","gestellt","bezahlt"].includes(e.status)?e.status:"offen"; /* Nochmal/neu: pre enthält keinen Status → offen */
+  tmpWareB=e.wareneinsatzBerechnet===true;
   tmpModus=(e.modus==="stunde")?"stunde":"tag";modusTouched=!!id||!!(pre&&pre.modus!=null);
   satzTouched=!!id||!!(pre&&pre.tagessatz!=null); /* Nochmal/Bearbeiten: Satz nicht mehr vom Kunden überschreiben */
   openSheet(`<h3>${id?"Einsatz bearbeiten":"Einsatz erfassen"}</h3>
@@ -681,19 +731,22 @@ function editEinsatz(id,pre){
       <div id="e_newBox" class="hidden" style="margin-top:10px"><div class="two"><input type="text" class="txt" id="nk_name" placeholder="Kundenname"><input type="number" id="nk_satz" placeholder="Tagessatz €" min="0" step="50"></div><button class="btn ghost" id="nk_add" style="margin:10px 0 0;padding:10px">Kunde anlegen &amp; wählen</button></div></div>
     <div class="field"><label>Datum</label><input type="date" id="e_datum" value="${esc(e.datum||"")}"></div>
     <div class="two"><div class="field"><label>Beginn</label><input type="time" id="e_beginn" value="${esc(e.beginn||"")}"></div><div class="field"><label>Ende</label><input type="time" id="e_ende" value="${esc(e.ende||"")}"></div></div>
-    <div class="two"><div class="field"><label>Fahrt hin (Min.)</label><input type="number" id="e_fh" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.fahrtHin))}" placeholder="0"></div><div class="field"><label>Fahrt zurück (Min.)</label><input type="number" id="e_fz" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.fahrtZurueck))}" placeholder="0"></div></div>
+    <div class="two"><div class="field"><label>Fahrt hin (Std:Min)</label><input type="time" id="e_fh" value="${esc(h2hmDur(e.fahrtHin))}"></div><div class="field"><label>Fahrt zurück (Std:Min)</label><input type="time" id="e_fz" value="${esc(h2hmDur(e.fahrtZurueck))}"></div></div>
     <details class="zz" id="e_zz"${(+(e.vorbereitung||0)+ +(e.nachbereitung||0))>0?" open":""}>
       <summary>＋ Vor- und Nachbereitung <span class="zzv" id="e_zzsum"></span></summary>
       <div class="two">
-        <div><span class="sublab">Vorbereitung (Min.)</span><input type="number" id="e_vb" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.vorbereitung))}" placeholder="0"></div>
-        <div><span class="sublab">Nachbereitung (Min.)</span><input type="number" id="e_nb" inputmode="numeric" min="0" step="5" value="${esc(hToMin(e.nachbereitung))}" placeholder="0"></div>
+        <div><span class="sublab">Vorbereitung (Std:Min)</span><input type="time" id="e_vb" value="${esc(h2hmDur(e.vorbereitung))}"></div>
+        <div><span class="sublab">Nachbereitung (Std:Min)</span><input type="time" id="e_nb" value="${esc(h2hmDur(e.nachbereitung))}"></div>
       </div>
     </details>
     <div class="field"><label>Abrechnung</label><div class="toggles" id="e_modus"><button data-m="tag">Tagessatz</button><button data-m="stunde">Stundensatz</button></div></div>
     <div class="field"><label id="e_satzlab">Tagessatz (netto, €)</label><input type="number" id="e_satz" value="${esc(e.tagessatz??"")}" min="0" step="50" placeholder="z. B. 650"></div>
+    <div class="field"><label>Wareneinsatz (netto, €)</label><input type="number" id="e_ware" inputmode="decimal" min="0" step="10" value="${esc(e.wareneinsatz?String(e.wareneinsatz):"")}" placeholder="0">
+      <div id="e_wareBox" class="hidden" style="margin-top:10px"><div class="toggles" id="e_wareB"><button type="button" data-wb="0">Trage ich selbst</button><button type="button" data-wb="1">Kunde zahlt mit</button></div></div></div>
     <div class="field"><label>Stimmung (optional)</label><div class="toggles" id="e_stim"><button data-s="1">🟢 entspannt</button><button data-s="2">· okay</button><button data-s="3">🔴 Stress</button></div></div>
     <div class="field"><label>Status</label><div class="toggles" id="e_status"><button data-st="offen">offen</button><button data-st="gestellt">gestellt</button><button data-st="bezahlt">bezahlt</button></div></div>
-    <div class="field"><label>Notiz (optional)</label><input type="text" class="txt" id="e_notiz" value="${esc(e.notiz||"")}" placeholder="z. B. Jobbeschreibung"></div>
+    <div class="field"><label>Notiz (optional)</label><input type="text" class="txt" id="e_notiz" value="${esc(e.notiz||"")}" placeholder="z. B. Jobbeschreibung">
+      <div class="toggles wrap" id="e_nchips" style="margin-top:10px"></div></div>
     <div class="calc" id="e_calc"></div><div id="e_warn"></div>
     <button class="btn" id="saveEins">Speichern</button>
     <div class="btnrow">${id?'<button class="btn danger" id="delEins" style="margin-bottom:0">Löschen</button>':''}<button class="btn ghost" id="cancelEins" style="margin-bottom:0">Abbrechen</button></div>`);
@@ -718,6 +771,16 @@ function editEinsatz(id,pre){
     DB.kunden.push(nk);persist();tmpKunde=nk.id;
     if(!satzTouched&&nk.tagessatz)g("e_satz").value=nk.tagessatz;
     g("e_newBox").classList.add("hidden");paintChips();recalc();toast("Kunde angelegt");};
+  /* Der Umschalter erscheint erst, wenn ein Betrag drinsteht – haelt das Sheet im Normalfall kurz. */
+  function paintWare(){const hat=(parseFloat(val("e_ware"))||0)>0;
+    g("e_wareBox").classList.toggle("hidden",!hat);
+    g("e_wareB").querySelectorAll("button").forEach(b=>b.classList.toggle("on",(b.dataset.wb==="1")===tmpWareB));}
+  g("e_wareB").querySelectorAll("button").forEach(b=>b.onclick=()=>{tmpWareB=b.dataset.wb==="1";paintWare();recalc();});
+  /* Notiz-Chips: einmal getippt, beim naechsten Einsatz antippbar (Idee Max, 01.08.2026). */
+  function paintNChips(){const vs=notizVorschlaege();const box=g("e_nchips");
+    box.innerHTML=vs.map(t=>`<button type="button" data-nz="${esc(t)}">${esc(t)}</button>`).join("");
+    box.classList.toggle("hidden",!vs.length);
+    box.querySelectorAll("[data-nz]").forEach(b=>b.onclick=()=>{g("e_notiz").value=b.dataset.nz;});}
   function paintStim(){g("e_stim").querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.s===tmpStim));}
   g("e_stim").querySelectorAll("button").forEach(b=>b.onclick=()=>{const s=+b.dataset.s;tmpStim=(tmpStim===s?null:s);paintStim();});
   function paintStatus(){g("e_status").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.st===tmpStatus));}
@@ -726,14 +789,16 @@ function editEinsatz(id,pre){
     g("e_satzlab").textContent=tmpModus==="stunde"?"Stundensatz (netto, €)":"Tagessatz (netto, €)";}
   g("e_modus").querySelectorAll("button").forEach(b=>b.onclick=()=>{tmpModus=b.dataset.m;modusTouched=true;paintModus();recalc();});
   function recalc(){
-    /* Zusatzzeiten mitgeben, sonst rechnet die Vorschau ohne sie. Eingabe ist in MINUTEN,
-       calcEinsatz erwartet STUNDEN – daher hier umrechnen. */
+    /* Zusatzzeiten UND Wareneinsatz mitgeben, sonst rechnet die Vorschau ohne sie. Eingabe ist
+       H:MM, calcEinsatz erwartet STUNDEN – daher hier umrechnen. */
     const c=calcEinsatz({beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:val("e_satz")===""?null:parseFloat(val("e_satz")),modus:tmpModus,
-      fahrtHin:minToH(val("e_fh")),fahrtZurueck:minToH(val("e_fz")),vorbereitung:minToH(val("e_vb")),nachbereitung:minToH(val("e_nb"))},S);
+      fahrtHin:hmDur2h(val("e_fh")),fahrtZurueck:hmDur2h(val("e_fz")),vorbereitung:hmDur2h(val("e_vb")),nachbereitung:hmDur2h(val("e_nb")),
+      wareneinsatz:parseFloat(val("e_ware"))||0,wareneinsatzBerechnet:tmpWareB},S);
     g("e_calc").innerHTML=`
       <div class="c"><div class="l">${c.arbeitZusatz>0?"Vor Ort":"Stunden"}</div><div class="n">${fmtStd(c.stunden)}</div></div>
       ${c.arbeitZusatz>0?`<div class="c"><div class="l">Arbeit</div><div class="n">${fmtStd(c.arbeitStunden)}</div></div>`:""}
       ${tmpModus==="stunde"?`<div class="c"><div class="l">Honorar</div><div class="n">${eur(c.honorar)}</div></div>`:""}
+      ${c.eigenerAufwand>0?`<div class="c"><div class="l">Wareneinsatz</div><div class="n" style="color:var(--blue-text)">−${eur(c.eigenerAufwand)}</div></div>`:""}
       <div class="c"><div class="l">Ø Arbeit</div><div class="n">${fmtSatz(c.stundensatzArbeit)}</div></div>
       ${c.fahrtStunden>0?`<div class="c"><div class="l">Ø Tür zu Tür</div><div class="n">${fmtSatz(c.stundensatzGesamt)}</div></div>`:""}
       <div class="c"><div class="l">Ü-Stunden</div><div class="n">${c.ueberstunden==null?"–":(c.ueberstunden>0?"+":"")+fmtStd(c.ueberstunden)}</div></div>
@@ -748,12 +813,14 @@ function editEinsatz(id,pre){
   }
   ["e_datum","e_beginn","e_ende","e_fh","e_fz","e_vb","e_nb"].forEach(i=>g(i).oninput=recalc);
   g("e_satz").oninput=()=>{satzTouched=true;recalc();};
-  paintChips();paintStim();paintStatus();paintModus();recalc();
+  g("e_ware").oninput=()=>{paintWare();recalc();};
+  paintChips();paintStim();paintStatus();paintModus();paintWare();paintNChips();recalc();
   g("cancelEins").onclick=closeSheet;
   if(id)g("delEins").onclick=()=>askConfirm("Diesen Einsatz wirklich löschen?",()=>{DB.einsaetze=DB.einsaetze.filter(x=>x.id!==id);persist();closeSheet();render();toast("Einsatz gelöscht");});
   g("saveEins").onclick=()=>{
     const data={kundeId:tmpKunde,datum:val("e_datum"),beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:parseFloat(val("e_satz")),modus:tmpModus,stimmung:tmpStim,status:tmpStatus,abgerechnet:(tmpStatus==="bezahlt"),notiz:val("e_notiz"),
-      fahrtHin:minToH(val("e_fh")),fahrtZurueck:minToH(val("e_fz")),vorbereitung:minToH(val("e_vb")),nachbereitung:minToH(val("e_nb"))};
+      fahrtHin:hmDur2h(val("e_fh")),fahrtZurueck:hmDur2h(val("e_fz")),vorbereitung:hmDur2h(val("e_vb")),nachbereitung:hmDur2h(val("e_nb")),
+      wareneinsatz:Math.max(0,parseFloat(val("e_ware"))||0),wareneinsatzBerechnet:tmpWareB};
     if(id)Object.assign(e,data);else DB.einsaetze.push({id:uid(),...data});
     persist();closeSheet();render();toast(id?"Gespeichert":"Einsatz erfasst");};
 }
@@ -796,11 +863,12 @@ function renderKunden(){
   bindYear();
 }
 function editKunde(id){
-  const k=id?DB.kunden.find(x=>x.id===id):{name:"",tagessatz:"",notiz:""};
+  const k=id?DB.kunden.find(x=>x.id===id):{name:"",tagessatz:"",notiz:"",adresse:""};
   openSheet(`<h3>${id?"Kunde bearbeiten":"Neuer Kunde"}</h3>
     <div class="field"><label>Name</label><input type="text" class="txt" id="k_name" value="${esc(k.name)}" placeholder="Kundenname"></div>
     <div class="field"><label>Abrechnung</label><div class="toggles" id="k_modus"><button data-m="tag">Tagessatz</button><button data-m="stunde">Stundensatz</button></div></div>
     <div class="field"><label id="k_satzlab">Standard-Tagessatz (netto, €)</label><input type="number" id="k_satz" value="${esc(k.tagessatz??"")}" min="0" step="50" placeholder="z. B. 650"><p class="note">Wird beim neuen Einsatz vorbelegt und ist dort überschreibbar. Eine Änderung hier lässt bestehende Einsätze unverändert.</p></div>
+    <div class="field"><label>Anschrift (optional)</label><textarea class="txt" id="k_adr" rows="3" placeholder="Für den Briefkopf auf Leistungsnachweisen">${esc(k.adresse||"")}</textarea></div>
     <div class="field"><label>Notiz (optional)</label><input type="text" class="txt" id="k_notiz" value="${esc(k.notiz||"")}"></div>
     <button class="btn" id="saveK">Speichern</button>
     <div class="btnrow">${id?'<button class="btn danger" id="delK" style="margin-bottom:0">Löschen</button>':''}<button class="btn ghost" id="cancelK" style="margin-bottom:0">Abbrechen</button></div>`);
@@ -812,7 +880,7 @@ function editKunde(id){
   document.getElementById("cancelK").onclick=closeSheet;
   document.getElementById("saveK").onclick=()=>{
     const name=val("k_name").trim();if(!name){toast("Bitte Namen angeben");return;}
-    const data={name,tagessatz:parseFloat(val("k_satz"))||0,notiz:val("k_notiz"),modus:kmTmp};
+    const data={name,tagessatz:parseFloat(val("k_satz"))||0,notiz:val("k_notiz"),modus:kmTmp,adresse:val("k_adr")};
     if(id)Object.assign(k,data);else DB.kunden.push({id:uid(),...data});
     persist();closeSheet();render();toast("Gespeichert");};
   if(id)document.getElementById("delK").onclick=()=>{
@@ -934,6 +1002,17 @@ function impactText(y){
   const pct=hon?Math.round(vf/hon*100):0;
   return `<span class="imttl">Wirkung auf ${esc(y)}</span><span class="imtx">Rücklage ${eur(ruck)} · verfügbar ${eur(vf)} (${pct} % vom Honorar).</span>`;
 }
+/* Stammdaten (V2.5): erscheinen NUR im Briefkopf der PDFs. Echte Anschrift, bleibt lokal. */
+function openProfil(){
+  openSheet(`<h3>Dein Profil</h3>
+    <div class="field"><label>Name oder Firma</label><input type="text" class="txt" id="p_name" value="${esc(S.profil.name)}" placeholder="z. B. Max Mustermann"></div>
+    <div class="field"><label>Anschrift</label><textarea class="txt" id="p_adr" rows="3" placeholder="Straße&#10;PLZ Ort">${esc(S.profil.adresse)}</textarea></div>
+    <div class="field"><label>Kontakt (optional)</label><input type="text" class="txt" id="p_kontakt" value="${esc(S.profil.kontakt)}" placeholder="Telefon oder E-Mail">
+      <p class="note">Steht im Briefkopf von Leistungsnachweisen und Stundenzetteln. Wird nur auf diesem Gerät gespeichert.</p></div>
+    <button class="btn" id="saveP">Speichern</button><button class="btn ghost" id="cancelP" style="margin-bottom:0">Abbrechen</button>`);
+  document.getElementById("cancelP").onclick=closeSheet;
+  document.getElementById("saveP").onclick=()=>{S.profil={name:val("p_name").trim(),adresse:val("p_adr").trim(),kontakt:val("p_kontakt").trim()};persist();closeSheet();render();toast("Profil gespeichert");};
+}
 function openJahresziel(){
   openSheet(`<h3>Jahresziel</h3>
     <div class="field"><label>Verfügbar nach Rücklagen (€ pro Jahr)</label><input type="number" id="jz" min="0" step="1000" value="${esc(S.jahresziel)}"><p class="note">Dein Ziel für das, was nach den Steuer-Rücklagen übrig bleibt. Die Statistik zeigt „% vom Ziel".</p></div>
@@ -956,10 +1035,11 @@ function renderSettings(){
     <div class="impact" id="impactBox">${impactText(iy)}</div>
   </div>
   <div class="setcard nopad"><div class="setrow tap" id="paramRow"><span class="srk">Budget-Splits, Soll-Stunden & Zielsatz</span><span class="chev">›</span></div></div>
+  <div class="setcard nopad"><div class="setrow tap" id="profilRow"><div><div class="srk">Dein Profil</div><div class="srs">${S.profil.name?esc(S.profil.name):"Name und Anschrift für Briefköpfe"}</div></div><span class="chev">›</span></div></div>
   <div class="setcard nopad">
-    <div class="setrow tap" id="bakOut"><span class="srk">Backup teilen</span><span class="chev">›</span></div>
+    <div class="setrow tap" id="exportRow"><span class="srk">Export</span><span class="chev">›</span></div>
+    <div class="setrow tap line" id="bakOut"><span class="srk">Backup teilen</span><span class="chev">›</span></div>
     <div class="setrow tap line" id="bakIn"><span class="srk">Backup einlesen</span><span class="chev">›</span></div>
-    ${years().map(y=>`<div class="setrow tap line" data-csv="${esc(y)}"><span class="srk">CSV-Export ${esc(y)}</span><span class="chev">›</span></div>`).join("")}
     <div class="setrow line"><span class="srs">Letztes Backup: <b id="lastBak">${esc(lastBak)}</b></span></div>
   </div>
   <div class="privacy"><div class="pvtop"><span class="pvdot"></span><span class="pvttl">Alles bleibt auf diesem Gerät</span></div><p>Kein Server, kein Konto, keine Analytics. Deine Kunden und Umsätze verlassen dein Telefon nie.</p></div>
@@ -983,7 +1063,8 @@ function renderSettings(){
   document.getElementById("onbBtn").onclick=showOnboarding;
   document.getElementById("bakOut").onclick=exportBackup;
   document.getElementById("bakIn").onclick=()=>document.getElementById("backupInput").click();
-  view.querySelectorAll("[data-csv]").forEach(b=>b.onclick=()=>csvYear(b.dataset.csv));
+  document.getElementById("profilRow").onclick=openProfil;
+  document.getElementById("exportRow").onclick=()=>{state.export=true;window.scrollTo(0,0);render();};
   document.getElementById("wipe").onclick=()=>askConfirm("Wirklich ALLE Kunden und Einsätze löschen?",()=>{DB.kunden=[];DB.einsaetze=[];persist();render();toast("Alle Daten gelöscht");});
 }
 function openParams(){
@@ -1036,25 +1117,193 @@ document.getElementById("backupInput").addEventListener("change",e=>{
   }catch(err){console.error(err);toast("Backup konnte nicht gelesen werden");}};
   r.readAsText(f);
 });
-/* ===== CSV-Export (für Steuerberater – OHNE Stimmung) ===== */
-function csvEsc(s){s=String(s||"");return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
-function csvYear(y){
-  const E=einsJahr(y).slice().sort((a,b)=>((a.datum||"")+(a.beginn||"")).localeCompare((b.datum||"")+(b.beginn||"")));
-  if(!E.length){toast("Keine Einsätze in "+y);return;}
-  const num=n=>n==null?"":n.toFixed(2).replace(".",",");
-  const rows=[["Kunde","Datum","Beginn","Ende","Stunden","Modus","Satz (netto)","Honorar (netto)","Stundensatz","Rechnungsbetrag (brutto)",
-    "USt-Rücklage ("+Math.round(S.mwst*100)+" %)","Steuer-Rücklage ("+Math.round(S.steuersatz*100)+" %)","Verfügbar",
-    "Fixkosten ("+Math.round(S.splitFix*100)+" %)","Persönliches ("+Math.round(S.splitPersoenlich*100)+" %)","Sparen ("+Math.round(S.splitSparen*100)+" %)","Status",
-    "Vorbereitung","Nachbereitung","Fahrt hin","Fahrt zurück","Arbeit gesamt","Tür zu Tür","Notiz"].join(";")];
-  E.forEach(e=>{const c=calcEinsatz(e,S);
-    rows.push([csvEsc(kName(e.kundeId)),fmtDE(new Date(e.datum+"T00:00")),e.beginn,e.ende,num(c.stunden),
-      e.modus==="stunde"?"Stunde":"Tag",num(+e.tagessatz),num(c.honorar),
-      num(c.stundensatz),num(c.rechnungsbetrag),num(c.ustRuecklage),num(c.steuerRuecklage),num(c.verfuegbar),
-      num(c.splitFix),num(c.splitPersoenlich),num(c.splitSparen),csvEsc(e.status),
-      num(e.vorbereitung||0),num(e.nachbereitung||0),num(e.fahrtHin||0),num(e.fahrtZurueck||0),num(c.arbeitStunden),num(c.stundenGesamt),csvEsc(e.notiz)].join(";"));});
-  const blob=new Blob(["﻿"+rows.join("\r\n")],{type:"text/csv"});
-  shareOrDl(blob,"Kontor_"+y+".csv","text/csv");
+/* ===== Export-Modul (V2.5) =====
+   Feldkatalog: EINE Quelle fuer Beschriftung, Wert und Zugriffsrecht. Wer ein Feld ergaenzt,
+   muss `privat` bewusst setzen.
+   privat:true = darf NIE in eine kundengebundene Ausgabe. Das ist keine Voreinstellung,
+   die man wegklicken kann, sondern eine harte Sperre in feldErlaubt(). Der teuerste
+   denkbare Fehler waere, einem Kunden zu zeigen, was man an ihm verdient. */
+const F_ALL=[
+  {k:"datum",  t:"Datum",            d:"Tag des Einsatzes.",                      v:(e,c)=>e.datum?fmtDE(new Date(e.datum+"T00:00")):""},
+  {k:"kunde",  t:"Kunde",            d:"Name des Kunden.",                        v:(e,c)=>kName(e.kundeId)},
+  {k:"notiz",  t:"Beschreibung",     d:"Deine Notiz zum Einsatz.",                v:(e,c)=>e.notiz||""},
+  {k:"beginn", t:"Beginn",           d:"Startzeit vor Ort.",                      v:(e,c)=>e.beginn||""},
+  {k:"ende",   t:"Ende",             d:"Endzeit vor Ort.",                        v:(e,c)=>e.ende||""},
+  {k:"std",    t:"Stunden",          d:"Reine Zeit vor Ort. Basis fuer das Honorar.", v:(e,c)=>c.stunden,num:1},
+  {k:"vorb",   t:"Vorbereitung",     d:"Stunden Vorbereitung.",                   v:(e,c)=>e.vorbereitung||0,num:1},
+  {k:"nachb",  t:"Nachbereitung",    d:"Stunden Nachbereitung.",                  v:(e,c)=>e.nachbereitung||0,num:1},
+  {k:"fhin",   t:"Fahrt hin",        d:"Stunden Anfahrt.",                        v:(e,c)=>e.fahrtHin||0,num:1},
+  {k:"fzur",   t:"Fahrt zurueck",    d:"Stunden Rueckfahrt.",                     v:(e,c)=>e.fahrtZurueck||0,num:1},
+  {k:"arb",    t:"Arbeit gesamt",    d:"Vor Ort plus Vor- und Nachbereitung.",    v:(e,c)=>c.arbeitStunden,num:1},
+  {k:"tuer",   t:"Tuer zu Tuer",     d:"Arbeit gesamt plus Fahrt.",               v:(e,c)=>c.stundenGesamt,num:1},
+  {k:"modus",  t:"Abrechnung",       d:"Tagessatz oder Stundensatz.",             v:(e,c)=>e.modus==="stunde"?"Stunde":"Tag"},
+  {k:"satz",   t:"Satz (netto)",     d:"Vereinbarter Tages- oder Stundensatz.",   v:(e,c)=>+e.tagessatz||0,num:1},
+  {k:"hon",    t:"Honorar (netto)",  d:"Reines Arbeitshonorar ohne Wareneinsatz.",v:(e,c)=>c.honorar,num:1},
+  {k:"wareB",  t:"Wareneinsatz (weiterberechnet)",d:"Material, das der Kunde mitzahlt.",v:(e,c)=>c.wareBerechnet?c.wareneinsatz:0,num:1},
+  {k:"rgNetto",t:"Rechnung (netto)", d:"Honorar plus weiterberechneter Wareneinsatz.",v:(e,c)=>c.rechnungNetto,num:1},
+  {k:"rgBrutto",t:"Rechnung (brutto)",d:"Netto plus Umsatzsteuer.",               v:(e,c)=>c.rechnungsbetrag,num:1},
+  {k:"status", t:"Status",           d:"offen, gestellt oder bezahlt.",           v:(e,c)=>e.status||"offen"},
+  /* ab hier privat */
+  {k:"wareS",  t:"Wareneinsatz (selbst getragen)",d:"Deine eigene Ausgabe fuer den Einsatz.",v:(e,c)=>c.eigenerAufwand,num:1,privat:1},
+  {k:"satzEff",t:"Effektiver Stundensatz",d:"Was dir pro Stunde bleibt.",         v:(e,c)=>satzOf(c),num:1,privat:1},
+  {k:"ust",    t:"USt-Ruecklage",    d:"Gehoert dem Finanzamt.",                  v:(e,c)=>c.ustRuecklage,num:1,privat:1},
+  {k:"est",    t:"ESt-Ruecklage",    d:"Ruecklage fuer die Einkommensteuer.",     v:(e,c)=>c.steuerRuecklage,num:1,privat:1},
+  {k:"verf",   t:"Verfuegbar",       d:"Was nach Ruecklagen und Ausgaben bleibt.",v:(e,c)=>c.verfuegbar,num:1,privat:1},
+  {k:"spFix",  t:"Fixkosten-Anteil", d:"Budget-Split auf das Verfuegbare.",       v:(e,c)=>c.splitFix,num:1,privat:1},
+  {k:"spPer",  t:"Wuensche-Anteil",  d:"Budget-Split auf das Verfuegbare.",       v:(e,c)=>c.splitPersoenlich,num:1,privat:1},
+  {k:"spSpar", t:"Ruecklage-Anteil", d:"Budget-Split auf das Verfuegbare.",       v:(e,c)=>c.splitSparen,num:1,privat:1},
+  {k:"stim",   t:"Stimmung",         d:"Nur fuer dich. Nie an Dritte.",           v:(e,c)=>({1:"entspannt",2:"okay",3:"Stress"})[e.stimmung]||"",privat:1},
+];
+const F_BY=Object.fromEntries(F_ALL.map(f=>[f.k,f]));
+function feldErlaubt(k,kundeGebunden){const f=F_BY[k];return !!f&&(!kundeGebunden||!f.privat);}
+
+/* Werk-Vorlagen. kundeGebunden erzwingt Kundenfilter UND sperrt die privaten Felder. */
+const VORLAGEN=[
+  {id:"steuer",name:"Steuerberater",format:"csv",zeitraum:"jahr",kundeGebunden:false,
+   felder:["datum","kunde","beginn","ende","std","arb","tuer","modus","satz","hon","wareS","wareB","rgNetto","rgBrutto","ust","est","verf","status","notiz"]},
+  {id:"nachweis",name:"Leistungsnachweis",format:"pdf",zeitraum:"monat",kundeGebunden:true,
+   felder:["datum","notiz","beginn","ende","std"]},
+  {id:"zettel",name:"Stundenzettel zum Unterschreiben",format:"pdf",zeitraum:"monat",kundeGebunden:true,
+   felder:["datum","notiz","beginn","ende","std","arb"],unterschrift:true},
+  {id:"archiv",name:"Mein Archiv",format:"pdf",zeitraum:"jahr",kundeGebunden:false,
+   felder:["datum","kunde","notiz","std","arb","tuer","hon","wareS","satzEff","verf","status","stim"]},
+];
+
+/* Laufzeit-Zustand der Export-Seite. Bewusst NICHT gespeichert; gespeichert werden nur
+   eigene Vorlagen in S.exportVorlagen. */
+let EX=null;
+function exInit(){const v=VORLAGEN[0];
+  EX={vorlage:v.id,format:v.format,zeitraum:v.zeitraum,felder:v.felder.slice(),kundeGebunden:v.kundeGebunden,
+      unterschrift:!!v.unterschrift,kundeId:null,jahr:years()[0],monat:(DB.einsaetze.map(e=>(e.datum||"").slice(0,7)).sort().pop())||new Date().toISOString().slice(0,7)};}
+function exVorlageWaehlen(id){
+  const v=VORLAGEN.find(x=>x.id===id)||S.exportVorlagen.find(x=>x.id===id);if(!v)return;
+  EX.vorlage=id;EX.format=v.format;EX.zeitraum=v.zeitraum;EX.kundeGebunden=!!v.kundeGebunden;EX.unterschrift=!!v.unterschrift;
+  /* Sperre auch beim Vorlagenwechsel anwenden: eine gespeicherte Vorlage koennte aus einer
+     aelteren Version private Felder tragen. */
+  EX.felder=v.felder.filter(k=>feldErlaubt(k,EX.kundeGebunden));
+  if(EX.kundeGebunden&&!EX.kundeId)EX.kundeId=(DB.kunden[0]||{}).id||null;}
+/* Die auszugebenden Einsaetze: Zeitraum, dann Kundenfilter. */
+function exDaten(){
+  const pre=EX.zeitraum==="monat"?EX.monat:EX.jahr;
+  let list=DB.einsaetze.filter(e=>(e.datum||"").startsWith(pre));
+  if(EX.kundeGebunden&&EX.kundeId)list=list.filter(e=>e.kundeId===EX.kundeId);
+  return list.sort((a,b)=>((a.datum||"")+(a.beginn||"")).localeCompare((b.datum||"")+(b.beginn||"")));}
+function exZeitraumText(){return EX.zeitraum==="monat"?fmtMonth(EX.monat):EX.jahr;}
+function exDateiname(){const t=EX.kundeGebunden&&EX.kundeId?kName(EX.kundeId).replace(/[^\wäöüÄÖÜß-]+/g,"_"):"Kontor";
+  return t+"_"+(EX.zeitraum==="monat"?EX.monat:EX.jahr)+"."+(EX.format==="pdf"?"pdf":"csv");}
+
+function renderExport(){
+  if(!EX)exInit();
+  const eigene=S.exportVorlagen;
+  const kunden=DB.kunden.slice().sort((a,b)=>a.name.localeCompare(b.name,"de"));
+  if(EX.kundeGebunden&&!kunden.some(k=>k.id===EX.kundeId))EX.kundeId=(kunden[0]||{}).id||null;
+  const daten=exDaten();
+  const summe=daten.reduce((a,e)=>a+(calcEinsatz(e,S).rechnungNetto||0),0);
+  const ys=years();
+  const monate=[...new Set(DB.einsaetze.map(e=>(e.datum||"").slice(0,7)).filter(Boolean))].sort().reverse().slice(0,24);
+  if(EX.zeitraum==="monat"&&monate.length&&!monate.includes(EX.monat))EX.monat=monate[0];
+  let h=`<div class="dhead"><button class="backb" id="exBack" aria-label="Zurück">‹</button><h2>Export</h2></div>`;
+  h+=`<div class="secttl">Vorlage</div><div class="toggles wrap" id="exVorl">`
+    +VORLAGEN.concat(eigene).map(v=>`<button type="button" data-v="${esc(v.id)}"${EX.vorlage===v.id?' class="on"':''}>${esc(v.name)}</button>`).join("")+`</div>`;
+  h+=`<div class="secttl">Zeitraum</div><div class="toggles" id="exZr"><button type="button" data-z="monat"${EX.zeitraum==="monat"?' class="on"':''}>Monat</button><button type="button" data-z="jahr"${EX.zeitraum==="jahr"?' class="on"':''}>Jahr</button></div>`;
+  h+=EX.zeitraum==="monat"
+    ? `<div class="toggles wrap" id="exMon" style="margin-top:10px">${monate.map(mk=>`<button type="button" data-m="${esc(mk)}"${mk===EX.monat?' class="on"':''}>${esc(fmtMonth(mk))}</button>`).join("")||'<span class="srs">Noch keine Einsätze.</span>'}</div>`
+    : `<div class="toggles wrap" id="exJahr" style="margin-top:10px">${ys.map(y=>`<button type="button" data-y="${esc(y)}"${y===EX.jahr?' class="on"':''}>${esc(y)}</button>`).join("")}</div>`;
+  if(EX.kundeGebunden){
+    h+=`<div class="secttl">Kunde</div><div class="toggles wrap" id="exKunde">${kunden.map(k=>`<button type="button" data-k="${k.id}"${k.id===EX.kundeId?' class="on"':''}>${esc(k.name)}</button>`).join("")||'<span class="srs">Lege zuerst einen Kunden an.</span>'}</div>`;
+    h+=`<p class="note">Diese Vorlage geht an einen Kunden. Rücklagen, Verfügbares, dein Ø-Satz, selbst getragener Wareneinsatz und Stimmung sind deshalb gesperrt.</p>`;}
+  h+=`<div class="secttl">Format</div><div class="toggles" id="exFmt"><button type="button" data-f="pdf"${EX.format==="pdf"?' class="on"':''}>PDF</button><button type="button" data-f="csv"${EX.format==="csv"?' class="on"':''}>CSV</button></div>`;
+  h+=`<div class="secttl">Felder</div><div class="setcard nopad" id="exFelder">`
+    +F_ALL.filter(f=>feldErlaubt(f.k,EX.kundeGebunden)).map((f,i)=>{const an=EX.felder.includes(f.k);
+      return `<div class="setrow tap${i?" line":""}" data-fd="${esc(f.k)}"><div><div class="srk">${esc(f.t)}</div><div class="srs">${esc(f.d)}</div></div><span class="srv">${an?"✓":"–"}</span></div>`;}).join("")
+    +`</div>`;
+  h+=`<div class="setcard"><div class="srk">${daten.length} ${daten.length===1?"Einsatz":"Einsätze"} · ${esc(exZeitraumText())}</div><div class="srs">Rechnungssumme netto ${eur(summe)} · ${EX.felder.length} Felder</div></div>`;
+  h+=`<button class="btn" id="exGo"${daten.length&&EX.felder.length?"":" disabled"}>${EX.format==="pdf"?"PDF erzeugen":"CSV teilen"}</button>`;
+  h+=`<button class="btn ghost" id="exSave">Als eigene Vorlage sichern</button>`;
+  if(eigene.length)h+=`<button class="btn ghost" id="exDel" style="margin-bottom:0">Eigene Vorlage löschen</button>`;
+  view.innerHTML=h;
+  document.getElementById("exBack").onclick=()=>{state.export=false;window.scrollTo(0,0);render();};
+  view.querySelectorAll("#exVorl [data-v]").forEach(b=>b.onclick=()=>{exVorlageWaehlen(b.dataset.v);render();});
+  view.querySelectorAll("#exZr [data-z]").forEach(b=>b.onclick=()=>{EX.zeitraum=b.dataset.z;render();});
+  view.querySelectorAll("#exMon [data-m]").forEach(b=>b.onclick=()=>{EX.monat=b.dataset.m;render();});
+  view.querySelectorAll("#exJahr [data-y]").forEach(b=>b.onclick=()=>{EX.jahr=b.dataset.y;render();});
+  view.querySelectorAll("#exKunde [data-k]").forEach(b=>b.onclick=()=>{EX.kundeId=b.dataset.k;render();});
+  view.querySelectorAll("#exFmt [data-f]").forEach(b=>b.onclick=()=>{EX.format=b.dataset.f;render();});
+  view.querySelectorAll("#exFelder [data-fd]").forEach(b=>b.onclick=()=>{const k=b.dataset.fd;
+    if(!feldErlaubt(k,EX.kundeGebunden))return;
+    EX.felder=EX.felder.includes(k)?EX.felder.filter(x=>x!==k):F_ALL.map(f=>f.k).filter(x=>EX.felder.includes(x)||x===k);
+    render();});
+  document.getElementById("exGo").onclick=()=>{EX.format==="pdf"?exPDF():exCSV();};
+  document.getElementById("exSave").onclick=exVorlageSichern;
+  const del=document.getElementById("exDel");if(del)del.onclick=exVorlageLoeschen;
 }
+function exVorlageSichern(){
+  openSheet(`<h3>Eigene Vorlage</h3>
+    <div class="field"><label>Name</label><input type="text" class="txt" id="vn_name" placeholder="z. B. Steuerberater kurz"><p class="note">Gleicher Name überschreibt eine bestehende Vorlage. Gespeichert werden Format, Zeitraum-Art und die Feldauswahl.</p></div>
+    <button class="btn" id="vn_ok">Sichern</button><button class="btn ghost" id="vn_no" style="margin-bottom:0">Abbrechen</button>`);
+  document.getElementById("vn_no").onclick=closeSheet;
+  document.getElementById("vn_ok").onclick=()=>{const n=val("vn_name").trim();if(!n){toast("Bitte Namen angeben");return;}
+    const neu={id:uid(),name:n,format:EX.format,zeitraum:EX.zeitraum,felder:EX.felder.slice(),kundeGebunden:EX.kundeGebunden};
+    const i=S.exportVorlagen.findIndex(v=>v.name===n);
+    if(i>=0){neu.id=S.exportVorlagen[i].id;S.exportVorlagen[i]=neu;}else S.exportVorlagen.push(neu);
+    EX.vorlage=neu.id;persist();closeSheet();render();toast("Vorlage gesichert");};
+}
+function exVorlageLoeschen(){
+  openSheet(`<h3>Eigene Vorlage löschen</h3><div class="toggles wrap" id="vd_list">`
+    +S.exportVorlagen.map(v=>`<button type="button" data-d="${esc(v.id)}">${esc(v.name)}</button>`).join("")
+    +`</div><button class="btn ghost" id="vd_no" style="margin-top:16px;margin-bottom:0">Abbrechen</button>`);
+  document.getElementById("vd_no").onclick=closeSheet;
+  document.querySelectorAll("#vd_list [data-d]").forEach(b=>b.onclick=()=>{
+    S.exportVorlagen=S.exportVorlagen.filter(v=>v.id!==b.dataset.d);
+    if(EX.vorlage===b.dataset.d)exVorlageWaehlen(VORLAGEN[0].id);
+    persist();closeSheet();render();toast("Vorlage gelöscht");});
+}
+/* ===== Ausgabe: CSV und PDF (V2.5) =====
+   Beide rendern aus DERSELBEN Feldauswahl (F_ALL + EX.felder), damit CSV und PDF nie
+   auseinanderlaufen. */
+function csvEsc(s){s=String(s||"");return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+function exFelder(){return EX.felder.map(k=>F_BY[k]).filter(f=>f&&feldErlaubt(f.k,EX.kundeGebunden));}
+function exCSV(){
+  const fs=exFelder(),daten=exDaten();
+  if(!fs.length||!daten.length){toast("Nichts zu exportieren");return;}
+  const num=n=>n==null?"":(+n).toFixed(2).replace(".",",");
+  const rows=[fs.map(f=>csvEsc(f.t)).join(";")];
+  daten.forEach(e=>{const c=calcEinsatz(e,S);
+    rows.push(fs.map(f=>{const v=f.v(e,c);return f.num?num(v):csvEsc(v);}).join(";"));});
+  const blob=new Blob(["\ufeff"+rows.join("\r\n")],{type:"text/csv"});
+  shareOrDl(blob,exDateiname(),"text/csv");
+}
+/* PDF ohne Fremd-Library: ein verstecktes Druck-Element wird befuellt, dann window.print().
+   Auf dem iPhone landet man im Teilen-Dialog und sichert als PDF. Kein jsPDF, kein CDN. */
+function exPDF(){
+  const fs=exFelder(),daten=exDaten();
+  if(!fs.length||!daten.length){toast("Nichts zu exportieren");return;}
+  const kunde=EX.kundeGebunden&&EX.kundeId?kunde_(EX.kundeId):null;
+  const sumStd=daten.reduce((a,e)=>a+(calcEinsatz(e,S).stunden||0),0);
+  const sumHon=daten.reduce((a,e)=>a+(calcEinsatz(e,S).rechnungNetto||0),0);
+  const zeigtGeld=fs.some(f=>["hon","rgNetto","rgBrutto","satz","verf"].includes(f.k));
+  const num=n=>n==null?"":(+n).toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2});
+  let h=`<div class="pr-head">
+      <div class="pr-abs">${S.profil.name?`<strong>${esc(S.profil.name)}</strong><br>`:""}${esc(S.profil.adresse).replace(/\n/g,"<br>")}${S.profil.kontakt?`<br>${esc(S.profil.kontakt)}`:""}</div>
+      ${kunde?`<div class="pr-emp"><strong>${esc(kunde.name)}</strong>${kunde.adresse?"<br>"+esc(kunde.adresse).replace(/\n/g,"<br>"):""}</div>`:""}
+    </div>
+    <h1>${esc(VORLAGEN.concat(S.exportVorlagen).find(v=>v.id===EX.vorlage)?.name||"Übersicht")}</h1>
+    <div class="pr-sub">${esc(exZeitraumText())}${kunde?"":""} · ${daten.length} ${daten.length===1?"Einsatz":"Einsätze"}</div>
+    <table><thead><tr>${fs.map(f=>`<th${f.num?' class="r"':""}>${esc(f.t)}</th>`).join("")}</tr></thead><tbody>`;
+  daten.forEach(e=>{const c=calcEinsatz(e,S);
+    h+=`<tr>${fs.map(f=>{const v=f.v(e,c);return `<td${f.num?' class="r"':""}>${esc(f.num?num(v):String(v??""))}</td>`;}).join("")}</tr>`;});
+  h+=`</tbody></table>
+    <div class="pr-sum">Summe: ${fmtStd(sumStd)} Std vor Ort${zeigtGeld?" · "+esc(num(sumHon))+" € netto":""}</div>`;
+  if(EX.unterschrift)h+=`<div class="pr-sig"><div><div class="pr-line"></div>Ort, Datum</div><div><div class="pr-line"></div>Unterschrift Auftraggeber</div></div>`;
+  h+=`<div class="pr-foot">Erstellt mit Kontor am ${esc(fmtDE(new Date()))}</div>`;
+  document.getElementById("printroot").innerHTML=h;
+  document.body.classList.add("printing");
+  const auf=()=>{document.body.classList.remove("printing");window.removeEventListener("afterprint",auf);};
+  window.addEventListener("afterprint",auf);
+  window.print();
+  setTimeout(auf,3000); /* Sicherheitsnetz: iOS feuert afterprint nicht zuverlaessig. */
+}
+function kunde_(id){return DB.kunden.find(k=>k.id===id);}
 /* ===== Anleitung ===== */
 function openHelp(){
   openSheet(`<h3>Anleitung</h3><div class="help">
