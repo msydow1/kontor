@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.5 -->
+<!-- Kontor V2.5.1 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -366,7 +366,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.5</b></div>
+    <div class="foot-v">Kontor <b>V2.5.1</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -731,13 +731,12 @@ function editEinsatz(id,pre){
       <div id="e_newBox" class="hidden" style="margin-top:10px"><div class="two"><input type="text" class="txt" id="nk_name" placeholder="Kundenname"><input type="number" id="nk_satz" placeholder="Tagessatz €" min="0" step="50"></div><button class="btn ghost" id="nk_add" style="margin:10px 0 0;padding:10px">Kunde anlegen &amp; wählen</button></div></div>
     <div class="field"><label>Datum</label><input type="date" id="e_datum" value="${esc(e.datum||"")}"></div>
     <div class="two"><div class="field"><label>Beginn</label><input type="time" id="e_beginn" value="${esc(e.beginn||"")}"></div><div class="field"><label>Ende</label><input type="time" id="e_ende" value="${esc(e.ende||"")}"></div></div>
-    <div class="two"><div class="field"><label>Fahrt hin (Std:Min)</label><input type="time" id="e_fh" value="${esc(h2hmDur(e.fahrtHin))}"></div><div class="field"><label>Fahrt zurück (Std:Min)</label><input type="time" id="e_fz" value="${esc(h2hmDur(e.fahrtZurueck))}"></div></div>
+    <div class="field"><label>Fahrt hin</label><div class="toggles wrap" data-dfor="e_fh"></div><input type="time" class="hidden" id="e_fh" value="${esc(h2hmDur(e.fahrtHin))}"></div>
+    <div class="field"><label>Fahrt zurück</label><div class="toggles wrap" data-dfor="e_fz"></div><input type="time" class="hidden" id="e_fz" value="${esc(h2hmDur(e.fahrtZurueck))}"></div>
     <details class="zz" id="e_zz"${(+(e.vorbereitung||0)+ +(e.nachbereitung||0))>0?" open":""}>
       <summary>＋ Vor- und Nachbereitung <span class="zzv" id="e_zzsum"></span></summary>
-      <div class="two">
-        <div><span class="sublab">Vorbereitung (Std:Min)</span><input type="time" id="e_vb" value="${esc(h2hmDur(e.vorbereitung))}"></div>
-        <div><span class="sublab">Nachbereitung (Std:Min)</span><input type="time" id="e_nb" value="${esc(h2hmDur(e.nachbereitung))}"></div>
-      </div>
+      <div><span class="sublab">Vorbereitung</span><div class="toggles wrap" data-dfor="e_vb"></div><input type="time" class="hidden" id="e_vb" value="${esc(h2hmDur(e.vorbereitung))}"></div>
+      <div><span class="sublab">Nachbereitung</span><div class="toggles wrap" data-dfor="e_nb"></div><input type="time" class="hidden" id="e_nb" value="${esc(h2hmDur(e.nachbereitung))}"></div>
     </details>
     <div class="field"><label>Abrechnung</label><div class="toggles" id="e_modus"><button data-m="tag">Tagessatz</button><button data-m="stunde">Stundensatz</button></div></div>
     <div class="field"><label id="e_satzlab">Tagessatz (netto, €)</label><input type="number" id="e_satz" value="${esc(e.tagessatz??"")}" min="0" step="50" placeholder="z. B. 650"></div>
@@ -812,6 +811,28 @@ function editEinsatz(id,pre){
     g("saveEins").disabled=!(tmpKunde&&val("e_datum")&&c.stunden!=null&&c.stunden>0&&satz>0);
   }
   ["e_datum","e_beginn","e_ende","e_fh","e_fz","e_vb","e_nb"].forEach(i=>g(i).oninput=recalc);
+  /* Dauer-Schnellchips (V2.5.1, aus der nativen App zurueckportiert): ein Tipp statt
+     Uhr-Raedchen. Das time-Input bleibt die eine Wahrheit (recalc/Speichern lesen es
+     unveraendert), Chips schreiben nur hinein. "…" oeffnet das Input fuer krumme Werte.
+     Vergleich in ganzen MINUTEN, nie im Double (Rundungsfalle). */
+  const DMIN=[0,15,30,45,60,90,120];
+  const dchip=t=>t<60?String(t):Math.floor(t/60)+":"+String(t%60).padStart(2,"0");
+  function paintDauer(fid){
+    const box=document.querySelector(`[data-dfor="${fid}"]`),inp=g(fid);
+    if(!box||!inp)return;
+    const cur=Math.round(hmDur2h(inp.value)*60),offen=!inp.classList.contains("hidden");
+    let h=DMIN.includes(cur)?"":`<button type="button" class="on" data-dm="${cur}">${dchip(cur)}</button>`;
+    h+=DMIN.map(t=>`<button type="button" data-dm="${t}"${t===cur?' class="on"':''}>${dchip(t)}</button>`).join("");
+    h+=`<button type="button" data-dcustom="1"${offen?' class="on"':''}>…</button>`;
+    box.innerHTML=h;
+    box.querySelectorAll("[data-dm]").forEach(b=>b.onclick=()=>{
+      inp.value=h2hmDur(+b.dataset.dm/60);inp.classList.add("hidden");paintDauer(fid);recalc();});
+    box.querySelector("[data-dcustom]").onclick=()=>{inp.classList.toggle("hidden");paintDauer(fid);};
+  }
+  const paintAlleDauern=()=>["e_fh","e_fz","e_vb","e_nb"].forEach(paintDauer);
+  ["e_fh","e_fz","e_vb","e_nb"].forEach(i=>{const alt=g(i).oninput;g(i).oninput=()=>{if(alt)alt();
+    const box=document.querySelector(`[data-dfor="${i}"]`);if(box)paintDauer(i);};});
+  paintAlleDauern();
   g("e_satz").oninput=()=>{satzTouched=true;recalc();};
   g("e_ware").oninput=()=>{paintWare();recalc();};
   paintChips();paintStim();paintStatus();paintModus();paintWare();paintNChips();recalc();
