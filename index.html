@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.5.1 -->
+<!-- Kontor V2.6 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -305,6 +305,16 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 
 /* Beta 0.7 Teil 3: Kunden-Karten */
 .badge.wide{letter-spacing:.1em;padding:4px 9px}
+.badge.ustmark{margin-left:6px}
+/* Umsatzsteuer nach Satz (V2.6) */
+.ustrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 10px;padding:12px 0;border-top:1px solid var(--hairline-soft)}
+.ustlist>.ustrow:first-child{border-top:none;padding-top:0}
+.ustrow .uh{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:600;color:var(--text-strong)}
+.ustrow .uh span{font-size:11px;font-weight:400;color:var(--ink-55)}
+.ustrow .ul{font-size:10.5px;color:var(--ink-55)}
+.ustrow .uv{font-size:13px;font-weight:500;color:var(--text-strong);font-variant-numeric:tabular-nums}
+.ustrow.tot{border-top:1px solid var(--border)}
+.ustrow.tot .uv{font-weight:600}
 .kcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(21,23,26,.04);padding:18px;margin-bottom:12px;display:flex;flex-direction:column;gap:14px;cursor:pointer}
 .kcard.quiet{gap:0;padding:15px 18px}
 .kcard .khead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -366,7 +376,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.5.1</b></div>
+    <div class="foot-v">Kontor <b>V2.6</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -408,7 +418,8 @@ DB.einsaetze.forEach(e=>{e.stimmung=[1,2,3].includes(e.stimmung)?e.stimmung:null
   e.notiz=String(e.notiz??"");e.status=["offen","gestellt","bezahlt"].includes(e.status)?e.status:(e.abgerechnet?"bezahlt":"offen");e.abgerechnet=(e.status==="bezahlt");e.tagessatz=numS(e.tagessatz,0);e.modus=(e.modus==="stunde")?"stunde":"tag";
   e.fahrtHin=Math.max(0,numS(e.fahrtHin,0));e.fahrtZurueck=Math.max(0,numS(e.fahrtZurueck,0));
   e.vorbereitung=Math.max(0,numS(e.vorbereitung,0));e.nachbereitung=Math.max(0,numS(e.nachbereitung,0));
-  e.wareneinsatz=Math.max(0,numS(e.wareneinsatz,0));e.wareneinsatzBerechnet=e.wareneinsatzBerechnet===true;});
+  e.wareneinsatz=Math.max(0,numS(e.wareneinsatz,0));e.wareneinsatzBerechnet=e.wareneinsatzBerechnet===true;
+  e.ustArt=["regel","ermaessigt","rc"].includes(e.ustArt)?e.ustArt:"regel";});
 if(DB.kunden.length||DB.einsaetze.length)S.onboarded=true; /* Bestandsdaten sehen nie ein Onboarding */
 function persist(){Store.save(DB);}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -514,18 +525,28 @@ function calcEinsatz(e,P){
   const ware=nz(e.wareneinsatz);
   const wareBerechnet=!!e.wareneinsatzBerechnet;
   const eigenerAufwand=wareBerechnet?0:ware;
-  if(honorar==null)return{stunden,stundensatz:null,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit:null,stundensatzGesamt:null,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag:null,honorar:null,rechnungNetto:null,rechnungsbetrag:null,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
+  /* USt je Einsatz (V2.6): "regel" = Satz aus den Einstellungen (Standard 19 %),
+     "ermaessigt" = 7 % (Nutzungsrechte), "rc" = 0 % Reverse Charge (der Kunde schuldet die
+     Steuer). Kleinunternehmer (mwst 0) weisen nie USt aus, auch nicht ermaessigt. Fehlt das
+     Feld (Altdaten) oder ist es Muell, gilt "regel": bestehende Einsaetze rechnen wie bisher. */
+  const ustArt=(e.ustArt==="ermaessigt"||e.ustArt==="rc")?e.ustArt:"regel";
+  const ustSatz=!(P.mwst>0)?0:ustArt==="ermaessigt"?0.07:ustArt==="rc"?0:P.mwst;
+  if(honorar==null)return{stunden,stundensatz:null,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit:null,stundensatzGesamt:null,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag:null,honorar:null,rechnungNetto:null,rechnungsbetrag:null,ustArt,ustSatz,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
   const rechnungNetto=honorar+(wareBerechnet?ware:0);
   const nettoErtrag=honorar-eigenerAufwand;
   /* Effektive Saetze rechnen auf dem Netto-Ertrag: was nach eigenem Aufwand pro Stunde bleibt. */
   const stundensatz=(stunden&&stunden>0)?nettoErtrag/stunden:null;
   const stundensatzArbeit=(arbeitStunden&&arbeitStunden>0)?nettoErtrag/arbeitStunden:null;
   const stundensatzGesamt=(stundenGesamt&&stundenGesamt>0)?nettoErtrag/stundenGesamt:null;
-  const rechnungsbetrag=rechnungNetto*(1+P.mwst);
-  const ustRuecklage=rechnungNetto*P.mwst;        /* gehört dem Finanzamt */
+  /* In ganzen Cent und Basispunkten rechnen: 287,50 x 19 % ist im Double 54,62499..., die
+     USt muss aber kaufmaennisch 54,63 ergeben. Brutto = Netto + USt, beides auf den Cent. */
+  const nettoCent=Math.round(rechnungNetto*100);
+  const ustCent=Math.round(nettoCent*Math.round(ustSatz*10000)/10000);
+  const ustRuecklage=ustCent/100;                 /* gehört dem Finanzamt */
+  const rechnungsbetrag=(nettoCent+ustCent)/100;
   const steuerRuecklage=honorar*P.steuersatz;     /* auf NETTO, nur aufs Honorar */
   const verfuegbar=nettoErtrag-steuerRuecklage;
-  return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag,honorar,rechnungNetto,rechnungsbetrag,ustRuecklage,steuerRuecklage,verfuegbar,
+  return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag,honorar,rechnungNetto,rechnungsbetrag,ustArt,ustSatz,ustRuecklage,steuerRuecklage,verfuegbar,
     splitFix:verfuegbar*P.splitFix,splitPersoenlich:verfuegbar*P.splitPersoenlich,splitSparen:verfuegbar*P.splitSparen};
 }
 /*[/calc]*/
@@ -586,7 +607,7 @@ function colChartSVG(months){
 }
 
 /* ===== Routing ===== */
-let state={tab:"einsaetze",year:null,detail:null,detailFrom:null,detailYear:null,blur:false,export:false};
+let state={tab:"einsaetze",year:null,detail:null,detailFrom:null,detailYear:null,blur:false,export:false,ustSicht:"alle"};
 const view=document.getElementById("view"),tabbar=document.getElementById("tabbar");
 tabbar.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.detail=null;state.export=false;state.tab=b.dataset.tab;window.scrollTo(0,0);render();});
 /* Aktiven Tab immer aus state ableiten: bleibt korrekt auch nach programmatischem Wechsel (Import). */
@@ -654,8 +675,10 @@ function renderEinsaetze(){
         const dd=isNaN(d)?"–":String(d.getDate()).padStart(2,"0");const mm=isNaN(d)?"":MN[d.getMonth()].slice(0,3).toUpperCase();
         const chip=e.status==="bezahlt"?`<button type="button" class="badge green cyc" data-cyc="${e.id}">✓ bezahlt</button>`:e.status==="gestellt"?`<button type="button" class="badge blue cyc" data-cyc="${e.id}">gestellt</button>`:`<button type="button" class="badge neutral cyc" data-cyc="${e.id}">offen</button>`;
         const notiz=e.notiz?` · ${esc(e.notiz)}`:"";
+        /* Nur Abweichungen vom Regelsatz markieren, sonst traegt jede Zeile ein "19 %". */
+        const ustMark=(S.mwst>0&&c.ustArt!=="regel")?`<span class="badge neutral ustmark">${c.ustArt==="rc"?"Reverse Charge":"7 % USt"}</span>`:"";
         h+=`<div class="erow" data-e="${e.id}"><div class="dchip"><div class="d">${dd}</div><div class="mo">${esc(mm)}</div></div>
-          <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub">${esc(e.beginn||"–")}–${esc(e.ende||"–")} · ${fmtStd(stdOf(c))} h · ${fmtSatzH(satzOf(c))}</div>${chip}</div>
+          <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub">${esc(e.beginn||"–")}–${esc(e.ende||"–")} · ${fmtStd(stdOf(c))} h · ${fmtSatzH(satzOf(c))}</div>${chip}${ustMark}</div>
           <div class="eamt"><div class="b">${eur2(c.rechnungsbetrag)}</div><div class="f">${eur(c.verfuegbar)} frei</div><div class="r">${eur(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)} Rücklage</div><button class="again" data-again="${e.id}" aria-label="Als neuen Einsatz anlegen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></button></div></div>`;});
       h+=`</div>`;});}
   h+=`<button class="fab" id="addEins">＋ Einsatz</button>`;
@@ -677,7 +700,7 @@ function renderEinsaetze(){
   /* Rueckfrage, weil ein Fehltipp hier stillschweigend echte Daten dupliziert (Max 3x betroffen). */
   view.querySelectorAll("[data-again]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const src=DB.einsaetze.find(x=>x.id===b.dataset.again);if(!src)return;
-    askConfirm("Diesen Einsatz als neuen anlegen?",()=>editEinsatz(null,{kundeId:src.kundeId,beginn:src.beginn,ende:src.ende,tagessatz:src.tagessatz,modus:src.modus}),"Anlegen",true);});
+    askConfirm("Diesen Einsatz als neuen anlegen?",()=>editEinsatz(null,{kundeId:src.kundeId,beginn:src.beginn,ende:src.ende,tagessatz:src.tagessatz,modus:src.modus,ustArt:src.ustArt}),"Anlegen",true);});
   view.querySelectorAll("[data-cyc]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const e=DB.einsaetze.find(x=>x.id===b.dataset.cyc);if(!e)return;
     const next={offen:"gestellt",gestellt:"bezahlt",bezahlt:"offen"};
@@ -713,7 +736,7 @@ function stopTimer(){
   editEinsatz(null,{kundeId:k?k.id:null,beginn,ende,modus:k?k.modus:S.defaultModus,tagessatz:k?k.tagessatz:""});
 }
 /* ===== Erfassungs-Sheet ===== */
-let tmpKunde,tmpStim,tmpStatus,tmpModus,modusTouched,satzTouched,tmpWareB;
+let tmpKunde,tmpStim,tmpStatus,tmpModus,modusTouched,satzTouched,tmpWareB,tmpUst;
 function lastUse(kid){return DB.einsaetze.filter(e=>e.kundeId===kid).map(e=>e.datum||"").sort().pop()||"0";}
 /* Notiz-Vorschlaege: aus den echten Einsaetzen abgeleitet (Haeufigkeit, dann Frische) –
    bewusst KEIN eigener Datenbestand, der mit den Einsaetzen auseinanderlaufen koennte. */
@@ -724,6 +747,7 @@ function editEinsatz(id,pre){
   const e=id?DB.einsaetze.find(x=>x.id===id):Object.assign({datum:new Date().toISOString().slice(0,10),beginn:"",ende:"",tagessatz:"",modus:S.defaultModus,stimmung:null,status:"offen",abgerechnet:false,notiz:"",kundeId:null,wareneinsatz:0,wareneinsatzBerechnet:false},pre||{});
   tmpKunde=e.kundeId||null;tmpStim=e.stimmung||null;tmpStatus=["offen","gestellt","bezahlt"].includes(e.status)?e.status:"offen"; /* Nochmal/neu: pre enthält keinen Status → offen */
   tmpWareB=e.wareneinsatzBerechnet===true;
+  tmpUst=["ermaessigt","rc"].includes(e.ustArt)?e.ustArt:"regel";
   tmpModus=(e.modus==="stunde")?"stunde":"tag";modusTouched=!!id||!!(pre&&pre.modus!=null);
   satzTouched=!!id||!!(pre&&pre.tagessatz!=null); /* Nochmal/Bearbeiten: Satz nicht mehr vom Kunden überschreiben */
   openSheet(`<h3>${id?"Einsatz bearbeiten":"Einsatz erfassen"}</h3>
@@ -740,6 +764,7 @@ function editEinsatz(id,pre){
     </details>
     <div class="field"><label>Abrechnung</label><div class="toggles" id="e_modus"><button data-m="tag">Tagessatz</button><button data-m="stunde">Stundensatz</button></div></div>
     <div class="field"><label id="e_satzlab">Tagessatz (netto, €)</label><input type="number" id="e_satz" value="${esc(e.tagessatz??"")}" min="0" step="50" placeholder="z. B. 650"></div>
+    ${S.mwst>0?`<div class="field"><label>Umsatzsteuer</label><div class="toggles wrap" id="e_ust"><button type="button" data-u="regel">${Math.round(S.mwst*100)} %</button><button type="button" data-u="ermaessigt">7 % Nutzungsrechte</button><button type="button" data-u="rc">0 % Reverse Charge</button></div></div>`:""}
     <div class="field"><label>Wareneinsatz (netto, €)</label><input type="number" id="e_ware" inputmode="decimal" min="0" step="10" value="${esc(e.wareneinsatz?String(e.wareneinsatz):"")}" placeholder="0">
       <div id="e_wareBox" class="hidden" style="margin-top:10px"><div class="toggles" id="e_wareB"><button type="button" data-wb="0">Trage ich selbst</button><button type="button" data-wb="1">Kunde zahlt mit</button></div></div></div>
     <div class="field"><label>Stimmung (optional)</label><div class="toggles" id="e_stim"><button data-s="1">🟢 entspannt</button><button data-s="2">· okay</button><button data-s="3">🔴 Stress</button></div></div>
@@ -787,12 +812,15 @@ function editEinsatz(id,pre){
   function paintModus(){g("e_modus").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.m===tmpModus));
     g("e_satzlab").textContent=tmpModus==="stunde"?"Stundensatz (netto, €)":"Tagessatz (netto, €)";}
   g("e_modus").querySelectorAll("button").forEach(b=>b.onclick=()=>{tmpModus=b.dataset.m;modusTouched=true;paintModus();recalc();});
+  /* Kleinunternehmer sehen die Wahl nicht (e_ust fehlt), der gespeicherte Wert bleibt dann unberuehrt. */
+  function paintUst(){const box=g("e_ust");if(box)box.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.u===tmpUst));}
+  {const box=g("e_ust");if(box)box.querySelectorAll("button").forEach(b=>b.onclick=()=>{tmpUst=b.dataset.u;paintUst();recalc();});}
   function recalc(){
     /* Zusatzzeiten UND Wareneinsatz mitgeben, sonst rechnet die Vorschau ohne sie. Eingabe ist
        H:MM, calcEinsatz erwartet STUNDEN – daher hier umrechnen. */
     const c=calcEinsatz({beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:val("e_satz")===""?null:parseFloat(val("e_satz")),modus:tmpModus,
       fahrtHin:hmDur2h(val("e_fh")),fahrtZurueck:hmDur2h(val("e_fz")),vorbereitung:hmDur2h(val("e_vb")),nachbereitung:hmDur2h(val("e_nb")),
-      wareneinsatz:parseFloat(val("e_ware"))||0,wareneinsatzBerechnet:tmpWareB},S);
+      wareneinsatz:parseFloat(val("e_ware"))||0,wareneinsatzBerechnet:tmpWareB,ustArt:tmpUst},S);
     g("e_calc").innerHTML=`
       <div class="c"><div class="l">${c.arbeitZusatz>0?"Vor Ort":"Stunden"}</div><div class="n">${fmtStd(c.stunden)}</div></div>
       ${c.arbeitZusatz>0?`<div class="c"><div class="l">Arbeit</div><div class="n">${fmtStd(c.arbeitStunden)}</div></div>`:""}
@@ -802,7 +830,7 @@ function editEinsatz(id,pre){
       ${c.fahrtStunden>0?`<div class="c"><div class="l">Ø Tür zu Tür</div><div class="n">${fmtSatz(c.stundensatzGesamt)}</div></div>`:""}
       <div class="c"><div class="l">Ü-Stunden</div><div class="n">${c.ueberstunden==null?"–":(c.ueberstunden>0?"+":"")+fmtStd(c.ueberstunden)}</div></div>
       <div class="c"><div class="l">Brutto</div><div class="n">${eur(c.rechnungsbetrag)}</div></div>
-      ${S.mwst>0?`<div class="c"><div class="l">USt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.ustRuecklage)}</div></div>`:""}
+      ${S.mwst>0?`<div class="c"><div class="l">USt-Rücklage${c.ustArt==="regel"?"":c.ustArt==="rc"?" (Reverse Charge)":" (7 %)"}</div><div class="n" style="color:var(--blue-text)">${eur(c.ustRuecklage)}</div></div>`:""}
       <div class="c"><div class="l">ESt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.steuerRuecklage)}</div></div>
       <div class="c full"><div class="l">Verfügbar</div><div class="n" style="color:var(--pos)">${eur(c.verfuegbar)}</div></div>`;
     {const zs=g("e_zzsum");if(zs)zs.textContent=c.arbeitZusatz>0?fmtStd(c.arbeitZusatz)+" h":"";}
@@ -835,13 +863,13 @@ function editEinsatz(id,pre){
   paintAlleDauern();
   g("e_satz").oninput=()=>{satzTouched=true;recalc();};
   g("e_ware").oninput=()=>{paintWare();recalc();};
-  paintChips();paintStim();paintStatus();paintModus();paintWare();paintNChips();recalc();
+  paintChips();paintStim();paintStatus();paintModus();paintUst();paintWare();paintNChips();recalc();
   g("cancelEins").onclick=closeSheet;
   if(id)g("delEins").onclick=()=>askConfirm("Diesen Einsatz wirklich löschen?",()=>{DB.einsaetze=DB.einsaetze.filter(x=>x.id!==id);persist();closeSheet();render();toast("Einsatz gelöscht");});
   g("saveEins").onclick=()=>{
     const data={kundeId:tmpKunde,datum:val("e_datum"),beginn:val("e_beginn"),ende:val("e_ende"),tagessatz:parseFloat(val("e_satz")),modus:tmpModus,stimmung:tmpStim,status:tmpStatus,abgerechnet:(tmpStatus==="bezahlt"),notiz:val("e_notiz"),
       fahrtHin:hmDur2h(val("e_fh")),fahrtZurueck:hmDur2h(val("e_fz")),vorbereitung:hmDur2h(val("e_vb")),nachbereitung:hmDur2h(val("e_nb")),
-      wareneinsatz:Math.max(0,parseFloat(val("e_ware"))||0),wareneinsatzBerechnet:tmpWareB};
+      wareneinsatz:Math.max(0,parseFloat(val("e_ware"))||0),wareneinsatzBerechnet:tmpWareB,ustArt:tmpUst};
     if(id)Object.assign(e,data);else DB.einsaetze.push({id:uid(),...data});
     persist();closeSheet();render();toast(id?"Gespeichert":"Einsatz erfasst");};
 }
@@ -979,6 +1007,24 @@ function renderStats(){
   /* Offene Forderungen (Beta) */
   const offN=cs.filter(x=>x.e.status!=="bezahlt").length,offB=cs.filter(x=>x.e.status!=="bezahlt").reduce((a,x)=>a+(x.c.rechnungsbetrag||0),0);
   h+=`<div class="kt" style="margin-bottom:14px"><div class="l">Offene Forderungen · brutto · ${offN} offen</div><div class="n">${eur(offB)}</div></div>`;
+  /* Umsatzsteuer nach Satz (V2.6): Netto, USt und Brutto je Satz plus Gesamt, wahlweise nur
+     die offenen Einsaetze. In ganzen Cent summiert, damit Netto + USt = Brutto auch in der
+     Summe auf den Cent aufgeht. Netto ist die Rechnung netto (inkl. weiterberechneter Ware). */
+  if(S.mwst>0){
+    const nurOffen=state.ustSicht==="offen";
+    const basis=cs.filter(x=>x.c.rechnungsbetrag!=null&&(!nurOffen||x.e.status!=="bezahlt"));
+    const block=xs=>{const br=xs.reduce((a,x)=>a+Math.round(x.c.rechnungsbetrag*100),0),u=xs.reduce((a,x)=>a+Math.round(x.c.ustRuecklage*100),0);
+      return{n:xs.length,netto:(br-u)/100,ust:u/100,brutto:br/100};};
+    const zeile=(titel,b,cls)=>`<div class="ustrow${cls||""}"><div class="uh">${titel}<span>${b.n} ${b.n===1?"Einsatz":"Einsätze"}</span></div>
+      <div><div class="ul">Netto</div><div class="uv">${eur2(b.netto)}</div></div>
+      <div><div class="ul">USt</div><div class="uv">${eur2(b.ust)}</div></div>
+      <div><div class="ul">Brutto</div><div class="uv">${eur2(b.brutto)}</div></div></div>`;
+    let uz="";
+    [["regel",Math.round(S.mwst*100)+" %"],["ermaessigt","7 % Nutzungsrechte"],["rc","0 % Reverse Charge"]]
+      .forEach(([a,t])=>{const xs=basis.filter(x=>x.c.ustArt===a);if(xs.length)uz+=zeile(t,block(xs));});
+    uz+=basis.length?zeile("Gesamt",block(basis)," tot"):`<p class="note">Keine offenen Einsätze in ${esc(state.year)}.</p>`;
+    h+=`<div class="budget"><div class="bh"><h4>Umsatzsteuer nach Satz</h4><div class="yeartog" id="ustSicht" style="margin:0"><button data-us="alle"${nurOffen?"":' class="on"'}>Alle</button><button data-us="offen"${nurOffen?' class="on"':""}>Offen</button></div></div><div class="ustlist">${uz}</div></div>`;
+  }
   /* Budget 50/30/20 */
   h+=`<div class="budget">
     <div class="bh"><h4>Budget ${Math.round(S.splitFix*100)} / ${Math.round(S.splitPersoenlich*100)} / ${Math.round(S.splitSparen*100)}</h4><span>vom Verfügbaren</span></div>
@@ -1009,6 +1055,7 @@ function renderStats(){
   const pmMonths=Object.keys(pm).sort().map(mk=>({mk,paid:pm[mk].paid,open:pm[mk].open}));
   h+=`<div class="secttl">Pro Monat</div><div class="chartwrap">${colChartSVG(pmMonths)}</div><div class="kd-legend"><span><i class="sw-pos"></i>bezahlt</span><span><i class="sw-info"></i>offen / gestellt</span></div>`;
   view.innerHTML=h;bindYear();
+  {const us=document.getElementById("ustSicht");if(us)us.querySelectorAll("button").forEach(b=>b.onclick=()=>{state.ustSicht=b.dataset.us;render();});}
   view.querySelectorAll("[data-kdetail]").forEach(el=>el.onclick=()=>{state.detail=el.dataset.kdetail;state.detailFrom="stats";state.detailYear=null;window.scrollTo(0,0);render();});
 }
 function bindYear(){const ysel=document.getElementById("yearSel");
@@ -1162,6 +1209,7 @@ const F_ALL=[
   {k:"hon",    t:"Honorar (netto)",  d:"Reines Arbeitshonorar ohne Wareneinsatz.",v:(e,c)=>c.honorar,num:1},
   {k:"wareB",  t:"Wareneinsatz (weiterberechnet)",d:"Material, das der Kunde mitzahlt.",v:(e,c)=>c.wareBerechnet?c.wareneinsatz:0,num:1},
   {k:"rgNetto",t:"Rechnung (netto)", d:"Honorar plus weiterberechneter Wareneinsatz.",v:(e,c)=>c.rechnungNetto,num:1},
+  {k:"ustSatz",t:"USt-Satz",         d:"Regelsatz, 7 % oder 0 % Reverse Charge.", v:(e,c)=>c.ustArt==="rc"?"0 % Reverse Charge":Math.round(c.ustSatz*100)+" %"},
   {k:"rgBrutto",t:"Rechnung (brutto)",d:"Netto plus Umsatzsteuer.",               v:(e,c)=>c.rechnungsbetrag,num:1},
   {k:"status", t:"Status",           d:"offen, gestellt oder bezahlt.",           v:(e,c)=>e.status||"offen"},
   /* ab hier privat */
@@ -1181,7 +1229,7 @@ function feldErlaubt(k,kundeGebunden){const f=F_BY[k];return !!f&&(!kundeGebunde
 /* Werk-Vorlagen. kundeGebunden erzwingt Kundenfilter UND sperrt die privaten Felder. */
 const VORLAGEN=[
   {id:"steuer",name:"Steuerberater",format:"csv",zeitraum:"jahr",kundeGebunden:false,
-   felder:["datum","kunde","beginn","ende","std","arb","tuer","modus","satz","hon","wareS","wareB","rgNetto","rgBrutto","ust","est","verf","status","notiz"]},
+   felder:["datum","kunde","beginn","ende","std","arb","tuer","modus","satz","hon","wareS","wareB","rgNetto","ustSatz","rgBrutto","ust","est","verf","status","notiz"]},
   {id:"nachweis",name:"Leistungsnachweis",format:"pdf",zeitraum:"monat",kundeGebunden:true,
    felder:["datum","notiz","beginn","ende","std"]},
   {id:"zettel",name:"Stundenzettel zum Unterschreiben",format:"pdf",zeitraum:"monat",kundeGebunden:true,

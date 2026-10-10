@@ -1,6 +1,6 @@
 /* Kontor Service Worker – Offline-Cache.
    Navigation: network-first (Updates kommen an), Assets: cache-first. */
-const CACHE = "kontor-v2.5.1";
+const CACHE = "kontor-v2.6.0";
 const ASSETS = [
   "./",
   "manifest.json",
