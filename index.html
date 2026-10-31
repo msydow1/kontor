@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.6 -->
+<!-- Kontor V2.6.1 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -18,13 +18,13 @@
    danger = destruktiv/Stress. --on-accent ist die Schrift auf Akzentflaechen. */
 :root{--bg:#F4F2ED;--surface:#FFFFFF;--surface-2:#EFECE4;--field:#E9E7E1;
 --line:rgba(21,23,26,.09);--line-strong:rgba(21,23,26,.14);
---text:rgba(21,23,26,.82);--text-strong:#15171A;--muted:rgba(21,23,26,.55);--silver:rgba(21,23,26,.50);--faint:rgba(21,23,26,.35);
+--text:rgba(21,23,26,.82);--text-strong:#15171A;--muted:rgba(21,23,26,.62);--silver:rgba(21,23,26,.62);--faint:rgba(21,23,26,.35);
 --accent:#15171A;--on-accent:#F4F2ED;--accent-soft:rgba(21,23,26,.05);--accent-line:rgba(21,23,26,.08);
 --pos:#54BE86;--pos-soft:rgba(84,190,134,.14);--pos-line:rgba(84,190,134,.45);
 --info:#6B87A2;--info-soft:rgba(107,135,162,.16);--info-line:rgba(107,135,162,.40);--danger:#E0705C;
---ink:#15171A;--ink-70:rgba(21,23,26,.70);--ink-55:rgba(21,23,26,.55);--ink-50:rgba(21,23,26,.50);--ink-42:rgba(21,23,26,.42);--ink-35:rgba(21,23,26,.35);
+--ink:#15171A;--ink-70:rgba(21,23,26,.70);--ink-55:rgba(21,23,26,.62);--ink-50:rgba(21,23,26,.62);--ink-42:rgba(21,23,26,.42);--ink-35:rgba(21,23,26,.35);
 --hairline:rgba(21,23,26,.09);--hairline-soft:rgba(21,23,26,.07);--border:rgba(21,23,26,.08);--fill-soft:rgba(21,23,26,.05);
---green-text:#3F8F63;--green-bg:rgba(84,190,134,.14);--blue-text:#4F6C88;--blue-bg:rgba(107,135,162,.16)}
+--green-text:#367B55;--green-bg:rgba(84,190,134,.14);--blue-text:#4F6C88;--blue-bg:rgba(107,135,162,.16)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 /* clip statt hidden: schneidet genauso ab, macht den Body aber NICHT zum Scroll-Container.
    Mit hidden verliert jedes position:sticky darin seinen Bezug und klebt nicht (Safari 16+). */
@@ -36,7 +36,7 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .bar{position:sticky;top:0;z-index:30;background:rgb(21,23,26);padding:calc(env(safe-area-inset-top) + 16px) 18px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
 .bar .logo{width:30px;height:30px;border-radius:9px;flex:none;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--on-accent);font-size:16px;letter-spacing:-.5px}
 .bar h1{font-weight:700;font-size:18px;margin:0;letter-spacing:-.2px;flex:1;color:var(--text-strong)}
-.bar h1 small{display:block;font-weight:500;font-size:10px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase;margin-top:3px}
+.bar h1 small{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase;margin-top:3px}
 .iconbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
 .iconbtn:active{background:var(--surface)}
 /* Tab-Leiste unten: daumenerreichbar auf grossen iPhones. Auf max-560 zentriert wie der Inhalt. */
@@ -49,7 +49,7 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
   border-top:1px solid var(--line);
   padding:8px 6px calc(env(safe-area-inset-bottom) + 6px)}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;
-  background:none;color:var(--muted);font-family:inherit;font-size:10px;font-weight:600;
+  background:none;color:var(--muted);font-family:inherit;font-size:11px;font-weight:600;
   letter-spacing:.1px;padding:4px 0;-webkit-tap-highlight-color:transparent}
 .tabbar button.on{color:var(--text-strong)}
 .tabbar svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -66,7 +66,7 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .btnrow{display:flex;gap:10px}.btnrow .btn{margin-bottom:10px}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:14px 2px;background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;margin-bottom:0}
 .srow .nm{font-size:14px;font-weight:600;margin:0 10px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-strong)}
-.srow .nm small{display:block;color:var(--faint);font-size:11px;font-weight:400}
+.srow .nm small{display:block;color:var(--muted);font-size:11px;font-weight:400}
 .srow .v{font-weight:700;font-size:15px;flex:none;font-variant-numeric:tabular-nums}
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;backdrop-filter:blur(3px)}
 .scrim.on{display:block;animation:fadein .25s ease}
@@ -120,10 +120,10 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
 .toggles.wrap{flex-wrap:wrap}
 .toggles.wrap button{flex:0 1 auto;min-width:0;padding:9px 12px}
 .calc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:4px 0 12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px}
-.calc .c .l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.calc .c .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 .calc .c .n{font-weight:700;font-size:18px;margin-top:3px;font-variant-numeric:tabular-nums}
 .calc .c.full{grid-column:1/-1}
-.note{font-size:12px;color:var(--faint);line-height:1.5;margin:8px 0 0}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin:8px 0 0}
 .note b{color:var(--muted);font-weight:600}
 .remind{border:1px solid var(--info-line);background:var(--info-soft);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text);line-height:1.5;margin:0 0 14px}
 details.exp{margin-top:10px}
@@ -137,7 +137,7 @@ details.exp[open] summary::before{content:"–"}
 .hidden{display:none!important}
 /* Fuss traegt die Abstandsflaeche zur festen Tab-Leiste, damit die Version sichtbar bleibt */
 .foot{text-align:center;padding:34px 20px calc(env(safe-area-inset-bottom) + 80px)}
-.foot-v{font-size:11.5px;font-weight:600;color:var(--faint);letter-spacing:.2px}
+.foot-v{font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.2px}
 .foot-v b{color:var(--accent);font-weight:700}
 .cscrim{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:120;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
 .cscrim.on{display:flex;animation:fadein .25s ease}
@@ -150,8 +150,15 @@ details.exp[open] summary::before{content:"–"}
 .cdlg .cmsg{margin:0 0 18px;font-size:15px;line-height:1.5;color:var(--text)}
 .crow{display:flex;gap:10px}.crow .btn{flex:1}
 /* Dunkel-Modus: System-Standard (auto) UND manueller data-theme-Override. Beide Bloecke identisch halten. */
-@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15171A;--surface:#1E2228;--surface-2:#262B31;--field:#34393F;--line:rgba(240,239,236,.10);--line-strong:rgba(240,239,236,.14);--text:rgba(240,239,236,.82);--text-strong:#F0EFEC;--muted:rgba(240,239,236,.55);--silver:rgba(240,239,236,.50);--faint:rgba(240,239,236,.35);--accent:#F0EFEC;--on-accent:#15171A;--accent-soft:rgba(240,239,236,.06);--accent-line:rgba(240,239,236,.10);--pos:#54BE86;--pos-soft:rgba(84,190,134,.16);--pos-line:rgba(84,190,134,.45);--info:#6B87A2;--info-soft:rgba(107,135,162,.18);--info-line:rgba(107,135,162,.40);--danger:#E0705C;--ink:#F0EFEC;--ink-70:rgba(240,239,236,.70);--ink-55:rgba(240,239,236,.55);--ink-50:rgba(240,239,236,.50);--ink-42:rgba(240,239,236,.42);--ink-35:rgba(240,239,236,.35);--hairline:rgba(240,239,236,.10);--hairline-soft:rgba(240,239,236,.08);--border:rgba(240,239,236,.10);--fill-soft:rgba(240,239,236,.06);--green-text:#54BE86;--green-bg:rgba(84,190,134,.16);--blue-text:#89A4BE;--blue-bg:rgba(107,135,162,.18)}}
-:root[data-theme="dark"]{--bg:#15171A;--surface:#1E2228;--surface-2:#262B31;--field:#34393F;--line:rgba(240,239,236,.10);--line-strong:rgba(240,239,236,.14);--text:rgba(240,239,236,.82);--text-strong:#F0EFEC;--muted:rgba(240,239,236,.55);--silver:rgba(240,239,236,.50);--faint:rgba(240,239,236,.35);--accent:#F0EFEC;--on-accent:#15171A;--accent-soft:rgba(240,239,236,.06);--accent-line:rgba(240,239,236,.10);--pos:#54BE86;--pos-soft:rgba(84,190,134,.16);--pos-line:rgba(84,190,134,.45);--info:#6B87A2;--info-soft:rgba(107,135,162,.18);--info-line:rgba(107,135,162,.40);--danger:#E0705C;--ink:#F0EFEC;--ink-70:rgba(240,239,236,.70);--ink-55:rgba(240,239,236,.55);--ink-50:rgba(240,239,236,.50);--ink-42:rgba(240,239,236,.42);--ink-35:rgba(240,239,236,.35);--hairline:rgba(240,239,236,.10);--hairline-soft:rgba(240,239,236,.08);--border:rgba(240,239,236,.10);--fill-soft:rgba(240,239,236,.06);--green-text:#54BE86;--green-bg:rgba(84,190,134,.16);--blue-text:#89A4BE;--blue-bg:rgba(107,135,162,.18)}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15171A;--surface:#1E2228;--surface-2:#262B31;--field:#34393F;--line:rgba(240,239,236,.10);--line-strong:rgba(240,239,236,.14);--text:rgba(240,239,236,.82);--text-strong:#F0EFEC;--muted:rgba(240,239,236,.60);--silver:rgba(240,239,236,.60);--faint:rgba(240,239,236,.35);--accent:#F0EFEC;--on-accent:#15171A;--accent-soft:rgba(240,239,236,.06);--accent-line:rgba(240,239,236,.10);--pos:#54BE86;--pos-soft:rgba(84,190,134,.16);--pos-line:rgba(84,190,134,.45);--info:#6B87A2;--info-soft:rgba(107,135,162,.18);--info-line:rgba(107,135,162,.40);--danger:#E0705C;--ink:#F0EFEC;--ink-70:rgba(240,239,236,.70);--ink-55:rgba(240,239,236,.60);--ink-50:rgba(240,239,236,.60);--ink-42:rgba(240,239,236,.42);--ink-35:rgba(240,239,236,.35);--hairline:rgba(240,239,236,.10);--hairline-soft:rgba(240,239,236,.08);--border:rgba(240,239,236,.10);--fill-soft:rgba(240,239,236,.06);--green-text:#54BE86;--green-bg:rgba(84,190,134,.16);--blue-text:#89A4BE;--blue-bg:rgba(107,135,162,.18)}}
+:root[data-theme="dark"]{--bg:#15171A;--surface:#1E2228;--surface-2:#262B31;--field:#34393F;--line:rgba(240,239,236,.10);--line-strong:rgba(240,239,236,.14);--text:rgba(240,239,236,.82);--text-strong:#F0EFEC;--muted:rgba(240,239,236,.60);--silver:rgba(240,239,236,.60);--faint:rgba(240,239,236,.35);--accent:#F0EFEC;--on-accent:#15171A;--accent-soft:rgba(240,239,236,.06);--accent-line:rgba(240,239,236,.10);--pos:#54BE86;--pos-soft:rgba(84,190,134,.16);--pos-line:rgba(84,190,134,.45);--info:#6B87A2;--info-soft:rgba(107,135,162,.18);--info-line:rgba(107,135,162,.40);--danger:#E0705C;--ink:#F0EFEC;--ink-70:rgba(240,239,236,.70);--ink-55:rgba(240,239,236,.60);--ink-50:rgba(240,239,236,.60);--ink-42:rgba(240,239,236,.42);--ink-35:rgba(240,239,236,.35);--hairline:rgba(240,239,236,.10);--hairline-soft:rgba(240,239,236,.08);--border:rgba(240,239,236,.10);--fill-soft:rgba(240,239,236,.06);--green-text:#54BE86;--green-bg:rgba(84,190,134,.16);--blue-text:#89A4BE;--blue-bg:rgba(107,135,162,.18)}
+/* Text-Grau (V2.6.1, HIG-Audit 01.11.2026): --muted/--silver/--ink-55/--ink-50 sind
+   TEXTFARBEN und stehen hell auf 62 %, dunkel auf 60 % (mind. 4,5:1 auch auf Feld-Grau).
+   Die Zahlen im Namen stammen aus dem Design-Handoff. --faint (35 %) NIE fuer Text.
+   "Kontrast erhoehen" in iOS (prefers-contrast:more) bekommt eigene, staerkere Werte. */
+@media (prefers-contrast:more){:root{--text:rgba(21,23,26,.94);--muted:rgba(21,23,26,.78);--silver:rgba(21,23,26,.78);--faint:rgba(21,23,26,.55);--ink-70:rgba(21,23,26,.85);--ink-55:rgba(21,23,26,.78);--ink-50:rgba(21,23,26,.78);--line:rgba(21,23,26,.24);--line-strong:rgba(21,23,26,.30);--hairline:rgba(21,23,26,.24);--hairline-soft:rgba(21,23,26,.20);--border:rgba(21,23,26,.24);--fill-soft:rgba(21,23,26,.10);--green-text:#285E41;--blue-text:#3A536D}}
+@media (prefers-contrast:more) and (prefers-color-scheme:dark){:root:not([data-theme]){--text:rgba(240,239,236,.94);--muted:rgba(240,239,236,.76);--silver:rgba(240,239,236,.76);--faint:rgba(240,239,236,.55);--ink-70:rgba(240,239,236,.85);--ink-55:rgba(240,239,236,.76);--ink-50:rgba(240,239,236,.76);--line:rgba(240,239,236,.26);--line-strong:rgba(240,239,236,.32);--hairline:rgba(240,239,236,.26);--hairline-soft:rgba(240,239,236,.22);--border:rgba(240,239,236,.26);--fill-soft:rgba(240,239,236,.12);--green-text:#7FD3A6;--blue-text:#AFC4D8}}
+@media (prefers-contrast:more){:root[data-theme="dark"]{--text:rgba(240,239,236,.94);--muted:rgba(240,239,236,.76);--silver:rgba(240,239,236,.76);--faint:rgba(240,239,236,.55);--ink-70:rgba(240,239,236,.85);--ink-55:rgba(240,239,236,.76);--ink-50:rgba(240,239,236,.76);--line:rgba(240,239,236,.26);--line-strong:rgba(240,239,236,.32);--hairline:rgba(240,239,236,.26);--hairline-soft:rgba(240,239,236,.22);--border:rgba(240,239,236,.26);--fill-soft:rgba(240,239,236,.12);--green-text:#7FD3A6;--blue-text:#AFC4D8}}
 /* Anleitung */
 .help .hsec{border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-bottom:14px;background:var(--surface)}
 .help h4{margin:0 0 12px;font-size:15.5px;font-weight:700;color:var(--text-strong);letter-spacing:-.2px}
@@ -169,7 +176,7 @@ details.exp[open] summary::before{content:"–"}
 .again{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--accent);font-size:15px;line-height:1;flex:none;display:flex;align-items:center;justify-content:center;position:relative}
 .again::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 .again:active{background:var(--accent-soft)}
-.openchip,.paidchip{font-size:10.5px;padding:3px 9px;border-radius:7px;font-weight:600;flex:none;font-family:inherit;line-height:1.3;cursor:pointer}
+.openchip,.paidchip{font-size:11px;padding:3px 9px;border-radius:7px;font-weight:600;flex:none;font-family:inherit;line-height:1.3;cursor:pointer}
 .openchip{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
 .paidchip{background:var(--pos-soft);color:var(--pos);border:1px solid var(--pos-line)}
 .sublab{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500}
@@ -181,7 +188,7 @@ details.exp[open] summary::before{content:"–"}
 .onboard .obody{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px}
 .onboard h2{font-weight:600;font-size:26px;letter-spacing:-.3px;margin:0;color:var(--text-strong)}
 .onboard p{font-size:15px;line-height:1.65;color:var(--text);margin:0}
-.onboard .onote{font-size:12.5px;color:var(--faint);line-height:1.55}
+.onboard .onote{font-size:12.5px;color:var(--muted);line-height:1.55}
 .onboard .odots{display:flex;gap:7px;justify-content:center;margin:18px 0 6px}
 .onboard .odots span{width:7px;height:7px;border-radius:50%;background:var(--line-strong)}
 .onboard .odots span.on{background:var(--accent)}
@@ -206,12 +213,12 @@ details.exp[open] summary::before{content:"–"}
 .bart-fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
 .bart-fill.pos{background:var(--pos)}.bart-fill.info{background:var(--info)}
 .bart-ziel{position:absolute;top:-4px;bottom:-4px;width:1.5px;background:var(--accent);opacity:.55}
-.kd-zlab{font-size:10px;color:var(--faint);text-align:right;margin-bottom:14px}
+.kd-zlab{font-size:11px;color:var(--muted);text-align:right;margin-bottom:14px}
 .kd-mood{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 15px;box-shadow:0 1px 2px rgba(21,23,26,.04)}
 .kd-mood .kd-dot{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--silver);font-variant-numeric:tabular-nums}
 .kd-mtrend{margin-left:auto;font-size:11px;color:var(--muted)}
 .chartwrap{margin-top:2px}
-.kd-legend{display:flex;gap:14px;font-size:10.5px;color:var(--muted);margin-top:8px}
+.kd-legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px}
 .kd-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px}
 .sw-pos{background:var(--pos)}.sw-info{background:var(--info)}
 /* Beta 0.6: Blur-Modus */
@@ -236,7 +243,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .split .g{background:var(--pos)}.split .b{background:var(--info)}
 .heroleg{display:flex;justify-content:space-between;margin-top:10px;font-size:11.5px;color:var(--muted)}
 .heroleg .dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
-.badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.02em;padding:3px 9px;border-radius:99px}
+.badge{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.02em;padding:3px 9px;border-radius:99px}
 .badge.neutral{background:var(--fill-soft);color:var(--ink-55)}
 .badge.blue{background:var(--blue-bg);color:var(--blue-text)}
 .badge.green{background:var(--green-bg);color:var(--green-text)}
@@ -254,9 +261,11 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .erow:active{background:var(--fill-soft)}
 .dchip{width:42px;flex:none;background:var(--fill-soft);border-radius:9px;text-align:center;padding:6px 0}
 .dchip .d{font-size:15px;font-weight:600;line-height:1;color:var(--text-strong)}
-.dchip .mo{font-size:9.5px;font-weight:500;color:var(--ink-50);letter-spacing:.05em}
+.dchip .mo{font-size:11px;font-weight:500;color:var(--ink-50);letter-spacing:.05em}
 .emid{flex:1;min-width:0}
-.emid .t{font-size:13.5px;font-weight:500;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emid .t{font-size:13.5px;font-weight:500;color:var(--text-strong);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+/* Unterzeile bricht nur an den Trennpunkten um: "62,50 €/h" bleibt immer zusammen. */
+.nw{white-space:nowrap}
 .emid .sub{font-size:11.5px;color:var(--ink-50);margin-top:2px}
 .emid .badge,.emid .cyc{margin-top:6px;font-family:inherit;border:none}
 .cyc{cursor:pointer}
@@ -280,7 +289,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .kt .l{font-size:11px;color:var(--ink-50)}
 .kt .n{font-size:20px;font-weight:500;color:var(--text-strong);font-variant-numeric:tabular-nums}
 .kt .n.blue{color:var(--blue-text)}
-.kt .sub{font-size:10.5px;color:var(--ink-55)}
+.kt .sub{font-size:11px;color:var(--ink-55)}
 .budget{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(21,23,26,.04);padding:16px;margin-bottom:14px}
 .budget .bh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
 .budget .bh h4{margin:0;font-size:13px;font-weight:600;color:var(--text-strong)}
@@ -293,7 +302,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .qcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(21,23,26,.04);padding:15px;margin-bottom:14px}
 .qcard .qh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .qcard .qh h3{margin:0;font-size:13px;font-weight:600;color:var(--text-strong)}
-.qcard .qh span{font-size:10.5px;color:var(--ink-50)}
+.qcard .qh span{font-size:11px;color:var(--ink-50)}
 .qhint{font-size:11.5px;color:var(--ink-55);line-height:1.5;margin-top:10px;text-wrap:pretty}
 .vcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(21,23,26,.04);padding:6px 15px 12px;margin-bottom:14px}
 .vrow{padding:12px 0 6px}.vrow+.vrow{border-top:1px solid var(--hairline-soft)}
@@ -311,7 +320,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .ustlist>.ustrow:first-child{border-top:none;padding-top:0}
 .ustrow .uh{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:600;color:var(--text-strong)}
 .ustrow .uh span{font-size:11px;font-weight:400;color:var(--ink-55)}
-.ustrow .ul{font-size:10.5px;color:var(--ink-55)}
+.ustrow .ul{font-size:11px;color:var(--ink-55)}
 .ustrow .uv{font-size:13px;font-weight:500;color:var(--text-strong);font-variant-numeric:tabular-nums}
 .ustrow.tot{border-top:1px solid var(--border)}
 .ustrow.tot .uv{font-weight:600}
@@ -322,7 +331,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
 .kcard .ksub{font-size:11.5px;color:var(--ink-50);margin-top:3px}
 .kcard .kpi{display:flex;border-top:1px solid var(--hairline);padding-top:14px}
 .kcard .kpi>div{flex:1;display:flex;flex-direction:column;gap:3px}
-.kcard .kpi .kl{font-size:10.5px;color:var(--ink-50)}
+.kcard .kpi .kl{font-size:11px;color:var(--ink-50)}
 .kcard .kpi .kv{font-size:15px;font-weight:500;color:var(--text-strong);font-variant-numeric:tabular-nums}
 .kcard .kbar{height:4px;border-radius:99px;background:var(--hairline-soft);overflow:hidden}
 .kcard .kbar i{display:block;height:100%;border-radius:99px}
@@ -376,7 +385,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.6</b></div>
+    <div class="foot-v">Kontor <b>V2.6.1</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -479,10 +488,10 @@ function quadrantSVG(rows,avg){
     <rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="url(#qgrad)"/>
     <line x1="${W/2}" y1="8" x2="${W/2}" y2="${H-8}" stroke="var(--hairline)" stroke-width="1"/>
     <line x1="8" y1="${H/2}" x2="${W-8}" y2="${H/2}" stroke="var(--hairline)" stroke-width="1"/>
-    <text x="12" y="20" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em">AUSBAUEN</text>
-    <text x="${W-12}" y="20" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em" text-anchor="end">HALTEN</text>
-    <text x="12" y="${H-12}" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em">PRÜFEN</text>
-    <text x="${W-12}" y="${H-12}" fill="var(--ink-55)" font-size="9.5" font-weight="600" letter-spacing="0.1em" text-anchor="end">NACHVERHANDELN</text>
+    <text x="12" y="20" fill="var(--ink-55)" font-size="11" font-weight="600" letter-spacing="0.08em">AUSBAUEN</text>
+    <text x="${W-12}" y="20" fill="var(--ink-55)" font-size="11" font-weight="600" letter-spacing="0.08em" text-anchor="end">HALTEN</text>
+    <text x="12" y="${H-12}" fill="var(--ink-55)" font-size="11" font-weight="600" letter-spacing="0.08em">PRÜFEN</text>
+    <text x="${W-12}" y="${H-12}" fill="var(--ink-55)" font-size="11" font-weight="600" letter-spacing="0.08em" text-anchor="end">NACHVERHANDELN</text>
     ${dots}</svg>`;
 }
 function fmtElapsed(ms){let s=Math.max(0,Math.floor(ms/1000));const h=Math.floor(s/3600);s-=h*3600;const m=Math.floor(s/60);s-=m*60;return h+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");}
@@ -593,16 +602,16 @@ function colChartSVG(months){
   const bw=Math.min(40,(plotW-10-gap*(n-1))/n);
   const x0=padL+(plotW-(bw*n+gap*(n-1)))/2,step=bw+gap;
   let s=`<line x1="${padL}" y1="${base}" x2="${W-6}" y2="${base}" stroke="var(--line-strong)" stroke-width="1"/>`
-    +`<text x="${padL-5}" y="${base+3}" fill="var(--faint)" font-size="8.5" text-anchor="end">0</text>`;
+    +`<text x="${padL-5}" y="${base+3}" fill="var(--muted)" font-size="11" text-anchor="end">0</text>`;
   const stepV=niceNum(scale/4);
   if(stepV>0)for(let v=stepV,i=0;v<=scale&&i<8;v+=stepV,i++){const gy=base-(v/scale)*plot;
     s+=`<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W-6}" y2="${gy.toFixed(1)}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 4"/>`
-      +`<text class="eur" x="${padL-5}" y="${(gy+3).toFixed(1)}" fill="var(--faint)" font-size="8.5" text-anchor="end">${esc(fmtKurz(v))}</text>`;}
+      +`<text class="eur" x="${padL-5}" y="${(gy+3).toFixed(1)}" fill="var(--muted)" font-size="11" text-anchor="end">${esc(fmtKurz(v))}</text>`;}
   months.forEach((m,i)=>{const x=x0+i*step;const hPaid=m.paid/scale*plot,hOpen=m.open/scale*plot;
     const yPaid=base-hPaid,yOpen=yPaid-hOpen;const lab=MN[+m.mk.slice(5,7)-1].slice(0,3);
     if(hPaid>0.5)s+=`<rect x="${x.toFixed(1)}" y="${yPaid.toFixed(1)}" width="${bw.toFixed(1)}" height="${hPaid.toFixed(1)}" rx="2.5" fill="var(--pos)"/>`;
     if(hOpen>0.5)s+=`<rect x="${x.toFixed(1)}" y="${yOpen.toFixed(1)}" width="${bw.toFixed(1)}" height="${hOpen.toFixed(1)}" rx="2.5" fill="var(--info)"/>`;
-    s+=`<text x="${(x+bw/2).toFixed(1)}" y="${base+15}" fill="var(--muted)" font-size="9.5" text-anchor="middle">${esc(lab)}</text>`;});
+    s+=`<text x="${(x+bw/2).toFixed(1)}" y="${base+15}" fill="var(--muted)" font-size="11" text-anchor="middle">${esc(lab)}</text>`;});
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monatliche Umsatzsäulen, grün bezahlt, blau offen"><title>Umsatz pro Monat</title><desc>Gestapelte Säulen je Monat: grün bezahlt, blau offen.</desc>${s}</svg>`;
 }
 
@@ -670,7 +679,7 @@ function renderEinsaetze(){
   else{const byMon={};
     list.forEach(e=>{const mk=(e.datum||"").slice(0,7);(byMon[mk]??=[]).push(e);});
     Object.keys(byMon).sort().reverse().forEach(mk=>{const m=mon[mk];
-      h+=`<div class="mgroup"><span class="m">${esc(fmtMonth(mk))}</span><span class="s">${m.n} Einsätze · ${eur(m.hon)}</span></div><div class="elist">`;
+      h+=`<div class="mgroup"><span class="m">${esc(fmtMonth(mk))}</span><span class="s">${m.n} ${m.n===1?"Einsatz":"Einsätze"} · ${eur(m.hon)}</span></div><div class="elist">`;
       byMon[mk].forEach(e=>{const c=calcEinsatz(e,S);const d=new Date((e.datum||"")+"T00:00");
         const dd=isNaN(d)?"–":String(d.getDate()).padStart(2,"0");const mm=isNaN(d)?"":MN[d.getMonth()].slice(0,3).toUpperCase();
         const chip=e.status==="bezahlt"?`<button type="button" class="badge green cyc" data-cyc="${e.id}">✓ bezahlt</button>`:e.status==="gestellt"?`<button type="button" class="badge blue cyc" data-cyc="${e.id}">gestellt</button>`:`<button type="button" class="badge neutral cyc" data-cyc="${e.id}">offen</button>`;
@@ -678,7 +687,7 @@ function renderEinsaetze(){
         /* Nur Abweichungen vom Regelsatz markieren, sonst traegt jede Zeile ein "19 %". */
         const ustMark=(S.mwst>0&&c.ustArt!=="regel")?`<span class="badge neutral ustmark">${c.ustArt==="rc"?"Reverse Charge":"7 % USt"}</span>`:"";
         h+=`<div class="erow" data-e="${e.id}"><div class="dchip"><div class="d">${dd}</div><div class="mo">${esc(mm)}</div></div>
-          <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub">${esc(e.beginn||"–")}–${esc(e.ende||"–")} · ${fmtStd(stdOf(c))} h · ${fmtSatzH(satzOf(c))}</div>${chip}${ustMark}</div>
+          <div class="emid"><div class="t">${esc(kName(e.kundeId))}${notiz}</div><div class="sub"><span class="nw">${esc(e.beginn||"–")}–${esc(e.ende||"–")}</span> · <span class="nw">${fmtStd(stdOf(c))} h</span> · <span class="nw">${fmtSatzH(satzOf(c))}</span></div>${chip}${ustMark}</div>
           <div class="eamt"><div class="b">${eur2(c.rechnungsbetrag)}</div><div class="f">${eur(c.verfuegbar)} frei</div><div class="r">${eur(c.ustRuecklage==null?null:c.ustRuecklage+c.steuerRuecklage)} Rücklage</div><button class="again" data-again="${e.id}" aria-label="Als neuen Einsatz anlegen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></button></div></div>`;});
       h+=`</div>`;});}
   h+=`<button class="fab" id="addEins">＋ Einsatz</button>`;
@@ -834,7 +843,7 @@ function editEinsatz(id,pre){
       <div class="c"><div class="l">ESt-Rücklage</div><div class="n" style="color:var(--blue-text)">${eur(c.steuerRuecklage)}</div></div>
       <div class="c full"><div class="l">Verfügbar</div><div class="n" style="color:var(--pos)">${eur(c.verfuegbar)}</div></div>`;
     {const zs=g("e_zzsum");if(zs)zs.textContent=c.arbeitZusatz>0?fmtStd(c.arbeitZusatz)+" h":"";}
-    g("e_warn").innerHTML=(c.stundenGesamt!=null&&c.stundenGesamt>=16)?'<p class="note" style="color:var(--accent)">⚠ Über 16 Std inkl. Fahrt – bitte Zeiten prüfen (Speichern trotzdem möglich).</p>':"";
+    g("e_warn").innerHTML=(c.stundenGesamt!=null&&c.stundenGesamt>=16)?'<p class="note" style="color:var(--accent)">⚠ Über 16 Std inkl. Fahrt. Bitte Zeiten prüfen (Speichern trotzdem möglich).</p>':"";
     const satz=parseFloat(val("e_satz"));
     g("saveEins").disabled=!(tmpKunde&&val("e_datum")&&c.stunden!=null&&c.stunden>0&&satz>0);
   }
@@ -898,7 +907,7 @@ function renderKunden(){
     const good=st.satz!=null&&st.satz>=jahresAvg;
     const dev=(st.satz!=null&&jahresAvg)?Math.round((st.satz/jahresAvg-1)*100):null;
     const ant=totHon?Math.round(st.hon/totHon*100):0;
-    const note=dev==null?"":dev>=0?`Liegt ${dev} % über deinem Ø-Stundensatz.`:`Liegt ${Math.abs(dev)} % unter deinem Ø-Stundensatz – Tagessatz nachverhandeln.`;
+    const note=dev==null?"":dev>=0?`Liegt ${dev} % über deinem Ø-Stundensatz.`:`Liegt ${Math.abs(dev)} % unter deinem Ø-Stundensatz. Tagessatz nachverhandeln.`;
     h+=`<div class="kcard" data-k="${k.id}">
       <div class="khead"><div><div class="kname">${esc(k.name)}</div><div class="ksub">${esc(subLine(k,st.n))}</div></div><span class="badge ${good?"green":"blue"} wide">${good?"HALTEN":"PRÜFEN"}</span></div>
       <div class="kpi"><div><span class="kl">Honorar</span><span class="kv">${eur(st.hon)}</span></div><div><span class="kl">Ø Satz${zbSuffix()}</span><span class="kv">${st.satz!=null?esc(fmtSatzBare(st.satz))+" €":"–"}</span></div><div><span class="kl">Anteil</span><span class="kv">${ant} %</span></div></div>
@@ -1041,7 +1050,7 @@ function renderStats(){
     const byHon=rows.slice().sort((a,b)=>(b.hon||0)-(a.hon||0));
     const worst=rows.slice().filter(r=>r.satz!=null).sort((a,b)=>(a.satz||0)-(b.satz||0))[0];
     const top=byHon[0];const topPct=hon?Math.round(top.hon/hon*100):0;
-    const tip=(worst?`${esc(kName(worst.kid))} bringt Zeit für ${esc(fmtSatzH(worst.satz))} – nachverhandeln. `:"")+(top?`${esc(kName(top.kid))} trägt ${topPct} % des Honorars.`:"");
+    const tip=(worst?`${esc(kName(worst.kid))} bringt nur ${esc(fmtSatzH(worst.satz))}: nachverhandeln. `:"")+(top?`${esc(kName(top.kid))} trägt ${topPct} % des Honorars.`:"");
     const mehr=rows.length>6?` Beschriftet sind die 6 größten Kunden, die übrigen ${rows.length-6} sind als blasse Punkte eingezeichnet.`:"";
     h+=`<div class="qcard"><div class="qh"><h3>Kunden-Quadrant</h3><span>Umsatz × Stundensatz${zbSuffix()}</span></div>${quadrantSVG(rows,avg)}<p class="qhint">${tip}${mehr}</p></div>`;
   }
@@ -1145,7 +1154,7 @@ function openParams(){
         <div><span class="sublab">Persönliches</span><input type="number" id="p_per" min="0" max="100" value="${Math.round(S.splitPersoenlich*100)}"></div>
       </div>
       <div style="margin-top:12px"><span class="sublab">Sparen/Investieren</span><input type="number" id="p_spa" min="0" max="100" value="${Math.round(S.splitSparen*100)}"></div>
-      <p class="note">So teilst du auf, was nach den Rücklagen übrig bleibt – Anteile frei wählbar, zusammen 100 %.</p></div>
+      <p class="note">So teilst du auf, was nach den Rücklagen übrig bleibt. Anteile frei wählbar, zusammen 100 %.</p></div>
     <button class="btn" id="saveP">Speichern</button><button class="btn ghost" id="cancelP" style="margin-bottom:0">Abbrechen</button>`);
   document.getElementById("cancelP").onclick=closeSheet;
   document.getElementById("saveP").onclick=()=>{
@@ -1377,27 +1386,27 @@ function kunde_(id){return DB.kunden.find(k=>k.id===id);}
 function openHelp(){
   openSheet(`<h3>Anleitung</h3><div class="help">
     <div class="hsec"><h4>📋 So ist Kontor aufgebaut</h4>
-      <p>Du erfasst <b>Einsätze</b> für deine <b>Kunden</b> – Datum, Beginn, Ende, Tagessatz. Kontor rechnet daraus Stunden, Stundensatz und dein Geld.</p>
-      <p>Menüs wie dieses schiebst du zum Schließen <b>nach unten</b> – oder du tippst „Abbrechen".</p>
+      <p>Du erfasst <b>Einsätze</b> für deine <b>Kunden</b>: Datum, Beginn, Ende, Tagessatz. Kontor rechnet daraus Stunden, Stundensatz und dein Geld.</p>
+      <p>Menüs wie dieses schiebst du zum Schließen <b>nach unten</b>, oder du tippst „Abbrechen".</p>
       <p class="tip">Alle Daten bleiben nur auf diesem Gerät. Kein Server, kein Konto. Kontor rechnet für deine <b>selbstständige</b> Arbeit. Angestellten-Tätigkeit gehört nicht hierher, die läuft über die Lohnabrechnung.</p></div>
-    <div class="hsec"><h4>⏱ Einsatz erfassen – 3 Tipps bis fertig</h4>
+    <div class="hsec"><h4>⏱ Einsatz erfassen: 3 Tipps bis fertig</h4>
       <p>Kunden-Chip antippen (Tagessatz füllt sich selbst), Beginn und Ende wählen, speichern. Neue Kunden legst du mit <b>„＋ Neu"</b> direkt im Formular an.</p>
-      <p><b>↻ Nochmal</b> an einem Einsatz übernimmt Kunde, Zeiten und Satz – nur das Datum steht auf heute. Endet ein Dreh nach Mitternacht (22:00–06:00), rechnet Kontor automatisch über 0:00 hinweg.</p>
-      <p>Die <b>Stimmung</b> (🟢 · 😐 · 🔴) ist optional – am Jahresende siehst du pro Kunde, wie sich die Zusammenarbeit angefühlt hat.</p></div>
+      <p><b>↻ Nochmal</b> an einem Einsatz übernimmt Kunde, Zeiten und Satz, nur das Datum steht auf heute. Endet ein Dreh nach Mitternacht (22:00–06:00), rechnet Kontor automatisch über 0:00 hinweg.</p>
+      <p>Die <b>Stimmung</b> (🟢 · 😐 · 🔴) ist optional. Am Jahresende siehst du pro Kunde, wie sich die Zusammenarbeit angefühlt hat.</p></div>
     <div class="hsec"><h4>💶 Wohin dein Geld fließt</h4>
       <p>Von deinem Honorar (netto) gehen zwei Rücklagen ab, die dir nie gehört haben:</p>
       <p><b>USt-Rücklage</b> · steht auf deiner Rechnung, gehört dem Finanzamt.<br><b>Steuer-Rücklage</b> (aufs Netto) · für Einkommensteuer und Abgaben.</p>
-      <p>Was übrig bleibt, ist dein <b>Verfügbar</b> – darauf laufen die Splits (Fixkosten · Persönliches · Sparen).</p>
+      <p>Was übrig bleibt, ist dein <b>Verfügbar</b>. Darauf laufen die Splits (Fixkosten · Persönliches · Sparen).</p>
       <p class="tip">Kleinunternehmer nach §19 UStG? Dann steht dein USt-Satz auf 0 % (Einrichtung oder Einstellungen) und die USt-Rücklage entfällt komplett.</p>
-      <p class="tip">Die Sätze stellst du in den Einstellungen ein (Regler für USt und Einkommensteuer-Rücklage). Den richtigen Steuersatz kennt dein Steuerberater – Kontor gibt keine Steuerberatung.</p></div>
+      <p class="tip">Die Sätze stellst du in den Einstellungen ein (Regler für USt und Einkommensteuer-Rücklage). Den richtigen Steuersatz kennt dein Steuerberater. Kontor gibt keine Steuerberatung.</p></div>
     <div class="hsec"><h4>📊 Statistik lesen</h4>
-      <p>Die Kundenliste sortiert nach <b>Ø-Stundensatz</b>: grün = über deinem Ziel, blau = darunter. Daneben stehen immer Einsätze, Stunden und Umsatzanteil – ein hoher Satz bei 6 Stunden im Jahr ist kein Top-Kunde.</p>
-      <p>Der <b>Quadrant</b> zeigt vier Handlungen: Ausbauen, Mitnehmen, Preis erhöhen, Ziehen lassen. Die Schwellen stehen dabei – es ist ein Vergleich deiner Kunden untereinander, kein Urteil.</p></div>
-    <div class="hsec"><h4>💾 Backup – wichtig!</h4>
+      <p>Die Kundenliste sortiert nach <b>Ø-Stundensatz</b>: grün = über deinem Ziel, blau = darunter. Daneben stehen immer Einsätze, Stunden und Umsatzanteil. Ein hoher Satz bei 6 Stunden im Jahr ist kein Top-Kunde.</p>
+      <p>Der <b>Quadrant</b> zeigt vier Handlungen: Ausbauen, Mitnehmen, Preis erhöhen, Ziehen lassen. Die Schwellen stehen dabei: ein Vergleich deiner Kunden untereinander, kein Urteil.</p></div>
+    <div class="hsec"><h4>💾 Backup: wichtig!</h4>
       <ol><li>Einstellungen → <b>„Backup teilen"</b></li><li>In „Dateien"/Cloud sichern oder dir selbst mailen</li><li>Wiederherstellen mit <b>„Backup einlesen"</b></li></ol>
-      <p class="tip">Deine Daten liegen nur im Browser dieses Geräts – iOS kann sie unter Speicherdruck löschen. Einlesen ersetzt den aktuellen Stand komplett.</p></div>
+      <p class="tip">Deine Daten liegen nur im Browser dieses Geräts. iOS kann sie unter Speicherdruck löschen. Einlesen ersetzt den aktuellen Stand komplett.</p></div>
     <div class="hsec"><h4>📄 CSV für die Buchhaltung</h4>
-      <p>Pro Jahr eine Datei mit allen Einsätzen und Beträgen – ohne Stimmung, die bleibt privat. Öffnet direkt in Numbers oder Excel.</p></div>
+      <p>Pro Jahr eine Datei mit allen Einsätzen und Beträgen, ohne Stimmung, die bleibt privat. Öffnet direkt in Numbers oder Excel.</p></div>
     <div class="hsec"><h4>📡 Offline &amp; Installation</h4>
       <p>Nach dem ersten Laden läuft Kontor auch ohne Internet. Installieren: in Safari öffnen → Teilen → <b>„Zum Home-Bildschirm"</b>.</p></div>
   </div>
@@ -1425,11 +1434,11 @@ function showOnboarding(){
     const steps=[
       `<h2>Kontor</h2><p>Erfasst deine Zeit und rechnet ehrlich aus, was dir davon bleibt: Rücklagen für Steuer und Umsatzsteuer, dein Verfügbares, dein Verdienst pro Kunde.</p><p class="onote">Deine Daten bleiben auf diesem Gerät. Kein Konto, kein Server.</p>`,
       `<h2>Wie rechnest du meistens ab?</h2>${choice("ob_modus",[{v:"tag",t:"Tagessatz",s:"Pauschale pro Einsatztag"},{v:"stunde",t:"Stundensatz",s:"Stunden mal Satz"}],w.modus)}<p class="onote">Gilt als Vorschlag für neue Kunden · pro Kunde und Einsatz änderbar.</p>`,
-      `<h2>Weist du Umsatzsteuer aus?</h2>${choice("ob_ust",[{v:"0.19",t:"Ja, 19 %",s:"Kontor legt sie automatisch beiseite – sie gehört dem Finanzamt"},{v:"0",t:"Nein, Kleinunternehmer (§19 UStG)",s:"Keine USt auf deinen Rechnungen"}],w.mwst)}`,
+      `<h2>Weist du Umsatzsteuer aus?</h2>${choice("ob_ust",[{v:"0.19",t:"Ja, 19 %",s:"Kontor legt sie automatisch beiseite, sie gehört dem Finanzamt"},{v:"0",t:"Nein, Kleinunternehmer (§19 UStG)",s:"Keine USt auf deinen Rechnungen"}],w.mwst)}`,
       `<h2>Rücklagen &amp; Ziel</h2>
-       <div class="field"><label>Steuer-Rücklage (% vom Honorar)</label><input type="number" id="ob_steuer" min="0" max="60" value="${esc(w.steuer)}"><p class="note">Näherung für Einkommensteuer und Abgaben – den echten Wert kennt dein Steuerberater. Keine Steuerberatung.</p></div>
+       <div class="field"><label>Steuer-Rücklage (% vom Honorar)</label><input type="number" id="ob_steuer" min="0" max="60" value="${esc(w.steuer)}"><p class="note">Näherung für Einkommensteuer und Abgaben. Den echten Wert kennt dein Steuerberater. Keine Steuerberatung.</p></div>
        <div class="field"><label>Ziel-Stundensatz (€, optional)</label><input type="number" id="ob_ziel" min="0" step="5" value="${esc(w.ziel)}"><p class="note">Färbt später die Kundenliste: grün über Ziel, blau darunter.</p></div>
-       <p class="onote">Vom Verfügbaren teilt Kontor 50 % Fixkosten · 30 % Persönliches · 20 % Sparen auf – änderbar in den Einstellungen.</p>`
+       <p class="onote">Vom Verfügbaren teilt Kontor 50 % Fixkosten · 30 % Persönliches · 20 % Sparen auf, änderbar in den Einstellungen.</p>`
     ];
     el.innerHTML=`<div class="oin">${step>0?'<button class="oskip" id="obSkip">Überspringen</button>':'<div class="oskip"></div>'}
       <div class="obody">${steps[step]}</div>${dots()}
