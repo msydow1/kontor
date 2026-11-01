@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.6.2 -->
+<!-- Kontor V2.6.3 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -93,6 +93,7 @@ body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sy
   body.printing>.app,body.printing>.tabbar,body.printing>.scrim,body.printing>.cscrim,body.printing>.toast{display:none!important}
   body.printing #printroot{display:block;color:#000;background:#fff;font-size:10pt}
   body.printing .eur{filter:none!important}
+  body.printing .eur .k b{transform:none!important}body.printing .eur .k b+b{display:none}
   #printroot .pr-head{display:flex;justify-content:space-between;gap:24px;font-size:9pt;line-height:1.45;margin-bottom:22mm}
   #printroot .pr-emp{text-align:right}
   #printroot h1{font-size:15pt;margin:0 0 2mm;font-weight:600}
@@ -223,7 +224,19 @@ details.exp[open] summary::before{content:"–"}
 .sw-pos{background:var(--pos)}.sw-info{background:var(--info)}
 /* Beta 0.6: Blur-Modus */
 .iconbtn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-body.blur .eur{filter:blur(0.35em);user-select:none}
+/* V2.6.3 Sichtschutz "Verdreht" (wie die native App): jede Ziffer und das € sind ein
+   Klapp-Element .k mit Vorder- und Rueckseite. body.blur klappt sie gestaffelt (--n) um,
+   die Rueckseite ist ein Buchstabe oder eine andere Ziffer, gespiegelt oder auf dem Kopf
+   (--sx/--sy). Komma, Punkt und Woerter stehen still. SVG-Labels bleiben beim Blur. */
+.eur{white-space:nowrap}
+.eur .k{display:inline-block;position:relative;font-style:normal;perspective:240px}
+.eur .k b{display:inline-block;font-weight:inherit;backface-visibility:hidden;transition:transform .18s ease-in-out;transition-delay:calc(var(--n)*45ms + .18s)}
+.eur .k b+b{position:absolute;left:-1em;right:-1em;top:0;text-align:center;transform:scale(var(--sx),var(--sy)) rotateX(90deg);transition-delay:calc(var(--n)*45ms);user-select:none}
+body.blur .eur{user-select:none}
+body.blur .eur .k b{transform:rotateX(90deg);transition-delay:calc(var(--n)*45ms)}
+body.blur .eur .k b+b{transform:scale(var(--sx),var(--sy));transition-delay:calc(var(--n)*45ms + .18s)}
+@media (prefers-reduced-motion:reduce){.eur .k b{transition:none}}
+body.blur text.eur{filter:blur(0.35em)}
 /* Beta 0.7 Warm Paper: Fundament */
 body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .bar{background:var(--bg);gap:12px;border-bottom:1px solid var(--hairline)}
@@ -385,7 +398,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.6.2</b></div>
+    <div class="foot-v">Kontor <b>V2.6.3</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -439,11 +452,25 @@ function fmtMonth(mk){return MN[+mk.slice(5,7)-1]+" "+mk.slice(0,4);}
 function fmtDE(dt){const d=dt||new Date();return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();}
 function fmtEUR0(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+" €";}
 /* Beta 0.6: Summen fuer den Blur-Modus markieren. Liefert HTML, daher NIE in esc() wickeln. */
-function eur(n){return '<span class="eur">'+fmtEUR0(n)+'</span>';}
+/* Rueckseite fuers Verdrehen, deterministisch aus Text und Stelle (sonst flackert es bei
+   jedem render()). Nie die echte Ziffer; ohne M/W/I, damit die Breite ungefaehr bleibt.
+   Das erste Zeichen steht nie aufrecht, sonst sieht ein Betrag echt aus und der Schutz
+   wirkt aus. */
+const VD_VORRAT="ACEFHJKLPRSTUVXYZ0123456789";
+function vdHash(t,i){let h=2166136261;for(let k=0;k<t.length;k++){h=Math.imul(h^t.charCodeAt(k),16777619)>>>0;}h=Math.imul(h^Math.imul(i+1,2654435761),16777619);h^=h>>>15;h=Math.imul(h,0x2c1b3c6d);h^=h>>>12;return h>>>0;}
+function vdHTML(t){let out="",n=0;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(!/[0-9€]/.test(c)){out+=esc(c);continue;}
+    let h=vdHash(t,i),f="€";
+    if(c!=="€"){f=VD_VORRAT[h%VD_VORRAT.length];while(f===c){h=(Math.imul(h,16777619)+1)>>>0;f=VD_VORRAT[h%VD_VORRAT.length];}}
+    const l=(n===0&&(h>>>8)%7===6)?0:(h>>>8)%7,sx=[0,1,4,5].includes(l)?-1:1,sy=[2,3,4,5].includes(l)?-1:1;
+    out+=`<i class="k" style="--n:${n++};--sx:${sx};--sy:${sy}"><b>${c}</b><b aria-hidden="true">${f}</b></i>`;}
+  return out;}
+function eur(n){return '<span class="eur">'+vdHTML(fmtEUR0(n))+'</span>';}
 function fmtStd(h){return h==null?"–":h.toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1});}
 function fmtSatz(n){return n==null?"–":Math.round(n).toLocaleString("de-DE")+" €/Std";}
 /* Warm Paper: 2-Dezimal-Betrag fuer Listen (Blur-erfasst) und Stundensatz als "€/h". */
-function eur2(n){return '<span class="eur">'+(n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €")+'</span>';}
+function eur2(n){return '<span class="eur">'+vdHTML(n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €")+'</span>';}
 function fmtSatzH(n){return n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" €/h";}
 function fmtSatzBare(n){return n==null?"–":n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2});}
 /* Zeitbasis-Schalter (S.zeitbasis): entscheidet an EINER Stelle, ob Anzeigen auf Arbeitszeit
