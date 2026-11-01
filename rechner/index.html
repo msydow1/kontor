@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F4F2ED">
+<title>Was bleibt dir wirklich?</title>
+<meta name="description" content="Tagessatz eintippen, sehen, was nach Umsatzsteuer und Steuerrücklage wirklich bleibt. Für Selbstständige mit Tages- oder Stundensatz.">
+<!-- Kontor Rechner R1 (Experiment 1b). Kein Zaehler, keine Cookies, keine externen URLs.
+     Alle Rechte vorbehalten. -->
+<link href="../vendor/inter.css" rel="stylesheet">
+<style>
+/* Warm Paper, dieselben Tokens wie app/kontor.html. */
+:root{--bg:#F4F2ED;--surface:#FFFFFF;--field:#E9E7E1;--line:rgba(21,23,26,.09);
+--text:rgba(21,23,26,.82);--text-strong:#15171A;--muted:rgba(21,23,26,.62);
+--accent:#15171A;--on-accent:#F4F2ED;
+--pos:#54BE86;--info:#6B87A2;--green-text:#367B55;--blue-text:#4F6C88;--fa:rgba(21,23,26,.22)}
+@media (prefers-color-scheme:dark){:root{--bg:#15171A;--surface:#1E2228;--field:#34393F;
+--line:rgba(240,239,236,.10);--text:rgba(240,239,236,.82);--text-strong:#F0EFEC;
+--muted:rgba(240,239,236,.60);--accent:#F0EFEC;--on-accent:#15171A;
+--green-text:#54BE86;--blue-text:#89A4BE;--fa:rgba(240,239,236,.26)}}
+@media (prefers-contrast:more){:root{--text:rgba(21,23,26,.94);--muted:rgba(21,23,26,.78);
+--line:rgba(21,23,26,.24);--green-text:#285E41;--blue-text:#3A536D}}
+@media (prefers-contrast:more) and (prefers-color-scheme:dark){:root{--text:rgba(240,239,236,.94);
+--muted:rgba(240,239,236,.76);--line:rgba(240,239,236,.26);--green-text:#7FD3A6;--blue-text:#AFC4D8}}
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:clip}
+body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,system-ui,sans-serif;
+font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 32px) 16px calc(env(safe-area-inset-bottom) + 40px)}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+h1{font-size:30px;line-height:1.15;letter-spacing:-.5px;color:var(--text-strong);margin:0 0 10px}
+.lead{margin:0 0 24px;color:var(--text)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+label,.lab{display:block;font-size:14px;font-weight:600;color:var(--text-strong);margin-bottom:6px}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.inp{position:relative}
+.inp input{width:100%;font:inherit;font-size:18px;font-variant-numeric:tabular-nums;color:var(--text-strong);
+background:var(--field);border:1px solid transparent;border-radius:12px;padding:12px 44px 12px 14px;min-height:48px}
+.inp input:focus{outline:none;border-color:var(--accent)}
+.inp span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+.toggles{display:flex;gap:8px}
+.toggles button{flex:1;font:inherit;font-size:15px;min-height:44px;border-radius:12px;border:1px solid var(--line);
+background:transparent;color:var(--text);cursor:pointer}
+.toggles button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+.range{display:flex;align-items:center;gap:12px}
+.range input{flex:1;accent-color:var(--accent);min-height:44px}
+.range output{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text-strong);min-width:3.2em;text-align:right}
+.result .big{font-size:44px;font-weight:700;letter-spacing:-1px;color:var(--green-text);font-variant-numeric:tabular-nums;line-height:1.1}
+.result .sub{color:var(--muted);font-size:14px;margin:2px 0 16px}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--field);margin-bottom:16px}
+.bar i{display:block;height:100%}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.row[hidden]{display:none}
+.row b{font-variant-numeric:tabular-nums;color:var(--text-strong);font-weight:600;white-space:nowrap}
+.row .k{display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:3px;flex:none}
+.row.sum b{color:var(--green-text)}
+.per{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:15px}
+.per b{font-variant-numeric:tabular-nums;color:var(--text-strong)}
+.cta{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border-radius:14px;
+background:var(--accent);color:var(--on-accent);font-weight:700;font-size:17px;text-decoration:none;margin:22px 0 10px}
+.trust{text-align:center;font-size:13px;color:var(--muted);margin:0 0 6px}
+.beta{text-align:center;font-size:14px;color:var(--text);margin:0 0 28px}
+h2{font-size:19px;color:var(--text-strong);margin:28px 0 10px;letter-spacing:-.2px}
+details{border-top:1px solid var(--line);padding:12px 0}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font-weight:600;color:var(--text-strong);min-height:28px}
+details p{margin:8px 0 0}
+.fine{font-size:13px;color:var(--muted);margin-top:24px}
+@media (max-width:360px){.two{grid-template-columns:1fr}.result .big{font-size:36px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">Für Selbstständige mit Tagessatz</p>
+  <h1>Was bleibt dir wirklich?</h1>
+  <p class="lead">Tipp deinen Satz ein. Der Rechner zieht ab, was dem Finanzamt gehört, und zeigt, was dir bleibt.</p>
+
+  <section class="card" aria-label="Eingaben">
+    <div class="two">
+      <div class="field"><label for="satz">Tagessatz netto</label>
+        <div class="inp"><input id="satz" type="number" inputmode="decimal" min="0" step="50" value="500"><span>€</span></div></div>
+      <div class="field"><label for="tage">Tage im Monat</label>
+        <div class="inp"><input id="tage" type="number" inputmode="numeric" min="0" max="31" step="1" value="12"><span>Tage</span></div></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="std">Stunden vor Ort</label>
+        <div class="inp"><input id="std" type="number" inputmode="decimal" min="0" max="24" step="0.5" value="10"><span>h</span></div></div>
+      <div class="field"><label for="fahrt">Fahrt je Tag</label>
+        <div class="inp"><input id="fahrt" type="number" inputmode="decimal" min="0" max="12" step="0.5" value="1"><span>h</span></div>
+        <div class="hint">Hin und zurück</div></div>
+    </div>
+    <div class="field"><span class="lab" id="ustLab">Umsatzsteuer</span>
+      <div class="toggles" role="group" aria-labelledby="ustLab">
+        <button type="button" data-ust="0.19" aria-pressed="true">19 %</button>
+        <button type="button" data-ust="0" aria-pressed="false">Kleinunternehmer</button>
+      </div></div>
+    <div class="field"><label for="est">Rücklage für Einkommensteuer</label>
+      <div class="range"><input id="est" type="range" min="10" max="45" step="1" value="30"><output id="estOut" for="est">30 %</output></div>
+      <div class="hint">Faustregel 25 bis 35 %. Deinen Wert kennt dein Steuerberater.</div></div>
+  </section>
+
+  <section class="card result" aria-live="polite" aria-label="Ergebnis">
+    <p class="eyebrow">Bleibt dir im Monat</p>
+    <div class="big" id="bleibt">–</div>
+    <p class="sub" id="bleibtSub"></p>
+    <div class="bar" aria-hidden="true"><i id="bV" style="background:var(--pos)"></i><i id="bE" style="background:var(--info)"></i><i id="bU" style="background:var(--fa)"></i></div>
+    <div class="row"><span>Rechnungen brutto</span><b id="rBrutto"></b></div>
+    <div class="row" id="ustRow"><span class="k"><span class="dot" style="background:var(--fa)"></span>Umsatzsteuer, gehört dem Finanzamt</span><b id="rUst"></b></div>
+    <div class="row"><span class="k"><span class="dot" style="background:var(--info)"></span>Rücklage Einkommensteuer</span><b id="rEst"></b></div>
+    <div class="row sum"><span class="k"><span class="dot" style="background:var(--pos)"></span>Verfügbar</span><b id="rVerf"></b></div>
+    <div class="per">Pro Stunde, Tür zu Tür: <b id="rStd"></b> netto, davon bleiben <b id="rStdBleibt"></b></div>
+  </section>
+
+  <a class="cta" href="../">Kontor ausprobieren</a>
+  <p class="trust">Kein Konto · Daten bleiben auf dem Handy · Gratis im Browser</p>
+  <p class="beta">Lieber als iPhone-App? Antworte einfach auf die Nachricht, mit der du diesen Link bekommen hast. Dann kommst du in die Beta.</p>
+
+  <h2>Fragen</h2>
+  <details><summary>Ersetzt das den Steuerberater?</summary>
+    <p>Nein. Kontor legt zurück, es berechnet keine Steuer. Den genauen Satz für deine Rücklage kennt dein Steuerberater, Kontor sorgt dafür, dass das Geld dann da ist.</p></details>
+  <details><summary>Was ist mit Krankenkasse und Rente?</summary>
+    <p>Die stecken hier noch in „Verfügbar“. In Kontor teilst du das Verfügbare auf feste Kosten, Persönliches und Sparen auf.</p></details>
+  <details><summary>Was macht Kontor mehr als dieser Rechner?</summary>
+    <p>Kontor rechnet das für jeden echten Einsatz: mit Fahrt, Vor- und Nachbereitung, je Kunde und übers Jahr. So siehst du, welcher Kunde sich wirklich lohnt.</p></details>
+  <details><summary>Wo landen meine Zahlen?</summary>
+    <p>Nirgends. Diese Seite rechnet nur in deinem Browser, ohne Cookies und ohne Zähler. In Kontor bleiben deine Daten auf deinem Gerät.</p></details>
+
+  <p class="fine">Beispielrechnung ohne Gewähr. Sie ersetzt keine Steuerberatung.</p>
+</main>
+<script>
+/*[calc]*/
+function hm2min(s){if(!s)return null;const m=String(s).match(/^\s*(\d{1,2}):(\d{2})\s*$/);if(!m)return null;const h=+m[1],mm=+m[2];return(h>23||mm>59)?null:h*60+mm;}
+/* Zusatzzeiten sind DAUER-Felder im Format H:MM (wie Beginn/Ende), gespeichert in STUNDEN
+   (Backup-Kompat). Umgerechnet wird nur an der Eingabegrenze des Sheets. Eine blosse Zahl
+   gilt als Stunden ("4" = 4:00). Muell und Negatives landen auf 0. */
+function hmDur2h(s){if(!s)return 0;const m=String(s).match(/^\s*(\d{1,2})(?::([0-5]?\d))?\s*$/);if(!m)return 0;return +m[1]+(+(m[2]||0))/60;}
+function h2hmDur(h){const n=+h;if(!Number.isFinite(n)||n<=0)return "";const t=Math.round(n*60);return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");}
+function calcEinsatz(e,P){
+  const b=hm2min(e.beginn),x=hm2min(e.ende);
+  let stunden=null;
+  if(b!=null&&x!=null){let d=x-b;if(d<0)d+=1440;stunden=d/60;} /* ende < beginn = Nachtdreh über 0:00 */
+  const raw=(e.tagessatz==null||e.tagessatz==="")?NaN:+e.tagessatz;
+  const satz=Number.isFinite(raw)?raw:null;
+  const modus=(e.modus==="stunde")?"stunde":"tag"; /* Whitelist: alles andere = tag */
+  /* honorar: Pauschale (Tagessatz) ODER Stunden x Stundensatz. Feldname tagessatz bleibt
+     aus Backup-Kompatibilitaet; die UI beschriftet je Modus. */
+  const honorar=(satz==null)?null:(modus==="stunde"?(stunden==null?null:stunden*satz):satz);
+  /* Zusatzzeit ist ZEIT, KEIN GELD: sie geht NIE ins honorar, sondern nur in die Bewertung.
+     ZWEI STUFEN (V2.3): Vor-/Nachbereitung ist ARBEIT und zaehlt in arbeitStunden;
+     Fahrt kommt erst in der Stufe "Tuer zu Tuer" (stundenGesamt) dazu. */
+  const nz=v=>{const n=+v;return Number.isFinite(n)&&n>0?n:0;};
+  const arbeitZusatz=nz(e.vorbereitung)+nz(e.nachbereitung);
+  const fahrtStunden=nz(e.fahrtHin)+nz(e.fahrtZurueck);
+  const zusatzStunden=arbeitZusatz+fahrtStunden;
+  const arbeitStunden=stunden==null?null:stunden+arbeitZusatz;
+  const stundenGesamt=stunden==null?null:stunden+zusatzStunden;
+  const ueberstunden=arbeitStunden==null?null:arbeitStunden-P.sollStunden; /* Vor-/Nachbereitung ist Mehrarbeit, Fahrt nicht */
+  /* Wareneinsatz (V2.4): Ausgaben je Einsatz (Material, Leihgebuehr). KEINE Steuerlogik –
+     kein Vorsteuerabzug, keine Minderung der ESt-Ruecklage; das rechnet der Steuerberater
+     (Entscheidung Max, 01.08.2026). Weiterberechnet wandert er 1:1 in die Rechnung,
+     selbst getragen mindert er nur den Netto-Ertrag. Die Ruecklage bleibt bewusst eher
+     zu hoch als zu niedrig. */
+  const ware=nz(e.wareneinsatz);
+  const wareBerechnet=!!e.wareneinsatzBerechnet;
+  const eigenerAufwand=wareBerechnet?0:ware;
+  /* USt je Einsatz (V2.6): "regel" = Satz aus den Einstellungen (Standard 19 %),
+     "ermaessigt" = 7 % (Nutzungsrechte), "rc" = 0 % Reverse Charge (der Kunde schuldet die
+     Steuer). Kleinunternehmer (mwst 0) weisen nie USt aus, auch nicht ermaessigt. Fehlt das
+     Feld (Altdaten) oder ist es Muell, gilt "regel": bestehende Einsaetze rechnen wie bisher. */
+  const ustArt=(e.ustArt==="ermaessigt"||e.ustArt==="rc")?e.ustArt:"regel";
+  const ustSatz=!(P.mwst>0)?0:ustArt==="ermaessigt"?0.07:ustArt==="rc"?0:P.mwst;
+  if(honorar==null)return{stunden,stundensatz:null,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit:null,stundensatzGesamt:null,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag:null,honorar:null,rechnungNetto:null,rechnungsbetrag:null,ustArt,ustSatz,ustRuecklage:null,steuerRuecklage:null,verfuegbar:null,splitFix:null,splitPersoenlich:null,splitSparen:null};
+  const rechnungNetto=honorar+(wareBerechnet?ware:0);
+  const nettoErtrag=honorar-eigenerAufwand;
+  /* Effektive Saetze rechnen auf dem Netto-Ertrag: was nach eigenem Aufwand pro Stunde bleibt. */
+  const stundensatz=(stunden&&stunden>0)?nettoErtrag/stunden:null;
+  const stundensatzArbeit=(arbeitStunden&&arbeitStunden>0)?nettoErtrag/arbeitStunden:null;
+  const stundensatzGesamt=(stundenGesamt&&stundenGesamt>0)?nettoErtrag/stundenGesamt:null;
+  /* In ganzen Cent und Basispunkten rechnen: 287,50 x 19 % ist im Double 54,62499..., die
+     USt muss aber kaufmaennisch 54,63 ergeben. Brutto = Netto + USt, beides auf den Cent. */
+  const nettoCent=Math.round(rechnungNetto*100);
+  const ustCent=Math.round(nettoCent*Math.round(ustSatz*10000)/10000);
+  const ustRuecklage=ustCent/100;                 /* gehört dem Finanzamt */
+  const rechnungsbetrag=(nettoCent+ustCent)/100;
+  const steuerRuecklage=honorar*P.steuersatz;     /* auf NETTO, nur aufs Honorar */
+  const verfuegbar=nettoErtrag-steuerRuecklage;
+  return{stunden,stundensatz,ueberstunden,arbeitZusatz,fahrtStunden,zusatzStunden,arbeitStunden,stundenGesamt,stundensatzArbeit,stundensatzGesamt,wareneinsatz:ware,wareBerechnet,eigenerAufwand,nettoErtrag,honorar,rechnungNetto,rechnungsbetrag,ustArt,ustSatz,ustRuecklage,steuerRuecklage,verfuegbar,
+    splitFix:verfuegbar*P.splitFix,splitPersoenlich:verfuegbar*P.splitPersoenlich,splitSparen:verfuegbar*P.splitSparen};
+}
+/*[/calc]*/
+
+/* Ein Beispieltag laeuft durch denselben Rechenkern wie die App, der Monat ist Tag x Tage. */
+const $=id=>document.getElementById(id);
+const eur=n=>Number.isFinite(n)?n.toLocaleString("de-DE",{style:"currency",currency:"EUR",maximumFractionDigits:0}):"–";
+const eur2=n=>Number.isFinite(n)?n.toLocaleString("de-DE",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2}):"–";
+const zahl=(id,max)=>{const n=parseFloat(String($(id).value).replace(",","."));return Number.isFinite(n)&&n>0?Math.min(n,max):0;};
+const hm=h=>{const t=Math.round(h*60);return String(Math.floor(t/60)%24).padStart(2,"0")+":"+String(t%60).padStart(2,"0");};
+let mwst=0.19;
+
+function rechne(){
+  const satz=zahl("satz",100000),tage=Math.round(zahl("tage",31)),std=zahl("std",24),fahrt=zahl("fahrt",12);
+  const est=+$("est").value;$("estOut").textContent=est+" %";
+  const P={mwst,steuersatz:est/100,sollStunden:10,splitFix:.5,splitPersoenlich:.3,splitSparen:.2};
+  const r=calcEinsatz({beginn:"08:00",ende:hm(8+std),tagessatz:satz,modus:"tag",fahrtHin:fahrt/2,fahrtZurueck:fahrt/2},P);
+  const brutto=r.rechnungsbetrag*tage,ust=r.ustRuecklage*tage,estR=r.steuerRuecklage*tage,verf=r.verfuegbar*tage;
+  $("bleibt").textContent=eur(verf);
+  $("bleibtSub").textContent=satz>0&&tage>0?`von ${eur(brutto)} auf deinen Rechnungen, also ${Math.round(verf/brutto*100)}\u00a0%`:"";
+  $("rBrutto").textContent=eur(brutto);$("ustRow").hidden=!(mwst>0);$("rUst").textContent="− "+eur(ust);
+  $("rEst").textContent="− "+eur(estR);$("rVerf").textContent=eur(verf);
+  const w=v=>brutto>0?(v/brutto*100)+"%":"0";
+  $("bV").style.width=w(verf);$("bE").style.width=w(estR);$("bU").style.width=w(ust);
+  const tz=r.stundenGesamt;
+  $("rStd").textContent=eur2(r.stundensatzGesamt);
+  $("rStdBleibt").textContent=eur2(tz>0?r.verfuegbar/tz:NaN);
+}
+document.querySelectorAll("input").forEach(i=>i.addEventListener("input",rechne));
+document.querySelectorAll("[data-ust]").forEach(b=>b.onclick=()=>{
+  mwst=+b.dataset.ust;
+  document.querySelectorAll("[data-ust]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+  rechne();});
+rechne();
+</script>
+</body>
+</html>

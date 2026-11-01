@@ -1,6 +1,6 @@
 /* Kontor Service Worker – Offline-Cache.
    Navigation: network-first (Updates kommen an), Assets: cache-first. */
-const CACHE = "kontor-v2.6.1";
+const CACHE = "kontor-v2.6.2";
 const ASSETS = [
   "./",
   "manifest.json",
@@ -30,6 +30,9 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
+  /* Der Rechner (rechner/) ist eine eigene Seite: nie als App-Huelle unter "./" ablegen,
+     sonst startet die App offline als Rechner. */
+  if (new URL(req.url).pathname.includes("/rechner/")) return;
   if (req.mode === "navigate") {
     e.respondWith(
       fetch(req).then(res => {

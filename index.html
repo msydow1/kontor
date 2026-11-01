@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Kontor Beta">
 <meta name="theme-color" content="#15171A">
 <title>Kontor Beta</title>
-<!-- Kontor V2.6.1 -->
+<!-- Kontor V2.6.2 -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link href="vendor/inter.css" rel="stylesheet">
@@ -385,7 +385,7 @@ body{background:var(--bg);color:var(--text);font-variant-numeric:tabular-nums;-w
   <div class="bar"><div class="logo">K</div><div class="wm" id="barsub">KONTOR</div><button class="iconbtn" id="blurBtn" aria-label="Beträge verbergen"></button><button class="iconbtn" id="themeBtn" aria-label="Theme"></button></div>
   <div class="view" id="view"></div>
   <div class="foot">
-    <div class="foot-v">Kontor <b>V2.6.1</b></div>
+    <div class="foot-v">Kontor <b>V2.6.2</b></div>
   </div>
 </div>
 <nav class="tabbar" id="tabbar">
@@ -709,7 +709,7 @@ function renderEinsaetze(){
   /* Rueckfrage, weil ein Fehltipp hier stillschweigend echte Daten dupliziert (Max 3x betroffen). */
   view.querySelectorAll("[data-again]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const src=DB.einsaetze.find(x=>x.id===b.dataset.again);if(!src)return;
-    askConfirm("Diesen Einsatz als neuen anlegen?",()=>editEinsatz(null,{kundeId:src.kundeId,beginn:src.beginn,ende:src.ende,tagessatz:src.tagessatz,modus:src.modus,ustArt:src.ustArt}),"Anlegen",true);});
+    askConfirm("Diesen Einsatz als neuen anlegen?",()=>editEinsatz(null,{kundeId:src.kundeId,beginn:src.beginn,ende:src.ende,tagessatz:src.tagessatz,modus:src.modus,ustArt:src.ustArt,fahrtHin:src.fahrtHin,fahrtZurueck:src.fahrtZurueck,vorbereitung:src.vorbereitung,nachbereitung:src.nachbereitung}),"Anlegen",true);});
   view.querySelectorAll("[data-cyc]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const e=DB.einsaetze.find(x=>x.id===b.dataset.cyc);if(!e)return;
     const next={offen:"gestellt",gestellt:"bezahlt",bezahlt:"offen"};
@@ -1391,7 +1391,7 @@ function openHelp(){
       <p class="tip">Alle Daten bleiben nur auf diesem Gerät. Kein Server, kein Konto. Kontor rechnet für deine <b>selbstständige</b> Arbeit. Angestellten-Tätigkeit gehört nicht hierher, die läuft über die Lohnabrechnung.</p></div>
     <div class="hsec"><h4>⏱ Einsatz erfassen: 3 Tipps bis fertig</h4>
       <p>Kunden-Chip antippen (Tagessatz füllt sich selbst), Beginn und Ende wählen, speichern. Neue Kunden legst du mit <b>„＋ Neu"</b> direkt im Formular an.</p>
-      <p><b>↻ Nochmal</b> an einem Einsatz übernimmt Kunde, Zeiten und Satz, nur das Datum steht auf heute. Endet ein Dreh nach Mitternacht (22:00–06:00), rechnet Kontor automatisch über 0:00 hinweg.</p>
+      <p><b>↻ Nochmal</b> an einem Einsatz übernimmt Kunde, Zeiten, Fahrt, Vor- und Nachbereitung und den Satz, nur das Datum steht auf heute. Endet ein Dreh nach Mitternacht (22:00–06:00), rechnet Kontor automatisch über 0:00 hinweg.</p>
       <p>Die <b>Stimmung</b> (🟢 · 😐 · 🔴) ist optional. Am Jahresende siehst du pro Kunde, wie sich die Zusammenarbeit angefühlt hat.</p></div>
     <div class="hsec"><h4>💶 Wohin dein Geld fließt</h4>
       <p>Von deinem Honorar (netto) gehen zwei Rücklagen ab, die dir nie gehört haben:</p>
